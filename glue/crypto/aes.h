@@ -5,15 +5,13 @@
 
 #pragma once
 
-#include <stddef.h>
-
 #define AES_BLOCK_SIZE 16 // AES operates on 16 bytes at a time
-
-typedef unsigned char BYTE; // 8-bit byte
-typedef unsigned int WORD;  // 32-bit word, change to "long" for 16-bit machines
 
 namespace glue {
 namespace crypto {
+
+typedef unsigned char BYTE; // 8-bit byte
+typedef unsigned int WORD;  // 32-bit word, change to "long" for 16-bit machines
 
 ///////////////////
 // AES

@@ -4,148 +4,278 @@
 //
 
 #include "glue/crypto/salsa20.h"
+#include "glue/crypto/loadstor.h"
+#include "glue/crypto/rotate.h"
+#include "glue/crypto/secmem.h"
+
+#include <exception>
 
 namespace glue {
+namespace crypto {
 
-Salsa20::Salsa20(const uint8_t *key) {
-    std::memset(vector_, 0, sizeof(vector_));
-    setKey(key);
-}
+namespace {
 
-//----------------------------------------------------------------------------------
-void Salsa20::setKey(const uint8_t *key) {
-    static const char constants[] = "expand 32-byte k";
+#define SALSA20_QUARTER_ROUND(x1, x2, x3, x4)                                  \
+    do {                                                                       \
+        x2 ^= rotl<7>(x1 + x4);                                                \
+        x3 ^= rotl<9>(x2 + x1);                                                \
+        x4 ^= rotl<13>(x3 + x2);                                               \
+        x1 ^= rotl<18>(x4 + x3);                                               \
+    } while (0)
 
-    if (key == nullptr)
-        return;
+/*
+ * Generate HSalsa20 cipher stream (for XSalsa20 IV setup)
+ */
+void hsalsa20(uint32_t output[8], const uint32_t input[16]) {
+    uint32_t x00 = input[0], x01 = input[1], x02 = input[2], x03 = input[3],
+             x04 = input[4], x05 = input[5], x06 = input[6], x07 = input[7],
+             x08 = input[8], x09 = input[9], x10 = input[10], x11 = input[11],
+             x12 = input[12], x13 = input[13], x14 = input[14], x15 = input[15];
 
-    vector_[0] = convert(reinterpret_cast<const uint8_t *>(&constants[0]));
-    vector_[1] = convert(&key[0]);
-    vector_[2] = convert(&key[4]);
-    vector_[3] = convert(&key[8]);
-    vector_[4] = convert(&key[12]);
-    vector_[5] = convert(reinterpret_cast<const uint8_t *>(&constants[4]));
+    for (size_t i = 0; i != 10; ++i) {
+        SALSA20_QUARTER_ROUND(x00, x04, x08, x12);
+        SALSA20_QUARTER_ROUND(x05, x09, x13, x01);
+        SALSA20_QUARTER_ROUND(x10, x14, x02, x06);
+        SALSA20_QUARTER_ROUND(x15, x03, x07, x11);
 
-    std::memset(&vector_[6], 0, 4 * sizeof(uint32_t));
-
-    vector_[10] = convert(reinterpret_cast<const uint8_t *>(&constants[8]));
-    vector_[11] = convert(&key[16]);
-    vector_[12] = convert(&key[20]);
-    vector_[13] = convert(&key[24]);
-    vector_[14] = convert(&key[28]);
-    vector_[15] = convert(reinterpret_cast<const uint8_t *>(&constants[12]));
-}
-
-//----------------------------------------------------------------------------------
-void Salsa20::setIv(const uint8_t *iv) {
-    if (iv == nullptr)
-        return;
-
-    vector_[6] = convert(&iv[0]);
-    vector_[7] = convert(&iv[4]);
-    vector_[8] = vector_[9] = 0;
-}
-
-//----------------------------------------------------------------------------------
-void Salsa20::generateKeyStream(uint8_t output[BLOCK_SIZE]) {
-    uint32_t x[VECTOR_SIZE];
-    std::memcpy(x, vector_, sizeof(vector_));
-
-    for (int32_t i = 20; i > 0; i -= 2) {
-        x[4] ^= rotate(static_cast<uint32_t>(x[0] + x[12]), 7);
-        x[8] ^= rotate(static_cast<uint32_t>(x[4] + x[0]), 9);
-        x[12] ^= rotate(static_cast<uint32_t>(x[8] + x[4]), 13);
-        x[0] ^= rotate(static_cast<uint32_t>(x[12] + x[8]), 18);
-        x[9] ^= rotate(static_cast<uint32_t>(x[5] + x[1]), 7);
-        x[13] ^= rotate(static_cast<uint32_t>(x[9] + x[5]), 9);
-        x[1] ^= rotate(static_cast<uint32_t>(x[13] + x[9]), 13);
-        x[5] ^= rotate(static_cast<uint32_t>(x[1] + x[13]), 18);
-        x[14] ^= rotate(static_cast<uint32_t>(x[10] + x[6]), 7);
-        x[2] ^= rotate(static_cast<uint32_t>(x[14] + x[10]), 9);
-        x[6] ^= rotate(static_cast<uint32_t>(x[2] + x[14]), 13);
-        x[10] ^= rotate(static_cast<uint32_t>(x[6] + x[2]), 18);
-        x[3] ^= rotate(static_cast<uint32_t>(x[15] + x[11]), 7);
-        x[7] ^= rotate(static_cast<uint32_t>(x[3] + x[15]), 9);
-        x[11] ^= rotate(static_cast<uint32_t>(x[7] + x[3]), 13);
-        x[15] ^= rotate(static_cast<uint32_t>(x[11] + x[7]), 18);
-        x[1] ^= rotate(static_cast<uint32_t>(x[0] + x[3]), 7);
-        x[2] ^= rotate(static_cast<uint32_t>(x[1] + x[0]), 9);
-        x[3] ^= rotate(static_cast<uint32_t>(x[2] + x[1]), 13);
-        x[0] ^= rotate(static_cast<uint32_t>(x[3] + x[2]), 18);
-        x[6] ^= rotate(static_cast<uint32_t>(x[5] + x[4]), 7);
-        x[7] ^= rotate(static_cast<uint32_t>(x[6] + x[5]), 9);
-        x[4] ^= rotate(static_cast<uint32_t>(x[7] + x[6]), 13);
-        x[5] ^= rotate(static_cast<uint32_t>(x[4] + x[7]), 18);
-        x[11] ^= rotate(static_cast<uint32_t>(x[10] + x[9]), 7);
-        x[8] ^= rotate(static_cast<uint32_t>(x[11] + x[10]), 9);
-        x[9] ^= rotate(static_cast<uint32_t>(x[8] + x[11]), 13);
-        x[10] ^= rotate(static_cast<uint32_t>(x[9] + x[8]), 18);
-        x[12] ^= rotate(static_cast<uint32_t>(x[15] + x[14]), 7);
-        x[13] ^= rotate(static_cast<uint32_t>(x[12] + x[15]), 9);
-        x[14] ^= rotate(static_cast<uint32_t>(x[13] + x[12]), 13);
-        x[15] ^= rotate(static_cast<uint32_t>(x[14] + x[13]), 18);
+        SALSA20_QUARTER_ROUND(x00, x01, x02, x03);
+        SALSA20_QUARTER_ROUND(x05, x06, x07, x04);
+        SALSA20_QUARTER_ROUND(x10, x11, x08, x09);
+        SALSA20_QUARTER_ROUND(x15, x12, x13, x14);
     }
 
-    for (size_t i = 0; i < VECTOR_SIZE; ++i) {
-        x[i] += vector_[i];
-        convert(x[i], &output[4 * i]);
+    output[0] = x00;
+    output[1] = x05;
+    output[2] = x10;
+    output[3] = x15;
+    output[4] = x06;
+    output[5] = x07;
+    output[6] = x08;
+    output[7] = x09;
+}
+
+} // namespace
+
+/*
+ * Generate Salsa20 cipher stream
+ */
+// static
+void Salsa20::salsa_core(uint8_t output[64], const uint32_t input[16],
+                         size_t rounds) {
+    // OCL_ASSERT_NOMSG(rounds % 2 == 0);
+
+    uint32_t x00 = input[0], x01 = input[1], x02 = input[2], x03 = input[3],
+             x04 = input[4], x05 = input[5], x06 = input[6], x07 = input[7],
+             x08 = input[8], x09 = input[9], x10 = input[10], x11 = input[11],
+             x12 = input[12], x13 = input[13], x14 = input[14], x15 = input[15];
+
+    for (size_t i = 0; i != rounds / 2; ++i) {
+        SALSA20_QUARTER_ROUND(x00, x04, x08, x12);
+        SALSA20_QUARTER_ROUND(x05, x09, x13, x01);
+        SALSA20_QUARTER_ROUND(x10, x14, x02, x06);
+        SALSA20_QUARTER_ROUND(x15, x03, x07, x11);
+
+        SALSA20_QUARTER_ROUND(x00, x01, x02, x03);
+        SALSA20_QUARTER_ROUND(x05, x06, x07, x04);
+        SALSA20_QUARTER_ROUND(x10, x11, x08, x09);
+        SALSA20_QUARTER_ROUND(x15, x12, x13, x14);
     }
 
-    ++vector_[8];
-    vector_[9] += vector_[8] == 0 ? 1 : 0;
+    store_le(x00 + input[0], output + 4 * 0);
+    store_le(x01 + input[1], output + 4 * 1);
+    store_le(x02 + input[2], output + 4 * 2);
+    store_le(x03 + input[3], output + 4 * 3);
+    store_le(x04 + input[4], output + 4 * 4);
+    store_le(x05 + input[5], output + 4 * 5);
+    store_le(x06 + input[6], output + 4 * 6);
+    store_le(x07 + input[7], output + 4 * 7);
+    store_le(x08 + input[8], output + 4 * 8);
+    store_le(x09 + input[9], output + 4 * 9);
+    store_le(x10 + input[10], output + 4 * 10);
+    store_le(x11 + input[11], output + 4 * 11);
+    store_le(x12 + input[12], output + 4 * 12);
+    store_le(x13 + input[13], output + 4 * 13);
+    store_le(x14 + input[14], output + 4 * 14);
+    store_le(x15 + input[15], output + 4 * 15);
 }
 
-//----------------------------------------------------------------------------------
-void Salsa20::processBlocks(const uint8_t *input, uint8_t *output,
-                            size_t numBlocks) {
-    assert(input != nullptr && output != nullptr);
+#undef SALSA20_QUARTER_ROUND
 
-    uint8_t keyStream[BLOCK_SIZE];
+/*
+ * Combine cipher stream with message
+ */
+void Salsa20::cipher(const uint8_t in[], uint8_t out[], size_t length) {
+    verify_key_set(m_state.empty() == false);
 
-    for (size_t i = 0; i < numBlocks; ++i) {
-        generateKeyStream(keyStream);
+    while (length >= m_buffer.size() - m_position) {
+        const size_t available = m_buffer.size() - m_position;
 
-        for (size_t j = 0; j < BLOCK_SIZE; ++j)
-            *(output++) = keyStream[j] ^ *(input++);
+        xor_buf(out, in, &m_buffer[m_position], available);
+        salsa_core(m_buffer.data(), m_state.data(), 20);
+
+        ++m_state[8];
+        m_state[9] += (m_state[8] == 0);
+
+        length -= available;
+        in += available;
+        out += available;
+
+        m_position = 0;
     }
+
+    xor_buf(out, in, &m_buffer[m_position], length);
+
+    m_position += length;
 }
 
-//----------------------------------------------------------------------------------
-void Salsa20::processBytes(const uint8_t *input, uint8_t *output,
-                           size_t numBytes) {
-    assert(input != nullptr && output != nullptr);
+void Salsa20::initialize_state() {
+    static const uint32_t TAU[] = {0x61707865, 0x3120646e, 0x79622d36,
+                                   0x6b206574};
 
-    uint8_t keyStream[BLOCK_SIZE];
-    size_t numBytesToProcess;
+    static const uint32_t SIGMA[] = {0x61707865, 0x3320646e, 0x79622d32,
+                                     0x6b206574};
 
-    while (numBytes != 0) {
-        generateKeyStream(keyStream);
-        numBytesToProcess = numBytes >= BLOCK_SIZE ? BLOCK_SIZE : numBytes;
+    m_state[1] = m_key[0];
+    m_state[2] = m_key[1];
+    m_state[3] = m_key[2];
+    m_state[4] = m_key[3];
 
-        for (size_t i = 0; i < numBytesToProcess; ++i, --numBytes)
-            *(output++) = keyStream[i] ^ *(input++);
+    if (m_key.size() == 4) {
+        m_state[0] = TAU[0];
+        m_state[5] = TAU[1];
+        m_state[10] = TAU[2];
+        m_state[15] = TAU[3];
+        m_state[11] = m_key[0];
+        m_state[12] = m_key[1];
+        m_state[13] = m_key[2];
+        m_state[14] = m_key[3];
+    } else {
+        m_state[0] = SIGMA[0];
+        m_state[5] = SIGMA[1];
+        m_state[10] = SIGMA[2];
+        m_state[15] = SIGMA[3];
+        m_state[11] = m_key[4];
+        m_state[12] = m_key[5];
+        m_state[13] = m_key[6];
+        m_state[14] = m_key[7];
     }
+
+    m_state[6] = 0;
+    m_state[7] = 0;
+    m_state[8] = 0;
+    m_state[9] = 0;
+
+    m_position = 0;
 }
 
-//----------------------------------------------------------------------------------
-uint32_t Salsa20::rotate(uint32_t value, uint32_t numBits) {
-    return (value << numBits) | (value >> (32 - numBits));
+void Salsa20::set_key(const uint8_t key[], size_t length) {
+    if (!valid_keylength(length))
+        throw std::invalid_argument("[Salsa20] Invalid key length");
+    key_schedule(key, length);
+}
+/*
+ * Salsa20 Key Schedule
+ */
+void Salsa20::key_schedule(const uint8_t key[], size_t length) {
+    m_key.resize(length / 4);
+    load_le<uint32_t>(m_key.data(), key, m_key.size());
+
+    m_state.resize(16);
+    m_buffer.resize(64);
+
+    set_iv(nullptr, 0);
 }
 
-//----------------------------------------------------------------------------------
-void Salsa20::convert(uint32_t value, uint8_t *array) {
-    array[0] = static_cast<uint8_t>(value >> 0);
-    array[1] = static_cast<uint8_t>(value >> 8);
-    array[2] = static_cast<uint8_t>(value >> 16);
-    array[3] = static_cast<uint8_t>(value >> 24);
+/*
+ * Set the Salsa IV
+ */
+void Salsa20::set_iv(const uint8_t iv[], size_t length) {
+    verify_key_set(m_state.empty() == false);
+
+    if (!valid_iv_length(length))
+        throw std::invalid_argument("[Salsa20] Invalid iv length");
+
+    initialize_state();
+
+    if (length == 0) {
+        // Salsa20 null IV
+        m_state[6] = 0;
+        m_state[7] = 0;
+    } else if (length == 8) {
+        // Salsa20
+        m_state[6] = load_le<uint32_t>(iv, 0);
+        m_state[7] = load_le<uint32_t>(iv, 1);
+    } else {
+        // XSalsa20
+        m_state[6] = load_le<uint32_t>(iv, 0);
+        m_state[7] = load_le<uint32_t>(iv, 1);
+        m_state[8] = load_le<uint32_t>(iv, 2);
+        m_state[9] = load_le<uint32_t>(iv, 3);
+
+        std::vector<uint32_t> hsalsa(8);
+        hsalsa20(hsalsa.data(), m_state.data());
+
+        m_state[1] = hsalsa[0];
+        m_state[2] = hsalsa[1];
+        m_state[3] = hsalsa[2];
+        m_state[4] = hsalsa[3];
+        m_state[6] = load_le<uint32_t>(iv, 4);
+        m_state[7] = load_le<uint32_t>(iv, 5);
+        m_state[11] = hsalsa[4];
+        m_state[12] = hsalsa[5];
+        m_state[13] = hsalsa[6];
+        m_state[14] = hsalsa[7];
+    }
+
+    m_state[8] = 0;
+    m_state[9] = 0;
+
+    salsa_core(m_buffer.data(), m_state.data(), 20);
+    ++m_state[8];
+    m_state[9] += (m_state[8] == 0);
+
+    m_position = 0;
 }
 
-//----------------------------------------------------------------------------------
-uint32_t Salsa20::convert(const uint8_t *array) {
-    return ((static_cast<uint32_t>(array[0]) << 0) |
-            (static_cast<uint32_t>(array[1]) << 8) |
-            (static_cast<uint32_t>(array[2]) << 16) |
-            (static_cast<uint32_t>(array[3]) << 24));
+bool Salsa20::valid_iv_length(size_t iv_len) const {
+    return (iv_len == 0 || iv_len == 8 || iv_len == 24);
 }
 
+size_t Salsa20::default_iv_length() const { return 24; }
+
+/*
+ * Clear memory of sensitive data
+ */
+void Salsa20::clear() {
+    zap(m_key);
+    zap(m_state);
+    zap(m_buffer);
+    m_position = 0;
+}
+
+void Salsa20::seek(uint64_t offset) {
+    verify_key_set(m_state.empty() == false);
+
+    // Find the block offset
+    const uint64_t counter = offset / 64;
+    uint8_t counter8[8];
+    store_le(counter, counter8);
+
+    m_state[8] = load_le<uint32_t>(counter8, 0);
+    m_state[9] += load_le<uint32_t>(counter8, 1);
+
+    salsa_core(m_buffer.data(), m_state.data(), 20);
+
+    ++m_state[8];
+    m_state[9] += (m_state[8] == 0);
+
+    m_position = offset % 64;
+}
+
+void Salsa20::verify_key_set(bool cond) const {
+    if (cond == false)
+        throw std::runtime_error("[Salsa20] Key not set");
+}
+
+} // namespace crypto
 } // namespace glue

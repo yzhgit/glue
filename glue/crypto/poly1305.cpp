@@ -4,313 +4,229 @@
 //
 
 #include "glue/crypto/poly1305.h"
-
-#include "misc.hpp"
-#include <stdlib.h>
-#include <string.h>
-
-// Donna implementation.
+#include "glue/crypto/ct_utils.h"
+#include "glue/crypto/donna128.h"
+#include "glue/crypto/loadstor.h"
+#include "glue/crypto/secmem.h"
 
 namespace glue {
 namespace crypto {
 
-#define poly1305_block_size 16
+namespace {
 
-/* 17 + sizeof(size_t) + 14*sizeof(unsigned long) */
-typedef struct poly1305_state_internal_t {
-    unsigned long r[5];
-    unsigned long h[5];
-    unsigned long pad[4];
-    size_t leftover;
-    unsigned char buffer[poly1305_block_size];
-    unsigned char final;
-} poly1305_state_internal_t;
-
-void poly1305_init(poly1305_context *ctx, const unsigned char key[32]) {
-    poly1305_state_internal_t *st = (poly1305_state_internal_t *)ctx;
-
+void poly1305_init(std::vector<uint64_t> &X, const uint8_t key[32]) {
     /* r &= 0xffffffc0ffffffc0ffffffc0fffffff */
-    st->r[0] = (leget32(&key[0])) & 0x3ffffff;
-    st->r[1] = (leget32(&key[3]) >> 2) & 0x3ffff03;
-    st->r[2] = (leget32(&key[6]) >> 4) & 0x3ffc0ff;
-    st->r[3] = (leget32(&key[9]) >> 6) & 0x3f03fff;
-    st->r[4] = (leget32(&key[12]) >> 8) & 0x00fffff;
+    const uint64_t t0 = load_le<uint64_t>(key, 0);
+    const uint64_t t1 = load_le<uint64_t>(key, 1);
+
+    X[0] = (t0)&0xffc0fffffff;
+    X[1] = ((t0 >> 44) | (t1 << 20)) & 0xfffffc0ffff;
+    X[2] = ((t1 >> 24)) & 0x00ffffffc0f;
 
     /* h = 0 */
-    st->h[0] = 0;
-    st->h[1] = 0;
-    st->h[2] = 0;
-    st->h[3] = 0;
-    st->h[4] = 0;
+    X[3] = 0;
+    X[4] = 0;
+    X[5] = 0;
 
     /* save pad for later */
-    st->pad[0] = leget32(&key[16]);
-    st->pad[1] = leget32(&key[20]);
-    st->pad[2] = leget32(&key[24]);
-    st->pad[3] = leget32(&key[28]);
-
-    st->leftover = 0;
-    st->final = 0;
+    X[6] = load_le<uint64_t>(key, 2);
+    X[7] = load_le<uint64_t>(key, 3);
 }
 
-static void poly1305_blocks(poly1305_state_internal_t *st,
-                            const unsigned char *m, size_t bytes) {
-    const unsigned long hibit = (st->final) ? 0 : (1 << 24); /* 1 << 128 */
-    unsigned long r0, r1, r2, r3, r4;
-    unsigned long s1, s2, s3, s4;
-    unsigned long h0, h1, h2, h3, h4;
-    unsigned long long d0, d1, d2, d3, d4;
-    unsigned long c;
+void poly1305_blocks(std::vector<uint64_t> &X, const uint8_t *m, size_t blocks,
+                     bool is_final = false) {
+#if !defined(GL_TARGET_HAS_NATIVE_UINT128)
+    typedef donna128 uint128_t;
+#endif
 
-    r0 = st->r[0];
-    r1 = st->r[1];
-    r2 = st->r[2];
-    r3 = st->r[3];
-    r4 = st->r[4];
+    const uint64_t hibit =
+        is_final ? 0 : (static_cast<uint64_t>(1) << 40); /* 1 << 128 */
 
-    s1 = r1 * 5;
-    s2 = r2 * 5;
-    s3 = r3 * 5;
-    s4 = r4 * 5;
+    const uint64_t r0 = X[0];
+    const uint64_t r1 = X[1];
+    const uint64_t r2 = X[2];
 
-    h0 = st->h[0];
-    h1 = st->h[1];
-    h2 = st->h[2];
-    h3 = st->h[3];
-    h4 = st->h[4];
+    const uint64_t M44 = 0xFFFFFFFFFFF;
+    const uint64_t M42 = 0x3FFFFFFFFFF;
 
-    while (bytes >= poly1305_block_size) {
-        /* h += m[i] */
-        h0 += (leget32(m + 0)) & 0x3ffffff;
-        h1 += (leget32(m + 3) >> 2) & 0x3ffffff;
-        h2 += (leget32(m + 6) >> 4) & 0x3ffffff;
-        h3 += (leget32(m + 9) >> 6) & 0x3ffffff;
-        h4 += (leget32(m + 12) >> 8) | hibit;
+    uint64_t h0 = X[3 + 0];
+    uint64_t h1 = X[3 + 1];
+    uint64_t h2 = X[3 + 2];
 
-        /* h *= r */
-        d0 = ((unsigned long long)h0 * r0) + ((unsigned long long)h1 * s4) +
-             ((unsigned long long)h2 * s3) + ((unsigned long long)h3 * s2) +
-             ((unsigned long long)h4 * s1);
-        d1 = ((unsigned long long)h0 * r1) + ((unsigned long long)h1 * r0) +
-             ((unsigned long long)h2 * s4) + ((unsigned long long)h3 * s3) +
-             ((unsigned long long)h4 * s2);
-        d2 = ((unsigned long long)h0 * r2) + ((unsigned long long)h1 * r1) +
-             ((unsigned long long)h2 * r0) + ((unsigned long long)h3 * s4) +
-             ((unsigned long long)h4 * s3);
-        d3 = ((unsigned long long)h0 * r3) + ((unsigned long long)h1 * r2) +
-             ((unsigned long long)h2 * r1) + ((unsigned long long)h3 * r0) +
-             ((unsigned long long)h4 * s4);
-        d4 = ((unsigned long long)h0 * r4) + ((unsigned long long)h1 * r3) +
-             ((unsigned long long)h2 * r2) + ((unsigned long long)h3 * r1) +
-             ((unsigned long long)h4 * r0);
+    const uint64_t s1 = r1 * 20;
+    const uint64_t s2 = r2 * 20;
 
-        /* (partial) h %= p */
-        c = (unsigned long)(d0 >> 26);
-        h0 = (unsigned long)d0 & 0x3ffffff;
-        d1 += c;
-        c = (unsigned long)(d1 >> 26);
-        h1 = (unsigned long)d1 & 0x3ffffff;
-        d2 += c;
-        c = (unsigned long)(d2 >> 26);
-        h2 = (unsigned long)d2 & 0x3ffffff;
-        d3 += c;
-        c = (unsigned long)(d3 >> 26);
-        h3 = (unsigned long)d3 & 0x3ffffff;
-        d4 += c;
-        c = (unsigned long)(d4 >> 26);
-        h4 = (unsigned long)d4 & 0x3ffffff;
-        h0 += c * 5;
-        c = (h0 >> 26);
-        h0 = h0 & 0x3ffffff;
-        h1 += c;
+    for (size_t i = 0; i != blocks; ++i) {
+        const uint64_t t0 = load_le<uint64_t>(m, 0);
+        const uint64_t t1 = load_le<uint64_t>(m, 1);
 
-        m += poly1305_block_size;
-        bytes -= poly1305_block_size;
+        h0 += ((t0)&M44);
+        h1 += (((t0 >> 44) | (t1 << 20)) & M44);
+        h2 += (((t1 >> 24)) & M42) | hibit;
+
+        const uint128_t d0 =
+            uint128_t(h0) * r0 + uint128_t(h1) * s2 + uint128_t(h2) * s1;
+        const uint64_t c0 = carry_shift(d0, 44);
+
+        const uint128_t d1 =
+            uint128_t(h0) * r1 + uint128_t(h1) * r0 + uint128_t(h2) * s2 + c0;
+        const uint64_t c1 = carry_shift(d1, 44);
+
+        const uint128_t d2 =
+            uint128_t(h0) * r2 + uint128_t(h1) * r1 + uint128_t(h2) * r0 + c1;
+        const uint64_t c2 = carry_shift(d2, 42);
+
+        h0 = d0 & M44;
+        h1 = d1 & M44;
+        h2 = d2 & M42;
+
+        h0 += c2 * 5;
+        h1 += carry_shift(h0, 44);
+        h0 = h0 & M44;
+
+        m += 16;
     }
 
-    st->h[0] = h0;
-    st->h[1] = h1;
-    st->h[2] = h2;
-    st->h[3] = h3;
-    st->h[4] = h4;
+    X[3 + 0] = h0;
+    X[3 + 1] = h1;
+    X[3 + 2] = h2;
 }
 
-void poly1305_finish(poly1305_context *ctx, unsigned char mac[16]) {
-    poly1305_state_internal_t *st = (poly1305_state_internal_t *)ctx;
-    unsigned long h0, h1, h2, h3, h4, c;
-    unsigned long g0, g1, g2, g3, g4;
-    unsigned long long f;
-    unsigned long mask;
-
-    /* process the remaining block */
-    if (st->leftover) {
-        size_t i = st->leftover;
-        st->buffer[i++] = 1;
-        for (; i < poly1305_block_size; i++)
-            st->buffer[i] = 0;
-        st->final = 1;
-        poly1305_blocks(st, st->buffer, poly1305_block_size);
-    }
+void poly1305_finish(std::vector<uint64_t> &X, uint8_t mac[16]) {
+    const uint64_t M44 = 0xFFFFFFFFFFF;
+    const uint64_t M42 = 0x3FFFFFFFFFF;
 
     /* fully carry h */
-    h0 = st->h[0];
-    h1 = st->h[1];
-    h2 = st->h[2];
-    h3 = st->h[3];
-    h4 = st->h[4];
+    uint64_t h0 = X[3 + 0];
+    uint64_t h1 = X[3 + 1];
+    uint64_t h2 = X[3 + 2];
 
-    c = h1 >> 26;
-    h1 = h1 & 0x3ffffff;
+    uint64_t c;
+    c = (h1 >> 44);
+    h1 &= M44;
     h2 += c;
-    c = h2 >> 26;
-    h2 = h2 & 0x3ffffff;
-    h3 += c;
-    c = h3 >> 26;
-    h3 = h3 & 0x3ffffff;
-    h4 += c;
-    c = h4 >> 26;
-    h4 = h4 & 0x3ffffff;
+    c = (h2 >> 42);
+    h2 &= M42;
     h0 += c * 5;
-    c = h0 >> 26;
-    h0 = h0 & 0x3ffffff;
+    c = (h0 >> 44);
+    h0 &= M44;
+    h1 += c;
+    c = (h1 >> 44);
+    h1 &= M44;
+    h2 += c;
+    c = (h2 >> 42);
+    h2 &= M42;
+    h0 += c * 5;
+    c = (h0 >> 44);
+    h0 &= M44;
     h1 += c;
 
     /* compute h + -p */
-    g0 = h0 + 5;
-    c = g0 >> 26;
-    g0 &= 0x3ffffff;
-    g1 = h1 + c;
-    c = g1 >> 26;
-    g1 &= 0x3ffffff;
-    g2 = h2 + c;
-    c = g2 >> 26;
-    g2 &= 0x3ffffff;
-    g3 = h3 + c;
-    c = g3 >> 26;
-    g3 &= 0x3ffffff;
-    g4 = h4 + c - (1 << 26);
+    uint64_t g0 = h0 + 5;
+    c = (g0 >> 44);
+    g0 &= M44;
+    uint64_t g1 = h1 + c;
+    c = (g1 >> 44);
+    g1 &= M44;
+    uint64_t g2 = h2 + c - (static_cast<uint64_t>(1) << 42);
 
     /* select h if h < p, or h + -p if h >= p */
-    mask = (g4 >> ((sizeof(unsigned long) * 8) - 1)) - 1;
-    g0 &= mask;
-    g1 &= mask;
-    g2 &= mask;
-    g3 &= mask;
-    g4 &= mask;
-    mask = ~mask;
-    h0 = (h0 & mask) | g0;
-    h1 = (h1 & mask) | g1;
-    h2 = (h2 & mask) | g2;
-    h3 = (h3 & mask) | g3;
-    h4 = (h4 & mask) | g4;
+    const auto c_mask = CT::Mask<uint64_t>::expand(c);
+    h0 = c_mask.select(g0, h0);
+    h1 = c_mask.select(g1, h1);
+    h2 = c_mask.select(g2, h2);
 
-    /* h = h % (2^128) */
-    h0 = ((h0) | (h1 << 26)) & 0xffffffff;
-    h1 = ((h1 >> 6) | (h2 << 20)) & 0xffffffff;
-    h2 = ((h2 >> 12) | (h3 << 14)) & 0xffffffff;
-    h3 = ((h3 >> 18) | (h4 << 8)) & 0xffffffff;
+    /* h = (h + pad) */
+    const uint64_t t0 = X[6];
+    const uint64_t t1 = X[7];
 
-    /* mac = (h + pad) % (2^128) */
-    f = (unsigned long long)h0 + st->pad[0];
-    h0 = (unsigned long)f;
-    f = (unsigned long long)h1 + st->pad[1] + (f >> 32);
-    h1 = (unsigned long)f;
-    f = (unsigned long long)h2 + st->pad[2] + (f >> 32);
-    h2 = (unsigned long)f;
-    f = (unsigned long long)h3 + st->pad[3] + (f >> 32);
-    h3 = (unsigned long)f;
+    h0 += ((t0)&M44);
+    c = (h0 >> 44);
+    h0 &= M44;
+    h1 += (((t0 >> 44) | (t1 << 20)) & M44) + c;
+    c = (h1 >> 44);
+    h1 &= M44;
+    h2 += (((t1 >> 24)) & M42) + c;
+    h2 &= M42;
 
-    leput32(mac + 0, h0);
-    leput32(mac + 4, h1);
-    leput32(mac + 8, h2);
-    leput32(mac + 12, h3);
+    /* mac = h % (2^128) */
+    h0 = ((h0) | (h1 << 44));
+    h1 = ((h1 >> 20) | (h2 << 24));
+
+    store_le(mac, h0, h1);
 
     /* zero out the state */
-    st->h[0] = 0;
-    st->h[1] = 0;
-    st->h[2] = 0;
-    st->h[3] = 0;
-    st->h[4] = 0;
-    st->r[0] = 0;
-    st->r[1] = 0;
-    st->r[2] = 0;
-    st->r[3] = 0;
-    st->r[4] = 0;
-    st->pad[0] = 0;
-    st->pad[1] = 0;
-    st->pad[2] = 0;
-    st->pad[3] = 0;
+    clear_mem(X.data(), X.size());
 }
 
-void poly1305_update(poly1305_context *ctx, const unsigned char *m,
-                     size_t bytes) {
-    poly1305_state_internal_t *st = (poly1305_state_internal_t *)ctx;
-    size_t i;
+} // namespace
 
-    /* handle leftover */
-    if (st->leftover) {
-        size_t want = (poly1305_block_size - st->leftover);
-        if (want > bytes)
-            want = bytes;
-        for (i = 0; i < want; i++)
-            st->buffer[st->leftover + i] = m[i];
-        bytes -= want;
-        m += want;
-        st->leftover += want;
-        if (st->leftover < poly1305_block_size)
-            return;
-        poly1305_blocks(st, st->buffer, poly1305_block_size);
-        st->leftover = 0;
+void Poly1305::clear() {
+    zap(m_poly);
+    zap(m_buf);
+    m_buf_pos = 0;
+}
+
+void Poly1305::set_key(const uint8_t key[], size_t length) {
+    if (!valid_keylength(length))
+        throw std::invalid_argument("[Salsa20] Invalid key length");
+    key_schedule(key, length);
+}
+
+void Poly1305::key_schedule(const uint8_t key[], size_t) {
+    m_buf_pos = 0;
+    m_buf.resize(16);
+    m_poly.resize(8);
+
+    poly1305_init(m_poly, key);
+}
+
+void Poly1305::update(const uint8_t input[], size_t length) {
+    verify_key_set(m_poly.size() == 8);
+
+    if (m_buf_pos) {
+        buffer_insert(m_buf, m_buf_pos, input, length);
+
+        if (m_buf_pos + length >= m_buf.size()) {
+            poly1305_blocks(m_poly, m_buf.data(), 1);
+            input += (m_buf.size() - m_buf_pos);
+            length -= (m_buf.size() - m_buf_pos);
+            m_buf_pos = 0;
+        }
     }
 
-    /* process full blocks */
-    if (bytes >= poly1305_block_size) {
-        size_t want = (bytes & ~(poly1305_block_size - 1));
-        poly1305_blocks(st, m, want);
-        m += want;
-        bytes -= want;
+    const size_t full_blocks = length / m_buf.size();
+    const size_t remaining = length % m_buf.size();
+
+    if (full_blocks)
+        poly1305_blocks(m_poly, input, full_blocks);
+
+    buffer_insert(m_buf, m_buf_pos, input + full_blocks * m_buf.size(),
+                  remaining);
+    m_buf_pos += remaining;
+}
+
+void Poly1305::final(uint8_t out[]) {
+    verify_key_set(m_poly.size() == 8);
+
+    if (m_buf_pos != 0) {
+        m_buf[m_buf_pos] = 1;
+        const size_t len = m_buf.size() - m_buf_pos - 1;
+        if (len > 0) {
+            clear_mem(&m_buf[m_buf_pos + 1], len);
+        }
+        poly1305_blocks(m_poly, m_buf.data(), 1, true);
     }
 
-    /* store leftover */
-    if (bytes) {
-        for (i = 0; i < bytes; i++)
-            st->buffer[st->leftover + i] = m[i];
-        st->leftover += bytes;
-    }
+    poly1305_finish(m_poly, out);
+
+    m_poly.clear();
+    m_buf_pos = 0;
 }
 
-void poly1305_auth(unsigned char mac[16], const unsigned char *m, size_t bytes,
-                   const unsigned char key[32]) {
-    poly1305_context ctx;
-    poly1305_init(&ctx, key);
-    poly1305_update(&ctx, m, bytes);
-    poly1305_finish(&ctx, mac);
-}
-
-int crypto_equal(const unsigned char *mac1, const unsigned char *mac2,
-                 size_t n) {
-    size_t i;
-    unsigned int dif = 0;
-    for (i = 0; i < n; i++)
-        dif |= (mac1[i] ^ mac2[i]);
-    dif = (dif - 1) >> ((sizeof(unsigned int) * 8) - 1);
-    return (dif & 1);
-}
-
-void poly1305_pad16(poly1305_context *ctx, size_t n) {
-    static const uint8_t pad[16] = {0, 0, 0, 0, 0, 0, 0, 0,
-                                    0, 0, 0, 0, 0, 0, 0, 0};
-    size_t npad = n % 16;
-    if (npad != 0) {
-        npad = 16 - npad;
-    }
-    poly1305_update(ctx, pad, npad);
-}
-
-void poly1305_update(poly1305_context *ctx, uint64_t value) {
-    uint8_t b[8];
-    leput64(b, value);
-    poly1305_update(ctx, b, 8);
+void Poly1305::verify_key_set(bool cond) const {
+    if (cond == false)
+        throw std::runtime_error("[Poly1305] Key not set");
 }
 
 } // namespace crypto

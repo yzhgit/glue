@@ -351,3 +351,12 @@
     #define GL_UNLIKELY(x) (x)
     #define GL_LIKELY(x) (x)
 #endif
+
+/*
+ * Define GL_FUNC_ISA
+ */
+#if (defined(__GNUG__) && !defined(__clang__)) || (OCL_CLANG_VERSION > 38)
+    #define GL_FUNC_ISA(isa) __attribute__((target(isa)))
+#else
+    #define GL_FUNC_ISA(isa)
+#endif

@@ -5,50 +5,59 @@
 
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
+#include "glue/crypto/key_spec.h"
+
+#include <vector>
 
 namespace glue {
 namespace crypto {
 
-// Poly-1305 one time authentication. Donna implementation from Floodyberry.
-
-typedef struct poly1305_context {
-    size_t aligner;
-    unsigned char opaque[136];
-} poly1305_context;
-
-void poly1305_init(poly1305_context *ctx, const unsigned char key[32]);
-void poly1305_update(poly1305_context *ctx, const unsigned char *m,
-                     size_t bytes);
-void poly1305_finish(poly1305_context *ctx, unsigned char mac[16]);
-
-// This combines init/update/finish.
-
-void poly1305_auth(unsigned char mac[16], const unsigned char *m, size_t bytes,
-                   const unsigned char key[32]);
-
-// Constant time comparison. Return 1 or 0, no other values.
-int crypto_equal(const unsigned char *x, const unsigned char *y, size_t len);
-
-class Poly1305 {
-    poly1305_context c;
-
+/**
+ * DJB's Poly1305
+ * Important note: each key can only be used once
+ */
+class Poly1305 final {
   public:
-    Poly1305() {}
-    Poly1305(const unsigned char key[32]) { init(key); }
-    void init(const unsigned char key[32]) { poly1305_init(&c, key); }
-    void update(const unsigned char *m, size_t n) { poly1305_update(&c, m, n); }
-    void update(const char *m, size_t n) {
-        poly1305_update(&c, (const unsigned char *)m, n);
-    }
-    void finish(unsigned char mac[16]) { poly1305_finish(&c, mac); }
-};
+    void clear();
 
-// Add zero padding required by previous data of n bytes.
-void poly1305_pad16(poly1305_context *ctx, size_t n);
-// Convert value to a little endian 8 byte sequence and add it.
-void poly1305_update(poly1305_context *ctx, uint64_t value);
+    void set_key(const uint8_t key[], size_t key_len);
+
+    void update(const uint8_t[], size_t);
+
+    void final(uint8_t[]);
+
+    size_t output_length() const { return 16; }
+
+    /**
+     * @return minimum allowed key length
+     */
+    size_t maximum_keylength() const { return m_key_spec.maximum_keylength(); }
+
+    /**
+     * @return maximum allowed key length
+     */
+    size_t minimum_keylength() const { return m_key_spec.minimum_keylength(); }
+
+    /**
+     * Check whether a given key length is valid for this algorithm.
+     * @param length the key length to be checked.
+     * @return true if the key length is valid.
+     */
+    bool valid_keylength(size_t length) const {
+        return m_key_spec.valid_keylength(length);
+    }
+
+  private:
+    void key_schedule(const uint8_t[], size_t);
+
+    void verify_key_set(bool cond) const;
+
+    KeySpec m_key_spec{32};
+
+    std::vector<uint64_t> m_poly;
+    std::vector<uint8_t> m_buf;
+    size_t m_buf_pos = 0;
+};
 
 } // namespace crypto
 } // namespace glue

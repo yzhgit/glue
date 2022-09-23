@@ -5,102 +5,69 @@
 
 #pragma once
 
-#include <cassert>
-#include <climits>
-#include <cstdint>
-#include <cstring>
+#include "glue/crypto/key_spec.h"
+
+#include <vector>
 
 namespace glue {
 namespace crypto {
 
 /**
- * Represents Salsa20 cypher. Supports only 256-bit keys.
+ * DJB's Salsa20 (and XSalsa20)
  */
-class Salsa20 {
+class Salsa20 final {
   public:
-    /// Helper constants
-    enum : uint8_t {
-        VECTOR_SIZE = 16,
-        BLOCK_SIZE = 64,
-        KEY_SIZE = 32,
-        IV_SIZE = 8
-    };
+    Salsa20() = default;
+
+    void clear();
+
+    void set_key(const uint8_t key[], size_t key_len);
+
+    void set_iv(const uint8_t iv[], size_t iv_len);
+
+    void cipher(const uint8_t in[], uint8_t out[], size_t length);
+
+    void seek(uint64_t offset);
 
     /**
-     * \brief Constructs cypher with given key.
-     * \param[in] key 256-bit key
+     * @return minimum allowed key length
      */
-    inline Salsa20(const uint8_t *key = nullptr);
-    Salsa20(const Salsa20 &) = default;
-    Salsa20(Salsa20 &&) = default;
-    ~Salsa20() = default;
-    Salsa20 &operator=(const Salsa20 &) = default;
-    Salsa20 &operator=(Salsa20 &&) = default;
+    size_t maximum_keylength() const { return m_key_spec.maximum_keylength(); }
 
     /**
-     * \brief Sets key.
-     * \param[in] key 256-bit key
+     * @return maximum allowed key length
      */
-    inline void setKey(const uint8_t *key);
+    size_t minimum_keylength() const { return m_key_spec.minimum_keylength(); }
 
     /**
-     * \brief Sets IV.
-     * \param[in] iv 64-bit IV
+     * Check whether a given key length is valid for this algorithm.
+     * @param length the key length to be checked.
+     * @return true if the key length is valid.
      */
-    inline void setIv(const uint8_t *iv);
+    bool valid_keylength(size_t length) const {
+        return m_key_spec.valid_keylength(length);
+    }
 
-    /**
-     * \brief Generates key stream.
-     * \param[out] output generated key stream
-     */
-    inline void generateKeyStream(uint8_t output[BLOCK_SIZE]);
+    bool valid_iv_length(size_t iv_len) const;
 
-    /**
-     * \brief Processes blocks.
-     * \param[in] input input
-     * \param[out] output output
-     * \param[in] numBlocks number of blocks
-     */
-    inline void processBlocks(const uint8_t *input, uint8_t *output,
-                              size_t numBlocks);
+    size_t default_iv_length() const;
 
-    /**
-     * \brief Processes bytes.
-     *
-     * This function should be used carefully. If number of bytes is not
-     * multiple of block size, then next call to the processBlocks function will
-     * be invalid. Normally this function should be used once at the end of
-     * encryption or decryption. \param[in] input input \param[out] output
-     * output \param[in] numBytes number of bytes
-     */
-    inline void processBytes(const uint8_t *input, uint8_t *output,
-                             size_t numBytes);
+    static void salsa_core(uint8_t output[64], const uint32_t input[16],
+                           size_t rounds);
 
   private:
-    /**
-     * \brief Rotates value.
-     * \param[in] value value
-     * \param[in] numBits number of bits to rotate
-     * \return result of the rotation
-     */
-    inline uint32_t rotate(uint32_t value, uint32_t numBits);
+    void key_schedule(const uint8_t key[], size_t key_len);
 
-    /**
-     * \brief Converts 32-bit unsigned integer value to the array of bytes.
-     * \param[in] value 32-bit unsigned integer value
-     * \param[out] array array of bytes
-     */
-    inline void convert(uint32_t value, uint8_t *array);
+    void initialize_state();
 
-    /**
-     * \brief Converts array of bytes to the 32-bit unsigned integer value.
-     * \param[in] array array of bytes
-     * \return 32-bit unsigned integer value
-     */
-    inline uint32_t convert(const uint8_t *array);
+    void verify_key_set(bool cond) const;
 
-    // Data members
-    uint32_t vector_[VECTOR_SIZE];
+    KeySpec m_key_spec{16, 32, 16};
+
+    std::vector<uint32_t> m_key;
+    std::vector<uint32_t> m_state;
+    std::vector<uint8_t> m_buffer;
+    size_t m_position = 0;
 };
 
 } // namespace crypto

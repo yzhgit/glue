@@ -64,7 +64,7 @@
         #endif
     #endif
 
-    #if !defined(GL_NO_AUTOMATIC_LIBS) && !defined(GLUE_EXPORTS)
-        #pragma comment(lib, "glue_core" GL_LIB_SUFFIX)
-    #endif
+    // #if !defined(GL_NO_AUTOMATIC_LIBS) && !defined(GLUE_EXPORTS)
+    //     #pragma comment(lib, "glue_core" GL_LIB_SUFFIX)
+    // #endif
 #endif

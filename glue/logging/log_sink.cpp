@@ -4,7 +4,7 @@
 //
 
 #include "glue/logging/log_sink.h"
-#include <logging/types.h>
+#include "glue/logging/types.h"
 
 namespace glue {
 namespace logging {

@@ -11,12 +11,13 @@
 namespace glue {
 namespace crypto {
 
-class MD5 final {
+class SHA_512 {
   public:
-    enum { BlockSize = 64 };
-    enum { DigestSize = 16 };
+    /// split into 128 byte blocks (=> 1024 bits), hash is 64 bytes long
+    enum { BlockSize = 128 };
+    enum { DigestSize = 64 };
 
-    MD5();
+    SHA_512();
 
     void clear();
     void update(const uint8_t input[], size_t length);
@@ -24,7 +25,7 @@ class MD5 final {
     void final(uint8_t output[]);
 
   private:
-    void compress_n(const uint8_t[], size_t blocks);
+    void compress_n(const uint8_t input[], size_t blocks);
 
   private:
     /// size of processed data in bytes
@@ -33,10 +34,8 @@ class MD5 final {
     size_t m_position;
     /// bytes not processed yet
     std::vector<uint8_t> m_buffer;
-    /// message buffer
-    std::vector<uint32_t> m_M;
     /// digest value
-    std::vector<uint32_t> m_digest;
+    std::vector<uint64_t> m_digest;
 };
 
 } // namespace crypto
