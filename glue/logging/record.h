@@ -19,28 +19,32 @@ class Record {
     Record(Severity severity, size_t line, const char *file)
         : m_severity(severity), m_tid(util::gettid()), m_line(line),
           m_file(file) {
+        m_content.reserve(1024);
         util::ftime(&m_time);
     }
 
-    Record &ref() { return *this; }
-
-    //////////////////////////////////////////////////////////////////////////
-    // Stream output operators
-
-    Record &operator<<(char data) {
-        char str[] = {data, 0};
-        return *this << str;
-    }
-
-    Record &operator<<(std::ostream &(*data)(std::ostream &)) {
-        m_message << data;
+    template <typename T> Record &operator<<(const T &value) {
+        static_assert(std::is_floating_point<T>::value ||
+                          std::is_integral<T>::value,
+                      "is not a number type.");
+        m_content.append(std::to_string(value));
         return *this;
     }
 
-    template <typename T> Record &operator<<(const T &data) {
-        using namespace plog::detail;
-
-        m_message << data;
+    Record &operator<<(const char *str) {
+        if (str) {
+            m_content.append(str);
+        }
+        return *this;
+    }
+    Record &operator<<(char *str) {
+        if (str) {
+            m_content.append(str);
+        }
+        return *this;
+    }
+    Record &operator<<(const std::string &str) {
+        m_content.append(str);
         return *this;
     }
 
@@ -72,10 +76,7 @@ class Record {
 
     size_t getLine() const { return m_line; }
 
-    const util::nchar *getMessage() const {
-        m_messageStr = m_message.str();
-        return m_messageStr.c_str();
-    }
+    const char *getMessage() const { return m_content.c_str(); }
 
     const char *getFile() const { return m_file; }
 
@@ -89,8 +90,7 @@ class Record {
     const size_t m_tid;
     const size_t m_line;
     const char *const m_file;
-    util::nostringstream m_message;
-    mutable util::nstring m_messageStr;
+    std::string m_content;
 };
 
 } // namespace log
