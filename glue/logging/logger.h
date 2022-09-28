@@ -7,7 +7,6 @@
 
 #include "glue/logging/helpers.h"
 #include "glue/logging/sink.h"
-#include "glue/logging/types.h"
 
 #include <memory>
 #include <string>
@@ -16,49 +15,39 @@
 namespace glue {
 namespace log {
 
-/** Logger class */
 class Logger {
   public:
     /** Default Constructor
      *
-     * @param[in] name      Name of the logger
+     * @param[in] maxSeverity      Name of the logger
      */
-    Logger(const char *name);
-
-    /** Prevent instances of this class from being copied (As this class
-     * contains pointers) */
-    Logger(const Logger &) = delete;
-    /** Prevent instances of this class from being copied (As this class
-     * contains pointers) */
-    Logger &operator=(const Logger &) = delete;
-
-    /** Allow instances of this class to be moved */
-    Logger(Logger &&) = default;
-    /** Allow instances of this class to be moved */
-    Logger &operator=(Logger &&) = default;
+    Logger(Severity maxSeverity = Severity::off) : m_maxSeverity(maxSeverity) {}
 
     /** Add sink
      *
      * @param[in] sink   Sink to push the messages
      */
-    void addSink(std::shared_ptr<LogSink> sink);
+    Logger &addSink(LogSinkPtr sink) {
+        m_sinks.push_back(sink);
+        return *this;
+    }
 
-    /** Logs a message
-     *
-     * @param[in] severity Log level of the message
-     * @param[in] msg       Message to log
-     */
-    void log(LogLevel severity, const char *file, int line, const char *msg);
+    // /** Logs a message
+    //  *
+    //  * @param[in] severity Log level of the message
+    //  * @param[in] msg       Message to log
+    //  */
+    // void log(Severity severity, const char *file, int line, const char *msg);
 
-    /** Logs a formatted message
-     *
-     * @param[in] severity Log level of the message
-     * @param[in] fmt       Message format
-     * @param[in] args      Message arguments
-     */
-    template <typename... Args>
-    void log(LogLevel severity, const char *file, int line, const char *fmt,
-             Args... args);
+    // /** Logs a formatted message
+    //  *
+    //  * @param[in] severity Log level of the message
+    //  * @param[in] fmt       Message format
+    //  * @param[in] args      Message arguments
+    //  */
+    // template <typename... Args>
+    // void log(Severity severity, const char *file, int line, const char *fmt,
+    //          Args... args);
 
     /** Sets log level of the logger
      *
@@ -66,20 +55,13 @@ class Logger {
      *
      * @param[in] severity Log level to set
      */
-    void setSeverity(LogLevel severity);
+    void setMaxSeverity(Severity severity) { m_maxSeverity = severity; }
     /** Returns logger's log level
      *
      * @return Logger's log level
      */
-    LogLevel severity() const;
+    Severity getMaxSeverity() const { return m_maxSeverity; }
 
-    /** Returns logger's name
-     *
-     * @return Logger's name
-     */
-    const char *name() const;
-
-  private:
     /** Checks if a message should be logged depending
      *  on the message log level and the loggers one
      *
@@ -87,32 +69,50 @@ class Logger {
      *
      * @return True if message should be logged else false
      */
-    bool isLoggable(LogLevel severity) { return severity >= m_severity; }
+    bool checkSeverity(Severity severity) { return severity >= m_maxSeverity; }
 
-    /** Prints the message to all the printers
-     *
-     * @param[in] msg Message to print
-     */
-    void writeToSinks(const char *name, const LogSource &source,
-                      const std::string &msg);
+    virtual void write(const Record &record) {
+        if (checkSeverity(record.getSeverity())) {
+            *this += record;
+        }
+    }
+
+    void operator+=(const Record &record) {
+        for (std::vector<LogSinkPtr>::iterator it = m_sinks.begin();
+             it != m_sinks.end(); ++it) {
+            it->write(record);
+        }
+    }
 
   private:
-    const char *m_name;
-    LogLevel m_severity;
-    std::vector<std::shared_ptr<LogSink>> m_sinks;
+    // /** Prints the message to all the printers
+    //  *
+    //  * @param[in] msg Message to print
+    //  */
+    // void writeToSinks(const char *name, const Record &source,
+    //                   const std::string &msg);
+
+  private:
+    Severity m_maxSeverity;
+#ifdef _MSC_VER
+    #pragma warning(push)
+    #pragma warning(disable : 4251) // needs to have dll-interface to be used by
+                                    // clients of class
+#endif
+    std::vector<LogSinkPtr> m_sinks;
+#ifdef _MSC_VER
+    #pragma warning(pop)
+#endif
 };
 
-template <typename... Args>
-inline void Logger::log(LogLevel severity, const char *file, int line,
-                        const char *fmt, Args... args) {
-    if (isLoggable(severity)) {
-        writeToSinks(m_name, LogSource(severity, file, line),
-                     formatString(fmt, args...));
-    }
-}
-
-Logger* GetCurrentLogger();
-void InitLogger(bool console, const char *file);
+// template <typename... Args>
+// inline void Logger::log(Severity severity, const char *file, int line,
+//                         const char *fmt, Args... args) {
+//     if (isLoggable(severity)) {
+//         writeToSinks(m_name, Record(severity, file, line),
+//                      formatString(fmt, args...));
+//     }
+// }
 
 } // namespace log
 } // namespace glue

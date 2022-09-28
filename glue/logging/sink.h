@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "glue/logging/helpers.h"
+#include "glue/logging/record.h"
 
 #include <fstream>
 #include <iostream>
@@ -18,6 +18,8 @@
 
 namespace glue {
 namespace log {
+
+using LogSinkPtr = std::shared_ptr<LogSink>;
 
 /** Base Appender class to be inherited by other Appender classes */
 class LogSink {
@@ -40,7 +42,7 @@ class LogSink {
      *
      * @param[in] msg Message to print
      */
-    virtual void write(const char *name, LogLevel severity,
+    virtual void write(const char *name, Severity severity,
                        const std::string &prefix, const std::string &msg) = 0;
 
   protected:
@@ -53,7 +55,7 @@ class ConsoleSink final : public LogSink {
     ConsoleSink();
     ~ConsoleSink();
 
-    void write(const char *name, LogLevel severity, const std::string &prefix,
+    void write(const char *name, Severity severity, const std::string &prefix,
                const std::string &msg) override;
 
   private:
@@ -67,7 +69,7 @@ class FileSink final : public LogSink {
     FileSink(const std::string &filename);
     ~FileSink();
 
-    void write(const char *name, LogLevel severity, const std::string &prefix,
+    void write(const char *name, Severity severity, const std::string &prefix,
                const std::string &msg) override;
 
   private:

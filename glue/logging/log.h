@@ -44,31 +44,31 @@ constexpr const char *Basename(const char *fname, int offset) {
 #else
     #define LOG_DEBUG(name, fmt, ...)                                          \
         glue::log::LoggerRegistry()::get().getLogger(name)->log(               \
-            glue::log::LogLevel::DEBUG,                                        \
+            glue::log::Severity::debug,                                        \
             Basename(__FILE__, sizeof(__FILE__) - 1), __LINE__, fmt,           \
             ##__VA_ARGS__)
 
     #define LOG_INFO(name, fmt, ...)                                           \
         glue::log::LoggerRegistry()::get().getLogger(name)->log(               \
-            glue::log::LogLevel::INFO,                                         \
+            glue::log::Severity::info,                                         \
             Basename(__FILE__, sizeof(__FILE__) - 1), __LINE__, fmt,           \
             ##__VA_ARGS__)
 
     #define LOG_WARN(name, fmt, ...)                                           \
         glue::log::LoggerRegistry()::get().getLogger(name)->log(               \
-            glue::log::LogLevel::WARN,                                         \
+            glue::log::Severity::warn,                                         \
             Basename(__FILE__, sizeof(__FILE__) - 1), __LINE__, fmt,           \
             ##__VA_ARGS__)
 
     #define LOG_ERROR(name, fmt, ...)                                          \
         glue::log::LoggerRegistry()::get().getLogger(name)->log(               \
-            glue::log::LogLevel::ERROR,                                        \
+            glue::log::Severity::error,                                        \
             Basename(__FILE__, sizeof(__FILE__) - 1), __LINE__, fmt,           \
             ##__VA_ARGS__)
 
     #define LOG_FATAL(name, fmt, ...)                                          \
         glue::log::LoggerRegistry()::get().getLogger(name)->log(               \
-            glue::log::LogLevel::FATAL,                                        \
+            glue::log::Severity::fatal,                                        \
             Basename(__FILE__, sizeof(__FILE__) - 1), __LINE__, fmt,           \
             ##__VA_ARGS__)
 #endif

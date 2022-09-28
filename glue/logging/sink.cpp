@@ -18,7 +18,7 @@ ConsoleSink::ConsoleSink()
 
 ConsoleSink::~ConsoleSink() {}
 
-void ConsoleSink::write(const char *name, LogLevel severity,
+void ConsoleSink::write(const char *name, Severity severity,
                         const std::string &prefix, const std::string &msg) {
 #if defined(ANDROID)
     switch (severity) {
@@ -52,7 +52,7 @@ FileSink::FileSink(const std::string &filename) {
 
 FileSink::~FileSink() { m_outputStream.close(); }
 
-void FileSink::write(const char *name, LogLevel severity,
+void FileSink::write(const char *name, Severity severity,
                      const std::string &prefix, const std::string &msg) {
     m_outputStream << prefix << msg << '\n';
     m_outputStream.flush();
