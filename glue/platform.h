@@ -10,26 +10,12 @@
 //==============================================================================
 #if defined(_WIN32) || defined(_WIN64)
     #define GL_WINDOWS 1
-#elif defined(GL_ANDROID)
-    #undef GL_ANDROID
+#elif defined(ANDROID)
     #define GL_ANDROID 1
 #elif defined(__FreeBSD__) || (__OpenBSD__)
     #define GL_BSD 1
 #elif defined(LINUX) || defined(__linux__)
     #define GL_LINUX 1
-#elif defined(__APPLE_CPP__) || defined(__APPLE_CC__)
-    #define CF_EXCLUDE_CSTD_HEADERS 1
-    #include <AvailabilityMacros.h>
-    #include <TargetConditionals.h> // (needed to find out what platform we're using)
-
-    #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-        #define GL_IPHONE 1
-        #define GL_IOS 1
-    #else
-        #define GL_MAC 1
-    #endif
-#elif defined(__wasm__)
-    #define GL_WASM 1
 #else
     #error "Unknown platform!"
 #endif
@@ -61,50 +47,6 @@
     #define GL_LITTLE_ENDIAN 1
 
     #define GL_INTEL 1
-#endif
-
-//==============================================================================
-#if GL_MAC || GL_IOS
-
-    #if defined(DEBUG) || defined(_DEBUG) ||                                   \
-        !(defined(NDEBUG) || defined(_NDEBUG))
-        #define GL_DEBUG 1
-    #endif
-
-    #if !(defined(DEBUG) || defined(_DEBUG) || defined(NDEBUG) ||              \
-          defined(_NDEBUG))
-        #warning                                                               \
-            "Neither NDEBUG or DEBUG has been defined - you should set one of these to make it clear whether this is a release build,"
-    #endif
-
-    #ifdef __LITTLE_ENDIAN__
-        #define GL_LITTLE_ENDIAN 1
-    #else
-        #define GL_BIG_ENDIAN 1
-    #endif
-
-    #ifdef __LP64__
-        #define GL_64BIT 1
-    #else
-        #define GL_32BIT 1
-    #endif
-
-    #if defined(__ppc__) || defined(__ppc64__)
-        #error "PowerPC is no longer supported by JUCE!"
-    #elif defined(__arm__) || defined(__arm64__)
-        #define GL_ARM 1
-    #else
-        #define GL_INTEL 1
-    #endif
-
-    #if GL_MAC
-        #if !defined(MAC_OS_X_VERSION_10_14)
-            #error                                                             \
-                "The 10.14 SDK (Xcode 10.1+) is required to build JUCE apps. You can create apps that run on macOS 10.7+ by changing the deployment target."
-        #elif MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7
-            #error "Building for OSX 10.6 is no longer supported!"
-        #endif
-    #endif
 #endif
 
 //==============================================================================

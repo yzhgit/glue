@@ -8,7 +8,7 @@
 namespace glue {
 namespace ml {
 
-constexpr unsigned int GetDataTypeSize(DataType dataType) {
+constexpr uint32_t GetDataTypeSize(DataType dataType) {
     switch (dataType) {
     case DataType::BFloat16:
     case DataType::Float16:
@@ -31,6 +31,20 @@ constexpr unsigned int GetDataTypeSize(DataType dataType) {
     default:
         return 0U;
     }
+}
+
+uint32_t TensorInfo::GetNumDimensions() const { return m_Shape.size(); }
+
+uint32_t TensorInfo::GetNumElements() const {
+    uint32_t elementNum = 1;
+    for (const auto &dim : m_Shape) {
+        elementNum *= dim;
+    }
+    return elementNum;
+}
+
+uint32_t TensorInfo::GetNumBytes() const {
+    return GetNumElements() * GetDataTypeSize(m_DataType);
 }
 
 } // namespace ml

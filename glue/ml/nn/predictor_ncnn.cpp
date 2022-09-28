@@ -17,83 +17,29 @@
 #include "net.h"
 
 /* for My modules */
-#include "inference_helper_ncnn.h"
+#include "predictor_ncnn.h"
 
 /*** Macro ***/
-#define TAG "InferenceHelperNcnn"
+#define TAG "PredictorNcnn"
 #define PRINT(...) INFERENCE_HELPER_LOG_PRINT(TAG, __VA_ARGS__)
 #define PRINT_E(...) INFERENCE_HELPER_LOG_PRINT_E(TAG, __VA_ARGS__)
 
-/*** Function ***/
-/* Reference: https://github.com/Tencent/ncnn/blob/master/examples/yolox.cpp */
-class YoloV5Focus : public ncnn::Layer {
-  public:
-    YoloV5Focus() { one_blob_only = true; }
-
-    virtual int forward(const ncnn::Mat &bottom_blob, ncnn::Mat &top_blob,
-                        const ncnn::Option &opt) const {
-        int w = bottom_blob.w;
-        int h = bottom_blob.h;
-        int channels = bottom_blob.c;
-
-        int outw = w / 2;
-        int outh = h / 2;
-        int outc = channels * 4;
-
-        top_blob.create(outw, outh, outc, 4u, 1, opt.blob_allocator);
-        if (top_blob.empty())
-            return -100;
-
-#pragma omp parallel for num_threads(opt.num_threads)
-        for (int p = 0; p < outc; p++) {
-            const float *ptr =
-                bottom_blob.channel(p % channels).row((p / channels) % 2) +
-                ((p / channels) / 2);
-            float *outptr = top_blob.channel(p);
-
-            for (int i = 0; i < outh; i++) {
-                for (int j = 0; j < outw; j++) {
-                    *outptr = *ptr;
-
-                    outptr += 1;
-                    ptr += 2;
-                }
-
-                ptr += w;
-            }
-        }
-
-        return 0;
-    }
-};
-DEFINE_LAYER_CREATOR(YoloV5Focus)
 
 namespace glue {
 namespace ml {
 
-InferenceHelperNcnn::InferenceHelperNcnn() {
-    custom_ops_.clear();
-    custom_ops_.push_back(std::pair<const char *, const void *>(
-        "YoloV5Focus", (const void *)YoloV5Focus_layer_creator));
+PredictorNcnn::PredictorNcnn() {
     num_threads_ = 1;
 }
 
-InferenceHelperNcnn::~InferenceHelperNcnn() {}
+PredictorNcnn::~PredictorNcnn() {}
 
-int32_t InferenceHelperNcnn::SetNumThreads(const int32_t num_threads) {
+int32_t PredictorNcnn::SetNumThreads(const int32_t num_threads) {
     num_threads_ = num_threads;
     return kRetOk;
 }
 
-int32_t InferenceHelperNcnn::SetCustomOps(
-    const std::vector<std::pair<const char *, const void *>> &custom_ops) {
-    for (auto op : custom_ops) {
-        custom_ops_.push_back(op);
-    }
-    return kRetOk;
-}
-
-int32_t InferenceHelperNcnn::Initialize(
+int32_t PredictorNcnn::Initialize(
     const std::string &model_filename,
     std::vector<InputTensorInfo> &input_tensor_info_list,
     std::vector<OutputTensorInfo> &output_tensor_info_list) {
@@ -104,11 +50,6 @@ int32_t InferenceHelperNcnn::Initialize(
     net_->opt.use_fp16_storage = true;
     if (helper_type_ == kNcnnVulkan) {
         net_->opt.use_vulkan_compute = 1;
-    }
-
-    for (auto op : custom_ops_) {
-        net_->register_custom_layer(op.first,
-                                    (ncnn::layer_creator_func)(op.second));
     }
 
     std::string bin_filename = model_filename;
@@ -146,7 +87,7 @@ int32_t InferenceHelperNcnn::Initialize(
     return kRetOk;
 };
 
-int32_t InferenceHelperNcnn::Finalize(void) {
+int32_t PredictorNcnn::Finalize(void) {
     net_.reset();
     in_mat_list_.clear();
     out_mat_list_.clear();
@@ -156,7 +97,7 @@ int32_t InferenceHelperNcnn::Finalize(void) {
     return kRetErr;
 }
 
-int32_t InferenceHelperNcnn::PreProcess(
+int32_t PredictorNcnn::PreProcess(
     const std::vector<InputTensorInfo> &input_tensor_info_list) {
     in_mat_list_.clear();
     for (const auto &input_tensor_info : input_tensor_info_list) {
@@ -246,7 +187,7 @@ int32_t InferenceHelperNcnn::PreProcess(
     return kRetOk;
 }
 
-int32_t InferenceHelperNcnn::Process(
+int32_t PredictorNcnn::Process(
     std::vector<OutputTensorInfo> &output_tensor_info_list) {
     ncnn::Extractor ex = net_->create_extractor();
     ex.set_light_mode(true);

@@ -9,45 +9,37 @@
 #include <sstream>
 
 namespace glue {
-namespace logging {
+namespace log {
 
-Logger::Logger(const char *name) : name_(name) {}
+Logger::Logger(const char *name) : m_name(name) {}
 
-void Logger::addSink(std::shared_ptr<LogSink> sink) { sinks_.push_back(sink); }
+void Logger::addSink(std::shared_ptr<LogSink> sink) { m_sinks.push_back(sink); }
 
-void Logger::log(LogSeverity severity, const char *file, int line,
-                 const char *func, const char *msg) {
+void Logger::log(LogLevel severity, const char *file, int line,
+                 const char *msg) {
     if (isLoggable(severity)) {
-        writeToSinks(LogMessage(name_, severity, file, line, func, msg));
+        writeToSinks(m_name, LogSource(severity, file, line), msg);
     }
 }
 
-void Logger::setSeverity(LogSeverity severity) { severity_ = severity; }
+void Logger::setSeverity(LogLevel severity) { m_severity = severity; }
 
-LogSeverity Logger::severity() const { return severity_; }
+LogLevel Logger::severity() const { return m_severity; }
 
-const char *Logger::name() const { return name_; }
+const char *Logger::name() const { return m_name; }
 
-std::string Logger::formatMessage(const LogMessage &msg) {
-    std::stringstream ss;
-
-    char _time[25] = {0};
-    struct tm *local_tm = localtime(&msg.time_);
-    strftime(_time, 25, "%Y-%m-%d %H:%M:%S", local_tm);
-
-    ss << _time << " " << msg.thread_id_ << " " << std::setw(5)
-       << severityToString(msg.severity_) << " " << msg.file_ << ":"
-       << msg.line_ << " " << msg.func_ << " " << msg.raw_.c_str() << "\n";
-
-    return ss.str();
-}
-
-void Logger::writeToSinks(const LogMessage &msg) {
-    std::string formatStr = formatMessage(msg);
-    for (auto &s : sinks_) {
-        s->log(formatStr);
+void Logger::writeToSinks(const char *name, const LogSource &source,
+                          const std::string &msg) {
+    std::string prefix = source.toString();
+    for (auto &sink : m_sinks) {
+        sink->write(name, source.severity(), prefix, msg);
     }
 }
 
-} // namespace logging
+void InitLogger(bool console, const char *file) {
+    auto color_sink = std::make_shared<ConsoleSink>();
+    auto file_sink = std::make_shared<FileSink>("1.log");
+}
+
+} // namespace log
 } // namespace glue

@@ -83,7 +83,7 @@ class TensorInfo {
 
   public:
     std::string name;    // [In] Set the name_ of tensor
-    int32_t id;          // [Out] Do not modify (Used in InferenceHelper)
+    int32_t id;          // [Out] Do not modify (Used in Predictor)
     int32_t tensor_type; // [In] The type of tensor (e.g. kTensorTypeFp32)
     std::vector<int32_t>
         tensor_dims; // InputTensorInfo:   [In] The dimentions of tensor. (If
@@ -202,7 +202,7 @@ class OutputTensorInfo : public TensorInfo {
     float *data_fp32_;
 };
 
-class InferenceHelper {
+class Predictor {
   public:
     enum {
         kRetOk = 0,
@@ -210,39 +210,17 @@ class InferenceHelper {
     };
 
     typedef enum {
-        kOpencv,
-        kOpencvGpu,
-        kTensorflowLite,
-        kTensorflowLiteXnnpack,
-        kTensorflowLiteGpu,
-        kTensorflowLiteEdgetpu,
-        kTensorflowLiteNnapi,
         kTensorrt,
         kNcnn,
-        kNcnnVulkan,
-        kMnn,
         kSnpe,
-        kArmnn,
-        kNnabla,
-        kNnablaCuda,
-        kOnnxRuntime,
-        kOnnxRuntimeCuda,
-        kLibtorch,
-        kLibtorchCuda,
-        kTensorflow,
-        kTensorflowGpu,
-        kSample,
-    } HelperType;
+    } PredictorType;
 
   public:
-    static InferenceHelper *Create(const HelperType helper_type);
+    static Predictor *Create(const PredictorType helper_type);
 
   public:
-    virtual ~InferenceHelper() {}
+    virtual ~Predictor() {}
     virtual int32_t SetNumThreads(const int32_t num_threads) = 0;
-    virtual int32_t
-    SetCustomOps(const std::vector<std::pair<const char *, const void *>>
-                     &custom_ops) = 0;
     virtual int32_t
     Initialize(const std::string &model_filename,
                std::vector<InputTensorInfo> &input_tensor_info_list,
@@ -269,7 +247,7 @@ class InferenceHelper {
                         const InputTensorInfo &input_tensor_info, T *dst);
 
   protected:
-    HelperType helper_type_;
+    PredictorType helper_type_;
 };
 
 } // namespace ml

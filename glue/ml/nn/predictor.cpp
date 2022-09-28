@@ -13,15 +13,14 @@
 #include <string>
 #include <vector>
 
-/* for My modules */
-#include "inference_helper.h"
+#include "predictor.h"
 
 #ifdef INFERENCE_HELPER_ENABLE_TENSORRT
-    #include "inference_helper_tensorrt.h"
+    #include "predictor_tensorrt.h"
 #endif
 
 #ifdef INFERENCE_HELPER_ENABLE_NCNN
-    #include "inference_helper_ncnn.h"
+    #include "predictor_ncnn.h"
 #endif
 
 #ifdef INFERENCE_HELPER_ENABLE_MNN
@@ -29,32 +28,30 @@
 #endif
 
 #ifdef INFERENCE_HELPER_ENABLE_SNPE
-    #include "inference_helper_snpe.h"
+    #include "predictor_snpe.h"
 #endif
 
-/*** Macro ***/
-#define TAG "InferenceHelper"
+#define TAG "Predictor"
 #define PRINT(...) INFERENCE_HELPER_LOG_PRINT(TAG, __VA_ARGS__)
 #define PRINT_E(...) INFERENCE_HELPER_LOG_PRINT_E(TAG, __VA_ARGS__)
 
 namespace glue {
 namespace ml {
 
-InferenceHelper *
-InferenceHelper::Create(const InferenceHelper::HelperType helper_type) {
-    InferenceHelper *p = nullptr;
-    switch (helper_type) {
+Predictor *Predictor::Create(const Predictor::PredictorType type) {
+    Predictor *p = nullptr;
+    switch (type) {
 #ifdef INFERENCE_HELPER_ENABLE_TENSORRT
     case kTensorrt:
         PRINT("Use TensorRT \n");
-        p = new InferenceHelperTensorRt();
+        p = new PredictorTensorRt();
         break;
 #endif
 #ifdef INFERENCE_HELPER_ENABLE_NCNN
     case kNcnn:
     case kNcnnVulkan:
         PRINT("Use NCNN\n");
-        p = new InferenceHelperNcnn();
+        p = new PredictorNcnn();
         break;
 #endif
 #ifdef INFERENCE_HELPER_ENABLE_MNN
@@ -66,7 +63,7 @@ InferenceHelper::Create(const InferenceHelper::HelperType helper_type) {
 #ifdef INFERENCE_HELPER_ENABLE_SNPE
     case kSnpe:
         PRINT("Use SNPE\n");
-        p = new InferenceHelperSnpe();
+        p = new PredictorSnpe();
         break;
 #endif
     default:
@@ -81,7 +78,7 @@ InferenceHelper::Create(const InferenceHelper::HelperType helper_type) {
     return p;
 }
 
-void InferenceHelper::ConvertNormalizeParameters(InputTensorInfo &tensor_info) {
+void Predictor::ConvertNormalizeParameters(InputTensorInfo &tensor_info) {
     if (tensor_info.data_type != InputTensorInfo::kDataTypeImage)
         return;
 
@@ -104,9 +101,9 @@ void InferenceHelper::ConvertNormalizeParameters(InputTensorInfo &tensor_info) {
 #endif
 }
 
-void InferenceHelper::PreProcessImage(int32_t num_thread,
-                                      const InputTensorInfo &input_tensor_info,
-                                      float *dst) {
+void Predictor::PreProcessImage(int32_t num_thread,
+                                const InputTensorInfo &input_tensor_info,
+                                float *dst) {
     const int32_t img_width = input_tensor_info.GetWidth();
     const int32_t img_height = input_tensor_info.GetHeight();
     const int32_t img_channel = input_tensor_info.GetChannel();
@@ -143,9 +140,9 @@ void InferenceHelper::PreProcessImage(int32_t num_thread,
     }
 }
 
-void InferenceHelper::PreProcessImage(int32_t num_thread,
-                                      const InputTensorInfo &input_tensor_info,
-                                      uint8_t *dst) {
+void Predictor::PreProcessImage(int32_t num_thread,
+                                const InputTensorInfo &input_tensor_info,
+                                uint8_t *dst) {
     const int32_t img_width = input_tensor_info.GetWidth();
     const int32_t img_height = input_tensor_info.GetHeight();
     const int32_t img_channel = input_tensor_info.GetChannel();
@@ -164,9 +161,9 @@ void InferenceHelper::PreProcessImage(int32_t num_thread,
     }
 }
 
-void InferenceHelper::PreProcessImage(int32_t num_thread,
-                                      const InputTensorInfo &input_tensor_info,
-                                      int8_t *dst) {
+void Predictor::PreProcessImage(int32_t num_thread,
+                                const InputTensorInfo &input_tensor_info,
+                                int8_t *dst) {
     const int32_t img_width = input_tensor_info.GetWidth();
     const int32_t img_height = input_tensor_info.GetHeight();
     const int32_t img_channel = input_tensor_info.GetChannel();
@@ -191,9 +188,9 @@ void InferenceHelper::PreProcessImage(int32_t num_thread,
 }
 
 template <typename T>
-void InferenceHelper::PreProcessBlob(int32_t num_thread,
-                                     const InputTensorInfo &input_tensor_info,
-                                     T *dst) {
+void Predictor::PreProcessBlob(int32_t num_thread,
+                               const InputTensorInfo &input_tensor_info,
+                               T *dst) {
     const int32_t img_width = input_tensor_info.GetWidth();
     const int32_t img_height = input_tensor_info.GetHeight();
     const int32_t img_channel = input_tensor_info.GetChannel();
@@ -226,15 +223,15 @@ void InferenceHelper::PreProcessBlob(int32_t num_thread,
     }
 }
 
-template void InferenceHelper::PreProcessBlob<float>(
+template void Predictor::PreProcessBlob<float>(
     int32_t num_thread, const InputTensorInfo &input_tensor_info, float *dst);
-template void InferenceHelper::PreProcessBlob<int32_t>(
+template void Predictor::PreProcessBlob<int32_t>(
     int32_t num_thread, const InputTensorInfo &input_tensor_info, int32_t *dst);
-template void InferenceHelper::PreProcessBlob<int64_t>(
+template void Predictor::PreProcessBlob<int64_t>(
     int32_t num_thread, const InputTensorInfo &input_tensor_info, int64_t *dst);
-template void InferenceHelper::PreProcessBlob<uint8_t>(
+template void Predictor::PreProcessBlob<uint8_t>(
     int32_t num_thread, const InputTensorInfo &input_tensor_info, uint8_t *dst);
-template void InferenceHelper::PreProcessBlob<int8_t>(
+template void Predictor::PreProcessBlob<int8_t>(
     int32_t num_thread, const InputTensorInfo &input_tensor_info, int8_t *dst);
 
 } // namespace ml

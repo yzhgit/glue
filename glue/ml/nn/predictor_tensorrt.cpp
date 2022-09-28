@@ -21,10 +21,10 @@
 #include <cuda_runtime_api.h>
 
 /* for My modules */
-#include "inference_helper_tensorrt.h"
+#include "predictor_tensorrt.h"
 
 /*** Macro ***/
-#define TAG "InferenceHelperTensorRt"
+#define TAG "PredictorTensorRt"
 #define PRINT(...) INFERENCE_HELPER_LOG_PRINT(TAG, __VA_ARGS__)
 #define PRINT_E(...) INFERENCE_HELPER_LOG_PRINT_E(TAG, __VA_ARGS__)
 
@@ -41,7 +41,7 @@
     /* ★ Modify the following (use the same parameter as the model. Also, ppm
      * must be the same size but not normalized.) */
     #define CAL_DIR                                                            \
-        "../../InferenceHelper/inference_helper/tensorrt/calibration/"         \
+        "../../Predictor/inference_helper/tensorrt/calibration/"               \
         "sample_ppm"
     #define CAL_LIST_FILE "list.txt"
     #define CAL_BATCH_SIZE 10
@@ -64,25 +64,19 @@
 namespace glue {
 namespace ml {
 
-InferenceHelperTensorRt::~InferenceHelperTensorRt() = default;
+PredictorTensorRt::~PredictorTensorRt() = default;
 
-InferenceHelperTensorRt::InferenceHelperTensorRt() {
+PredictorTensorRt::PredictorTensorRt() {
     num_threads_ = 1;
     dla_core_ = -1;
 }
 
-int32_t InferenceHelperTensorRt::SetNumThreads(const int32_t num_threads) {
+int32_t PredictorTensorRt::SetNumThreads(const int32_t num_threads) {
     num_threads_ = num_threads;
     return kRetOk;
 }
 
-int32_t InferenceHelperTensorRt::SetCustomOps(
-    const std::vector<std::pair<const char *, const void *>> &custom_ops) {
-    PRINT("[WARNING] This method is not supported\n");
-    return kRetOk;
-}
-
-int32_t InferenceHelperTensorRt::Initialize(
+int32_t PredictorTensorRt::Initialize(
     const std::string &model_filename,
     std::vector<InputTensorInfo> &input_tensor_info_list,
     std::vector<OutputTensorInfo> &output_tensor_info_list) {
@@ -251,7 +245,7 @@ int32_t InferenceHelperTensorRt::Initialize(
     return kRetOk;
 }
 
-int InferenceHelperTensorRt::Finalize(void) {
+int PredictorTensorRt::Finalize(void) {
     int num_of_in_out = engine_->getNbBindings();
     for (int i = 0; i < num_of_in_out; i++) {
         const auto data_type = engine_->getBindingDataType(i);
@@ -276,7 +270,7 @@ int InferenceHelperTensorRt::Finalize(void) {
     return kRetOk;
 }
 
-int32_t InferenceHelperTensorRt::PreProcess(
+int32_t PredictorTensorRt::PreProcess(
     const std::vector<InputTensorInfo> &input_tensor_info_list) {
     for (const auto &input_tensor_info : input_tensor_info_list) {
         const int32_t img_width = input_tensor_info.GetWidth();
@@ -354,7 +348,7 @@ int32_t InferenceHelperTensorRt::PreProcess(
     return kRetOk;
 }
 
-int32_t InferenceHelperTensorRt::Process(
+int32_t PredictorTensorRt::Process(
     std::vector<OutputTensorInfo> &output_tensor_info_list) {
     cudaStream_t stream;
     cudaStreamCreate(&stream);
@@ -385,7 +379,7 @@ int32_t InferenceHelperTensorRt::Process(
     return kRetOk;
 }
 
-int32_t InferenceHelperTensorRt::AllocateBuffers(
+int32_t PredictorTensorRt::AllocateBuffers(
     std::vector<InputTensorInfo> &input_tensor_info_list,
     std::vector<OutputTensorInfo> &output_tensor_info_list) {
     int32_t num_of_in_out = engine_->getNbBindings();

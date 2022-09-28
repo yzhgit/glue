@@ -6,7 +6,7 @@
 #pragma once
 
 #include "glue/logging/helpers.h"
-#include "glue/logging/log_sink.h"
+#include "glue/logging/sink.h"
 #include "glue/logging/types.h"
 
 #include <memory>
@@ -14,7 +14,7 @@
 #include <vector>
 
 namespace glue {
-namespace logging {
+namespace log {
 
 /** Logger class */
 class Logger {
@@ -48,8 +48,7 @@ class Logger {
      * @param[in] severity Log level of the message
      * @param[in] msg       Message to log
      */
-    void log(LogSeverity severity, const char *file, int line, const char *func,
-             const char *msg);
+    void log(LogLevel severity, const char *file, int line, const char *msg);
 
     /** Logs a formatted message
      *
@@ -58,8 +57,8 @@ class Logger {
      * @param[in] args      Message arguments
      */
     template <typename... Args>
-    void log(LogSeverity severity, const char *file, int line, const char *func,
-             const char *fmt, Args... args);
+    void log(LogLevel severity, const char *file, int line, const char *fmt,
+             Args... args);
 
     /** Sets log level of the logger
      *
@@ -67,12 +66,12 @@ class Logger {
      *
      * @param[in] severity Log level to set
      */
-    void setSeverity(LogSeverity severity);
+    void setSeverity(LogLevel severity);
     /** Returns logger's log level
      *
      * @return Logger's log level
      */
-    LogSeverity severity() const;
+    LogLevel severity() const;
 
     /** Returns logger's name
      *
@@ -88,30 +87,32 @@ class Logger {
      *
      * @return True if message should be logged else false
      */
-    bool isLoggable(LogSeverity severity) { return severity >= severity_; }
+    bool isLoggable(LogLevel severity) { return severity >= m_severity; }
 
     /** Prints the message to all the printers
      *
      * @param[in] msg Message to print
      */
-    void writeToSinks(const LogMessage &msg);
-
-    std::string formatMessage(const LogMessage &msg);
+    void writeToSinks(const char *name, const LogSource &source,
+                      const std::string &msg);
 
   private:
-    const char *name_;
-    LogSeverity severity_;
-    std::vector<std::shared_ptr<LogSink>> sinks_;
+    const char *m_name;
+    LogLevel m_severity;
+    std::vector<std::shared_ptr<LogSink>> m_sinks;
 };
 
 template <typename... Args>
-inline void Logger::log(LogSeverity severity, const char *file, int line,
-                        const char *func, const char *fmt, Args... args) {
+inline void Logger::log(LogLevel severity, const char *file, int line,
+                        const char *fmt, Args... args) {
     if (isLoggable(severity)) {
-        writeToSinks(LogMessage(name_, severity, file, line, func,
-                                formatString(fmt, args...)));
+        writeToSinks(m_name, LogSource(severity, file, line),
+                     formatString(fmt, args...));
     }
 }
 
-} // namespace logging
+Logger* GetCurrentLogger();
+void InitLogger(bool console, const char *file);
+
+} // namespace log
 } // namespace glue

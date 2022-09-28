@@ -16,7 +16,7 @@ constexpr const char *Basename(const char *fname, int offset) {
 }
 
 void test_log(std::shared_ptr<Logger> logger) {
-    logger->log(LogSeverity::WARN, Basename(__FILE__, sizeof(__FILE__) - 1),
+    logger->log(LogLevel::WARN, Basename(__FILE__, sizeof(__FILE__) - 1),
                 __LINE__, __FUNCTION__, "This is warn message");
 }
 
@@ -30,13 +30,13 @@ int main(int argc, char *argv[]) {
     logger->addSink(color_sink);
     logger->addSink(file_sink);
 
-    logger->log(LogSeverity::DEBUG, Basename(__FILE__, sizeof(__FILE__) - 1),
+    logger->log(LogLevel::DEBUG, Basename(__FILE__, sizeof(__FILE__) - 1),
                 __LINE__, __FUNCTION__, "a = %d, b = %f", a, b);
 
-    logger->log(LogSeverity::INFO, Basename(__FILE__, sizeof(__FILE__) - 1),
+    logger->log(LogLevel::INFO, Basename(__FILE__, sizeof(__FILE__) - 1),
                 __LINE__, __FUNCTION__, "This is info message");
 
-    logger->log(LogSeverity::WARN, Basename(__FILE__, sizeof(__FILE__) - 1),
+    logger->log(LogLevel::WARN, Basename(__FILE__, sizeof(__FILE__) - 1),
                 __LINE__, __FUNCTION__, "This is warn message");
 
     test_log(logger);

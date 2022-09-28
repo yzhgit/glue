@@ -39,32 +39,3 @@
         #define GLUE_API
     #endif
 #endif
-
-//
-// Automatically link Foundation library.
-//
-#if defined(_MSC_VER)
-    #if defined(GL_DLL)
-        #if defined(_DEBUG)
-            #define GL_LIB_SUFFIX "d.lib"
-        #else
-            #define GL_LIB_SUFFIX ".lib"
-        #endif
-    #elif defined(_DLL)
-        #if defined(_DEBUG)
-            #define GL_LIB_SUFFIX "mdd.lib"
-        #else
-            #define GL_LIB_SUFFIX "md.lib"
-        #endif
-    #else
-        #if defined(_DEBUG)
-            #define GL_LIB_SUFFIX "mtd.lib"
-        #else
-            #define GL_LIB_SUFFIX "mt.lib"
-        #endif
-    #endif
-
-    // #if !defined(GL_NO_AUTOMATIC_LIBS) && !defined(GLUE_EXPORTS)
-    //     #pragma comment(lib, "glue_core" GL_LIB_SUFFIX)
-    // #endif
-#endif

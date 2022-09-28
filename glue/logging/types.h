@@ -6,14 +6,12 @@
 #pragma once
 
 #include <string>
-#include <time.h>
 
 namespace glue {
-namespace logging {
+namespace log {
 
 /** Logging level enumeration */
-enum class LogSeverity {
-    VERBOSE, /**< All logging messages */
+enum class LogLevel {
     DEBUG,
     INFO,  /**< Information log level */
     WARN,  /**< Warning log level */
@@ -23,26 +21,24 @@ enum class LogSeverity {
 };
 
 /** Log message */
-struct LogMessage {
+class LogSource {
+  public:
     /** Construct a log message
      *
      * @param[in] msg       Message to log.
      * @param[in] severity Logging level. Default: OFF
      */
-    LogMessage(const char *name, LogSeverity severity, const char *file,
-               int line, const char *func, std::string msg);
+    LogSource(LogLevel severity, const char *filename, uint32_t linenum);
 
-    const char *name_;
-    /** Logging level */
-    LogSeverity severity_;
-    const char *file_;
-    int line_;
-    const char *func_;
-    /** Log message */
-    std::string raw_;
-    time_t time_;
-    size_t thread_id_;
+    LogLevel severity() const { return m_severity; }
+
+    std::string toString() const;
+
+  private:
+    LogLevel m_severity;
+    const char *m_filename;
+    uint32_t m_linenum;
 };
 
-} // namespace logging
+} // namespace log
 } // namespace glue

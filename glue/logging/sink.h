@@ -17,13 +17,13 @@
 #endif
 
 namespace glue {
-namespace logging {
+namespace log {
 
 /** Base Appender class to be inherited by other Appender classes */
 class LogSink {
   public:
     /** Default Constructor */
-    LogSink() noexcept : mtx_() {}
+    LogSink() noexcept : m_mutex() {}
 
     /** Prevent instances of this class from being copied */
     LogSink(const LogSink &) = delete;
@@ -40,10 +40,11 @@ class LogSink {
      *
      * @param[in] msg Message to print
      */
-    virtual void log(const std::string &msg) = 0;
+    virtual void write(const char *name, LogLevel severity,
+                       const std::string &prefix, const std::string &msg) = 0;
 
-  private:
-    std::mutex mtx_;
+  protected:
+    std::mutex m_mutex;
 };
 
 /** Console Appender */
@@ -52,14 +53,12 @@ class ConsoleSink final : public LogSink {
     ConsoleSink();
     ~ConsoleSink();
 
-    void log(const std::string &msg) override;
+    void write(const char *name, LogLevel severity, const std::string &prefix,
+               const std::string &msg) override;
 
   private:
-    const bool isatty_;
-    std::ostream &outputStream_;
-#ifdef _WIN32
-    HANDLE outputHandle_;
-#endif
+    const bool m_isatty;
+    std::ostream &m_outputStream;
 };
 
 /** File Appender */
@@ -68,11 +67,12 @@ class FileSink final : public LogSink {
     FileSink(const std::string &filename);
     ~FileSink();
 
-    void log(const std::string &msg) override;
+    void write(const char *name, LogLevel severity, const std::string &prefix,
+               const std::string &msg) override;
 
   private:
-    std::ofstream outputStream_;
+    std::ofstream m_outputStream;
 };
 
-} // namespace logging
+} // namespace log
 } // namespace glue

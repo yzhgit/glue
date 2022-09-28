@@ -13,7 +13,7 @@
 #include <vector>
 
 /* for My modules */
-#include "inference_helper.h"
+#include "predictor.h"
 
 namespace nvinfer1 {
 class IRuntime;
@@ -24,14 +24,11 @@ class IExecutionContext;
 namespace glue {
 namespace ml {
 
-class InferenceHelperTensorRt : public InferenceHelper {
+class PredictorTensorRt : public Predictor {
   public:
-    InferenceHelperTensorRt();
-    ~InferenceHelperTensorRt() override;
+    PredictorTensorRt();
+    ~PredictorTensorRt() override;
     int32_t SetNumThreads(const int32_t num_threads) override;
-    int32_t SetCustomOps(
-        const std::vector<std::pair<const char *, const void *>> &custom_ops)
-        override;
     int32_t
     Initialize(const std::string &model_filename,
                std::vector<InputTensorInfo> &input_tensor_info_list,

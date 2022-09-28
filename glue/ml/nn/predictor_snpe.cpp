@@ -36,36 +36,30 @@
 #include "udlExample.hpp"
 
 /* for My modules */
-#include "inference_helper_snpe.h"
+#include "predictor_snpe.h"
 
 /*** Macro ***/
-#define TAG "InferenceHelperSnpe"
+#define TAG "PredictorSnpe"
 #define PRINT(...) INFERENCE_HELPER_LOG_PRINT(TAG, __VA_ARGS__)
 #define PRINT_E(...) INFERENCE_HELPER_LOG_PRINT_E(TAG, __VA_ARGS__)
 
 namespace glue {
 namespace ml {
 
-InferenceHelperSnpe::InferenceHelperSnpe() {
+PredictorSnpe::PredictorSnpe() {
     num_threads_ = 1;
     input_map_.reset(new zdl::DlSystem::UserBufferMap());
     output_map_.reset(new zdl::DlSystem::UserBufferMap());
 }
 
-InferenceHelperSnpe::~InferenceHelperSnpe() {}
+PredictorSnpe::~PredictorSnpe() {}
 
-int32_t InferenceHelperSnpe::SetNumThreads(const int32_t num_threads) {
+int32_t PredictorSnpe::SetNumThreads(const int32_t num_threads) {
     num_threads_ = num_threads;
     return kRetOk;
 }
 
-int32_t InferenceHelperSnpe::SetCustomOps(
-    const std::vector<std::pair<const char *, const void *>> &custom_ops) {
-    PRINT("[WARNING] This method is not supported\n");
-    return kRetOk;
-}
-
-int32_t InferenceHelperSnpe::Initialize(
+int32_t PredictorSnpe::Initialize(
     const std::string &model_filename,
     std::vector<InputTensorInfo> &input_tensor_info_list,
     std::vector<OutputTensorInfo> &output_tensor_info_list) {
@@ -134,9 +128,9 @@ int32_t InferenceHelperSnpe::Initialize(
     return kRetOk;
 };
 
-int32_t InferenceHelperSnpe::Finalize(void) { return kRetErr; }
+int32_t PredictorSnpe::Finalize(void) { return kRetErr; }
 
-int32_t InferenceHelperSnpe::PreProcess(
+int32_t PredictorSnpe::PreProcess(
     const std::vector<InputTensorInfo> &input_tensor_info_list) {
     if (!snpe_ || !input_map_ || !output_map_) {
         PRINT_E("Interpreter is not built yet\n");
@@ -210,8 +204,8 @@ int32_t InferenceHelperSnpe::PreProcess(
     return kRetOk;
 }
 
-int32_t InferenceHelperSnpe::Process(
-    std::vector<OutputTensorInfo> &output_tensor_info_list) {
+int32_t
+PredictorSnpe::Process(std::vector<OutputTensorInfo> &output_tensor_info_list) {
     if (!snpe_ || !input_map_ || !output_map_) {
         PRINT_E("Interpreter is not built yet\n");
         return kRetErr;
@@ -251,8 +245,8 @@ static zdl::DlSystem::RuntimeList GetSystemAvailability(void) {
 }
 
 std::unique_ptr<zdl::SNPE::SNPE>
-InferenceHelperSnpe::CreateSnpe(const std::string &model_filename,
-                                bool use_user_supplied_buffers) {
+PredictorSnpe::CreateSnpe(const std::string &model_filename,
+                          bool use_user_supplied_buffers) {
     zdl::DlSystem::RuntimeList runtime_list = GetSystemAvailability();
 
     std::unique_ptr<zdl::DlContainer::IDlContainer> container =
@@ -302,9 +296,9 @@ InferenceHelperSnpe::CreateSnpe(const std::string &model_filename,
 }
 
 int32_t
-InferenceHelperSnpe::GetTensorInfo(std::unique_ptr<zdl::SNPE::SNPE> const &snpe,
-                                   const std::string &name,
-                                   std::vector<int32_t> &dims) {
+PredictorSnpe::GetTensorInfo(std::unique_ptr<zdl::SNPE::SNPE> const &snpe,
+                             const std::string &name,
+                             std::vector<int32_t> &dims) {
     auto buffer_attributes_opt =
         snpe->getInputOutputBufferAttributes(name.c_str());
     if (!buffer_attributes_opt) {
@@ -321,7 +315,7 @@ InferenceHelperSnpe::GetTensorInfo(std::unique_ptr<zdl::SNPE::SNPE> const &snpe,
     return kRetOk;
 }
 
-int32_t InferenceHelperSnpe::GetAllTensorInfo(
+int32_t PredictorSnpe::GetAllTensorInfo(
     std::unique_ptr<zdl::SNPE::SNPE> const &snpe,
     std::vector<InputTensorInfo> &input_tensor_info_list,
     std::vector<OutputTensorInfo> &output_tensor_info_list) {

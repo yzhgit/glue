@@ -10,7 +10,7 @@
 #include <string>
 
 namespace glue {
-namespace logging {
+namespace log {
 
 /** Create a string given a format
  *
@@ -34,10 +34,10 @@ inline std::string formatString(const char *fmt, Args... args) {
  *
  * @return The string describing the logging level.
  */
-const char *severityToString(LogSeverity severity);
+const char *severityToString(LogLevel severity) noexcept;
 
 // Return current thread id as size_t (from thread local storage)
 size_t thread_id() noexcept;
 
-} // namespace logging
+} // namespace log
 } // namespace glue

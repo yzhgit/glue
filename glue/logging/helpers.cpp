@@ -5,32 +5,32 @@
 
 #include "glue/logging/helpers.h"
 
+#include <ctime>
 #include <map>
+#include <sstream>
 #include <string>
 
 #if _WIN32
-    #include <processthreadsapi.h>
+    #include <Windows.h>
 #endif
 
 namespace glue {
-namespace logging {
+namespace log {
 
-const char *severityToString(LogSeverity severity) {
+const char *severityToString(LogLevel severity) noexcept {
     switch (severity) {
-    case LogSeverity::FATAL:
-        return "FATAL";
-    case LogSeverity::ERROR:
-        return "ERROR";
-    case LogSeverity::WARN:
-        return "WARN";
-    case LogSeverity::INFO:
-        return "INFO";
-    case LogSeverity::DEBUG:
-        return "DEBUG";
-    case LogSeverity::VERBOSE:
-        return "VERB";
+    case LogLevel::FATAL:
+        return "F";
+    case LogLevel::ERROR:
+        return "E";
+    case LogLevel::WARN:
+        return "W";
+    case LogLevel::INFO:
+        return "I";
+    case LogLevel::DEBUG:
+        return "D";
     default:
-        return "NONE";
+        return "-";
     }
 }
 
@@ -82,13 +82,42 @@ size_t thread_id() noexcept {
 #endif
 }
 
-LogMessage::LogMessage(const char *name, LogSeverity severity, const char *file,
-                       int line, const char *func, std::string msg)
-    : name_(name), severity_(severity), file_(file), line_(line), func_(func),
-      raw_(std::move(msg)) {
-    time(&time_);
-    thread_id_ = thread_id();
+#if _WIN32
+int gettimeofday(struct timeval *tp, void *tzp) {
+    LARGE_INTEGER now, freq;
+    QueryPerformanceCounter(&now);
+    QueryPerformanceFrequency(&freq);
+    tp->tv_sec = now.QuadPart / freq.QuadPart;
+    tp->tv_usec = (now.QuadPart % freq.QuadPart) * 1000000 / freq.QuadPart;
+
+    return (0);
+}
+#endif
+
+LogSource::LogSource(LogLevel severity, const char *filename, uint32_t linenum)
+    : m_severity(severity), m_filename(filename), m_linenum(linenum) {}
+
+std::string LogSource::toString() const {
+    std::stringstream ss;
+
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    int msec = tv.tv_usec / 1000;
+
+    time_t now;
+    time(&now);
+
+    char time_buf[30] = {0};
+    struct tm *ptm = localtime(&now);
+    snprintf(time_buf, 30, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+             ptm->tm_year + 1900, ptm->tm_mon + 1, ptm->tm_mday, ptm->tm_hour,
+             ptm->tm_min, ptm->tm_sec, msec);
+
+    ss << '[' << severityToString(m_severity) << ' ' << time_buf << ' '
+       << thread_id() << ' ' << m_filename << ':' << m_linenum << ']';
+
+    return ss.str();
 }
 
-} // namespace logging
+} // namespace log
 } // namespace glue

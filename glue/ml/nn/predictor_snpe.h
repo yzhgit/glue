@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "inference_helper.h"
+#include "predictor.h"
 
 namespace zdl {
 namespace SNPE {
@@ -36,7 +36,7 @@ class UserBufferMap;
 namespace glue {
 namespace ml {
 
-class InferenceHelperSnpe : public InferenceHelper {
+class PredictorSnpe : public Predictor {
   private:
     enum {
         UNKNOWN,
@@ -48,12 +48,9 @@ class InferenceHelperSnpe : public InferenceHelper {
     enum { CPUBUFFER, GLBUFFER };
 
   public:
-    InferenceHelperSnpe();
-    ~InferenceHelperSnpe() override;
+    PredictorSnpe();
+    ~PredictorSnpe() override;
     int32_t SetNumThreads(const int32_t num_threads) override;
-    int32_t SetCustomOps(
-        const std::vector<std::pair<const char *, const void *>> &custom_ops)
-        override;
     int32_t
     Initialize(const std::string &model_filename,
                std::vector<InputTensorInfo> &input_tensor_info_list,

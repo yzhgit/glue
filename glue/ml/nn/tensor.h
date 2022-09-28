@@ -15,63 +15,59 @@
 namespace glue {
 namespace ml {
 
-using TensorShape = std::vector<uint32_t>;
+using ShapeType = std::vector<uint32_t>;
 
-class Quantization {
+class Quantization final {
   public:
-    Quantization() : type_(QuantType::NONE) {}
+    Quantization() : m_type(QuantType::NONE) {}
     Quantization(QuantType type, float scale, int32_t zero_point)
-        : type_(type), scales_({scale}), zero_points_({zero_point}) {}
+        : m_type(type), m_scales({scale}), m_zero_points({zero_point}) {}
     Quantization(QuantType type, int32_t channel_dim, std::vector<float> scales,
                  std::vector<int32_t> zero_points)
-        : type_(type), channel_dim_(channel_dim), scales_(std::move(scales)),
-          zero_points_(std::move(zero_points)) {}
+        : m_type(type), m_channel_dim(channel_dim), m_scales(std::move(scales)),
+          m_zero_points(std::move(zero_points)) {}
 
-    QuantType &Type() { return type_; }
-    const QuantType &Type() const { return type_; }
+    QuantType &Type() { return m_type; }
+    const QuantType &Type() const { return m_type; }
     Quantization &SetType(QuantType type) {
-        this->type_ = type;
+        m_type = type;
         return *this;
     }
 
-    int32_t &ChannelDim() { return this->channel_dim_; }
-    const int32_t &ChannelDim() const { return this->channel_dim_; }
+    int32_t &ChannelDim() { return m_channel_dim; }
+    const int32_t &ChannelDim() const { return m_channel_dim; }
     Quantization &SetChannelDim(int32_t channel_dim) {
-        this->channel_dim_ = channel_dim;
+        m_channel_dim = channel_dim;
         return *this;
     }
 
-    std::vector<float> &Scales() { return this->scales_; }
-    const std::vector<float> &Scales() const { return this->scales_; }
+    std::vector<float> &Scales() { return m_scales; }
+    const std::vector<float> &Scales() const { return m_scales; }
     Quantization &SetScales(std::vector<float> scales) {
-        this->scales_ = scales;
+        m_scales = scales;
         return *this;
     }
 
-    std::vector<int32_t> &ZeroPoints() { return this->zero_points_; }
-    const std::vector<int32_t> &ZeroPoints() const {
-        return this->zero_points_;
-    }
+    std::vector<int32_t> &ZeroPoints() { return m_zero_points; }
+    const std::vector<int32_t> &ZeroPoints() const { return m_zero_points; }
     Quantization &SetZeroPoints(std::vector<int32_t> zero_points) {
-        this->zero_points_ = zero_points;
+        m_zero_points = zero_points;
         return *this;
     }
 
   protected:
-    QuantType type_{QuantType::NONE};
-    int32_t channel_dim_{-1};
-    std::vector<float> scales_;
-    std::vector<int32_t> zero_points_;
+    QuantType m_type{QuantType::NONE};
+    int32_t m_channel_dim{-1};
+    std::vector<float> m_scales;
+    std::vector<int32_t> m_zero_points;
 };
 
-class TensorInfo {
+class TensorInfo final {
   public:
     TensorInfo() {}
-
-    TensorInfo(DataType datatype, const TensorShape &shape)
+    TensorInfo(DataType datatype, const ShapeType &shape)
         : m_DataType(datatype), m_Shape(shape) {}
-
-    TensorInfo(DataType datatype, const TensorShape &shape,
+    TensorInfo(DataType datatype, const ShapeType &shape,
                const Quantization &quantization)
         : TensorInfo(datatype, shape) {
         m_Quantization = quantization;
@@ -93,42 +89,41 @@ class TensorInfo {
     bool operator==(const TensorInfo &other) const;
     bool operator!=(const TensorInfo &other) const;
 
-    DataType GetDataType() const { return m_DataType; }
-
+    const DataType GetDataType() const { return m_DataType; }
     TensorInfo &SetDataType(DataType datatype) {
         m_DataType = datatype;
         return *this;
     }
 
-    const TensorShape &GetShape() const { return m_Shape; }
-
-    TensorShape &GetShape() { return m_Shape; }
-
-    TensorInfo &SetShape(TensorShape &shape) {
+    const ShapeType &GetShape() const { return m_Shape; }
+    TensorInfo &SetShape(ShapeType &shape) {
         m_Shape = shape;
         return *this;
     }
 
-    Quantization GetQuantization() const { return m_Quantization; }
+    uint32_t GetNumDimensions() const;
 
+    uint32_t GetNumElements() const;
+
+    uint32_t GetNumBytes() const;
+
+    const Quantization GetQuantization() const { return m_Quantization; }
     TensorInfo &SetQuantization(Quantization &quantization) {
         m_Quantization = quantization;
         return *this;
     }
 
-    unsigned int GetNumBytes() const;
-
   private:
     DataType m_DataType;
-    TensorShape m_Shape;
+    ShapeType m_Shape;
     Quantization m_Quantization;
 };
 
-class Tensor {
+class Tensor final {
   public:
     Tensor();
 
-    Tensor(const TensorInfo &info, void *data);
+    Tensor(const TensorInfo &info, void *data) : m_Info(info), m_Data(data) {}
 
     /// Tensors are copyable.
     Tensor(const Tensor &other);
@@ -136,15 +131,19 @@ class Tensor {
     /// Tensors are copyable.
     Tensor &operator=(const Tensor &);
 
-    const TensorInfo &GetInfo() const { return m_Info; }
-    TensorInfo &GetInfo() { return m_Info; }
-    const TensorShape &GetShape() const { return m_Info.GetShape(); }
-    TensorShape &GetShape() { return m_Info.GetShape(); }
+    const ShapeType &GetShape() const { return m_Info.GetShape(); }
 
-    DataType GetDataType() const { return m_Info.GetDataType(); }
-    unsigned int GetNumDimensions() const { return m_Info.GetNumDimensions(); }
-    unsigned int GetNumBytes() const { return m_Info.GetNumBytes(); }
-    unsigned int GetNumElements() const { return m_Info.GetNumElements(); }
+    const DataType GetDataType() const { return m_Info.GetDataType(); }
+
+    const Quantization GetQuantization() const {
+        return m_Info.GetQuantization();
+    }
+
+    uint32_t GetNumDimensions() const { return m_Info.GetNumDimensions(); }
+
+    uint32_t GetNumElements() const { return m_Info.GetNumElements(); }
+
+    uint32_t GetNumBytes() const { return m_Info.GetNumBytes(); }
 
     void *GetData() const { return m_Data; }
 
@@ -153,11 +152,34 @@ class Tensor {
     /// (could still new one on the heap and then leak it...)
     ~Tensor() {}
 
-    void *m_Data;
-
   private:
     TensorInfo m_Info;
+    void *m_Data;
 };
+
+template <typename T>
+inline std::vector<T> Quantize(const std::vector<float> &data, float scale,
+                               int32_t zero_point) {
+    std::vector<T> q;
+    for (const auto &f : data) {
+        q.push_back(static_cast<T>(std::max<float>(
+            std::numeric_limits<T>::min(),
+            std::min<float>(static_cast<float>(std::numeric_limits<T>::max()),
+                            std::round(zero_point + (f / scale))))));
+    }
+    return q;
+}
+
+template <typename T>
+inline std::vector<float> Dequantize(const std::vector<T> &data, float scale,
+                                     int32_t zero_point) {
+    std::vector<float> f;
+    f.reserve(data.size());
+    for (const T &q : data) {
+        f.push_back(scale * (q - zero_point));
+    }
+    return f;
+}
 
 } // namespace ml
 } // namespace glue

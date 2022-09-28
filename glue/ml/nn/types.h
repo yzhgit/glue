@@ -21,7 +21,7 @@ enum class DataType {
     Signed64 = 9,
 };
 
-enum class DataLayout { NCHW = 1, NHWC = 2, NDHWC = 3, NCDHW = 4 };
+enum class DataLayout { NCHW, NHWC};
 
 enum class QuantType { NONE, ASYMMETRIC, SYMMETRIC_PER_CHANNEL };
 

@@ -14,19 +14,16 @@
 
 #include "net.h"
 
-#include "inference_helper.h"
+#include "predictor.h"
 
 namespace glue {
 namespace ml {
 
-class InferenceHelperNcnn : public InferenceHelper {
+class PredictorNcnn : public Predictor {
   public:
-    InferenceHelperNcnn();
-    ~InferenceHelperNcnn() override;
+    PredictorNcnn();
+    ~PredictorNcnn() override;
     int32_t SetNumThreads(const int32_t num_threads) override;
-    int32_t SetCustomOps(
-        const std::vector<std::pair<const char *, const void *>> &custom_ops)
-        override;
     int32_t
     Initialize(const std::string &model_filename,
                std::vector<InputTensorInfo> &input_tensor_info_list,
@@ -42,7 +39,6 @@ class InferenceHelperNcnn : public InferenceHelper {
     std::vector<std::pair<std::string, ncnn::Mat>> in_mat_list_; // <name, mat>
     std::vector<ncnn::Mat> out_mat_list_;
     int32_t num_threads_;
-    std::vector<std::pair<const char *, const void *>> custom_ops_;
 };
 
 } // namespace ml
