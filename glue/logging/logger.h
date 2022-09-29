@@ -5,49 +5,32 @@
 
 #pragma once
 
-#include "glue/logging/helpers.h"
+#include "glue/logging/record.h"
 #include "glue/logging/sink.h"
+#include "glue/logging/util.h"
 
 #include <memory>
-#include <string>
 #include <vector>
 
 namespace glue {
 namespace log {
 
-class Logger {
+class Logger : public util::Singleton<Logger> {
   public:
     /** Default Constructor
      *
      * @param[in] maxSeverity      Name of the logger
      */
-    Logger(Severity maxSeverity = Severity::off) : m_maxSeverity(maxSeverity) {}
+    Logger(Severity maxSeverity = off) : m_maxSeverity(maxSeverity) {}
 
     /** Add sink
      *
      * @param[in] sink   Sink to push the messages
      */
-    Logger &addSink(LogSinkPtr sink) {
+    Logger &addSink(LogSink *sink) {
         m_sinks.push_back(sink);
         return *this;
     }
-
-    // /** Logs a message
-    //  *
-    //  * @param[in] severity Log level of the message
-    //  * @param[in] msg       Message to log
-    //  */
-    // void log(Severity severity, const char *file, int line, const char *msg);
-
-    // /** Logs a formatted message
-    //  *
-    //  * @param[in] severity Log level of the message
-    //  * @param[in] fmt       Message format
-    //  * @param[in] args      Message arguments
-    //  */
-    // template <typename... Args>
-    // void log(Severity severity, const char *file, int line, const char *fmt,
-    //          Args... args);
 
     /** Sets log level of the logger
      *
@@ -71,26 +54,31 @@ class Logger {
      */
     bool checkSeverity(Severity severity) { return severity >= m_maxSeverity; }
 
-    virtual void write(const Record &record) {
-        if (checkSeverity(record.getSeverity())) {
-            *this += record;
-        }
+    void log(Severity severity, size_t line, const char *file,
+             const char *format, ...) {
+        using namespace util;
+
+        char *str = NULL;
+        va_list ap;
+
+        va_start(ap, format);
+        int len = vasprintf(&str, format, ap);
+        static_cast<void>(len);
+        va_end(ap);
+
+        Record record(severity, line, file);
+        record << str;
+        *this += record;
+
+        free(str);
     }
 
     void operator+=(const Record &record) {
-        for (std::vector<LogSinkPtr>::iterator it = m_sinks.begin();
+        for (std::vector<LogSink *>::iterator it = m_sinks.begin();
              it != m_sinks.end(); ++it) {
-            it->write(record);
+            (*it)->write(record);
         }
     }
-
-  private:
-    // /** Prints the message to all the printers
-    //  *
-    //  * @param[in] msg Message to print
-    //  */
-    // void writeToSinks(const char *name, const Record &source,
-    //                   const std::string &msg);
 
   private:
     Severity m_maxSeverity;
@@ -99,20 +87,13 @@ class Logger {
     #pragma warning(disable : 4251) // needs to have dll-interface to be used by
                                     // clients of class
 #endif
-    std::vector<LogSinkPtr> m_sinks;
+    std::vector<LogSink *> m_sinks;
 #ifdef _MSC_VER
     #pragma warning(pop)
 #endif
 };
 
-// template <typename... Args>
-// inline void Logger::log(Severity severity, const char *file, int line,
-//                         const char *fmt, Args... args) {
-//     if (isLoggable(severity)) {
-//         writeToSinks(m_name, Record(severity, file, line),
-//                      formatString(fmt, args...));
-//     }
-// }
+inline Logger *get() { return Logger::getInstance(); }
 
 } // namespace log
 } // namespace glue

@@ -9,7 +9,7 @@ namespace glue {
 namespace log {
 
 /** Logging level enumeration */
-enum class Severity {
+enum Severity {
     debug,
     info,  /**< Information log level */
     warn,  /**< Warning log level */
@@ -26,18 +26,18 @@ enum class Severity {
  */
 inline const char *severityToString(Severity severity) {
     switch (severity) {
-    case Severity::fatal:
-        return "F";
-    case Severity::error:
-        return "E";
-    case Severity::warn:
-        return "W";
-    case Severity::info:
-        return "I";
-    case Severity::debug:
-        return "D";
+    case fatal:
+        return "FATAL";
+    case error:
+        return "ERROR";
+    case warn:
+        return "WARN";
+    case info:
+        return "INFO";
+    case debug:
+        return "DEBUG";
     default:
-        return "-";
+        return "OFF";
     }
 }
 

@@ -3,41 +3,33 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/logging/logger.h"
+#include "glue/logging/log.h"
+#include <deque>
 
-#define LOG "MYLOG"
-
-using namespace glue::logging;
-
-constexpr const char *Basename(const char *fname, int offset) {
-    return offset == 0 || fname[offset - 1] == '/' || fname[offset - 1] == '\\'
-               ? fname + offset
-               : Basename(fname, offset - 1);
-}
-
-void test_log(std::shared_ptr<Logger> logger) {
-    logger->log(LogLevel::WARN, Basename(__FILE__, sizeof(__FILE__) - 1),
-                __LINE__, __FUNCTION__, "This is warn message");
-}
+using namespace glue;
 
 int main(int argc, char *argv[]) {
     int a = 10;
     float b = 3.1;
 
-    auto color_sink = std::make_shared<ConsoleSink>();
-    auto file_sink = std::make_shared<FileSink>("1.log");
-    auto logger = std::make_shared<Logger>(LOG);
-    logger->addSink(color_sink);
-    logger->addSink(file_sink);
+    static log::ConsoleSink<log::DefaultFormatterUtc> consoleSink;
+    log::init<log::DefaultFormatter>(log::debug, "1.log").addSink(&consoleSink);
+    LOGD << "hello world";
 
-    logger->log(LogLevel::DEBUG, Basename(__FILE__, sizeof(__FILE__) - 1),
-                __LINE__, __FUNCTION__, "a = %d, b = %f", a, b);
+    LOGI << "You shouldn't see this message";
 
-    logger->log(LogLevel::INFO, Basename(__FILE__, sizeof(__FILE__) - 1),
-                __LINE__, __FUNCTION__, "This is info message");
+    LOGE << "a = " << a << " b = " << b << std::string(" This is an apple!!!");
 
-    logger->log(LogLevel::WARN, Basename(__FILE__, sizeof(__FILE__) - 1),
-                __LINE__, __FUNCTION__, "This is warn message");
+    LOGW_FMT("a = %d, b= %.3f", a, b);
 
-    test_log(logger);
+    CHECK_LT(a, b) << " exit!!!";
+
+    // Conditional logging.
+    int var = 1;
+    LOGD_IF(var != 0) << "You shouldn't see this message";
+    LOGD_IF(var == 0) << "This is a conditional log message";
+
+    LOGI_FMT_IF(var != 0, "You shouldn't see this message var != 0");
+    LOGE_FMT_IF(var == 0, "This is a conditional log message because %d == 0",
+                var);
 }

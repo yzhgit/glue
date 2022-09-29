@@ -5,35 +5,22 @@
 
 #pragma once
 
-#include <string>
+#include <assert.h>
+#include <stdio.h>
+#include <time.h>
 
 #ifdef _WIN32
     #include <Windows.h>
-    #include <io.h>
-    #include <share.h>
-    #include <time.h>
+    #include <sys/timeb.h>
 #else
     #include <sys/time.h>
     #include <unistd.h>
-    #if defined(__linux__) || defined(__FreeBSD__)
+    #if defined(__linux__)
         #include <sys/syscall.h>
     #endif
     #if defined(_POSIX_THREADS)
         #include <pthread.h>
     #endif
-#endif
-
-#ifdef _WIN32
-    #define _LOG_NSTR(x) L##x
-    #define LOG_NSTR(x) _LOG_NSTR(x)
-#else
-    #define LOG_NSTR(x) x
-#endif
-
-#ifdef _WIN32
-    #define LOG_CDECL __cdecl
-#else
-    #define LOG_CDECL
 #endif
 
 namespace glue {
@@ -66,6 +53,25 @@ inline int gettimeofday(struct timeval *tp, void *tzp) {
     tp->tv_usec = (now.QuadPart % freq.QuadPart) * 1000000 / freq.QuadPart;
 
     return (0);
+}
+#endif
+
+#ifdef _WIN32
+typedef _timeb Time;
+
+inline void ftime(Time *t) { _ftime(t); }
+#else
+struct Time {
+    time_t time;
+    unsigned short millitm;
+};
+
+inline void ftime(Time *t) {
+    timeval tv;
+    ::gettimeofday(&tv, NULL);
+
+    t->time = tv.tv_sec;
+    t->millitm = static_cast<unsigned short>(tv.tv_usec / 1000);
 }
 #endif
 
@@ -119,6 +125,43 @@ inline int vasprintf(char **strp, const char *format, va_list ap) {
     return retval;
 }
 #endif
+
+class NonCopyable {
+  protected:
+    NonCopyable() {}
+
+  private:
+    NonCopyable(const NonCopyable &);
+    NonCopyable &operator=(const NonCopyable &);
+};
+
+template <class T>
+class Singleton : NonCopyable {
+  public:
+#if defined(__clang__) || __GNUC__ >= 8
+    // This constructor is called before the `T` object is fully constructed,
+    // and pointers are not dereferenced anyway, so UBSan shouldn't check vptrs.
+    __attribute__((no_sanitize("vptr")))
+#endif
+    Singleton() {
+        assert(!m_instance);
+        m_instance = static_cast<T *>(this);
+    }
+
+    ~Singleton() {
+        assert(m_instance);
+        m_instance = 0;
+    }
+
+    static T *getInstance() { return m_instance; }
+
+  private:
+    static T *m_instance;
+};
+
+template <class T>
+T *Singleton<T>::m_instance = NULL;
+
 } // namespace util
 
 } // namespace log

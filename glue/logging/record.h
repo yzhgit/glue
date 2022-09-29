@@ -5,11 +5,12 @@
 
 #pragma once
 
-#include "glue/logging/helpers.h"
 #include "glue/logging/severity.h"
+#include "glue/logging/util.h"
 
 #include <cstdarg>
 #include <string>
+#include <vector>
 
 namespace glue {
 namespace log {
@@ -23,7 +24,8 @@ class Record {
         util::ftime(&m_time);
     }
 
-    template <typename T> Record &operator<<(const T &value) {
+    template <typename T>
+    Record &operator<<(const T &value) {
         static_assert(std::is_floating_point<T>::value ||
                           std::is_integral<T>::value,
                       "is not a number type.");
@@ -45,23 +47,6 @@ class Record {
     }
     Record &operator<<(const std::string &str) {
         m_content.append(str);
-        return *this;
-    }
-
-    Record &printf(const char *format, ...) {
-        using namespace util;
-
-        char *str = NULL;
-        va_list ap;
-
-        va_start(ap, format);
-        int len = vasprintf(&str, format, ap);
-        static_cast<void>(len);
-        va_end(ap);
-
-        *this << str;
-        free(str);
-
         return *this;
     }
 

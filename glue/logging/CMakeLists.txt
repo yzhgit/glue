@@ -6,12 +6,15 @@
 add_definitions(-D_AMD64_)
 
 add_executable(glog
-    helpers.h
-    helpers.cpp
-    log_sink.h
-    log_sink.cpp
+    init.h
+    util.h
+    sink.h
+    console_sink.h
+    file_sink.h
+    formatter.h
+    log.h
     logger.h
-    logger.cpp
-    types.h
+    record.h
+    severity.h
     test.cpp
 )
