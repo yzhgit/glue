@@ -18,17 +18,14 @@ namespace log {
 class Record {
   public:
     Record(Severity severity, size_t line, const char *file)
-        : m_severity(severity), m_tid(util::gettid()), m_line(line),
-          m_file(file) {
+        : m_severity(severity), m_tid(util::gettid()), m_line(line), m_file(file) {
         m_content.reserve(1024);
         util::ftime(&m_time);
     }
 
     template <typename T>
     Record &operator<<(const T &value) {
-        static_assert(std::is_floating_point<T>::value ||
-                          std::is_integral<T>::value,
-                      "is not a number type.");
+        static_assert(std::is_floating_point<T>::value || std::is_integral<T>::value, "is not a number type.");
         m_content.append(std::to_string(value));
         return *this;
     }

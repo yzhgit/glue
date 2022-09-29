@@ -30,6 +30,5 @@ int main(int argc, char *argv[]) {
     LOGD_IF(var == 0) << "This is a conditional log message";
 
     LOGI_FMT_IF(var != 0, "You shouldn't see this message var != 0");
-    LOGE_FMT_IF(var == 0, "This is a conditional log message because %d == 0",
-                var);
+    LOGE_FMT_IF(var == 0, "This is a conditional log message because %d == 0", var);
 }

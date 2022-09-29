@@ -17,9 +17,7 @@ namespace log {
 template <class Formatter>
 class FileSink : public LogSink {
   public:
-    FileSink(const char *filename) {
-        m_outputStream.open(filename, std::fstream::out | std::fstream::trunc);
-    }
+    FileSink(const char *filename) { m_outputStream.open(filename, std::fstream::out | std::fstream::trunc); }
 
     void write(const Record &record) override {
         std::string str = Formatter::format(record);

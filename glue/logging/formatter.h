@@ -29,22 +29,17 @@ class DefaultFormatterImpl {
   public:
     static std::string format(const Record &record) {
         tm t;
-        useUtcTime ? util::gmtime_s(&t, &record.getTime().time)
-                   : util::localtime_s(&t, &record.getTime().time);
+        useUtcTime ? util::gmtime_s(&t, &record.getTime().time) : util::localtime_s(&t, &record.getTime().time);
 
         std::stringstream ss;
-        ss << "[" << t.tm_year + 1900 << "-" << std::setfill('0')
-           << std::setw(2) << t.tm_mon + 1 << "-" << std::setfill('0')
-           << std::setw(2) << t.tm_mday << " ";
-        ss << std::setfill('0') << std::setw(2) << t.tm_hour << ":"
-           << std::setfill('0') << std::setw(2) << t.tm_min << ":"
-           << std::setfill('0') << std::setw(2) << t.tm_sec << "."
-           << std::setfill('0') << std::setw(3)
+        ss << "[" << t.tm_year + 1900 << "-" << std::setfill('0') << std::setw(2) << t.tm_mon + 1 << "-"
+           << std::setfill('0') << std::setw(2) << t.tm_mday << " ";
+        ss << std::setfill('0') << std::setw(2) << t.tm_hour << ":" << std::setfill('0') << std::setw(2) << t.tm_min
+           << ":" << std::setfill('0') << std::setw(2) << t.tm_sec << "." << std::setfill('0') << std::setw(3)
            << static_cast<int>(record.getTime().millitm) << " ";
-        ss << std::setfill(' ') << std::setw(5) << std::left
-           << severityToString(record.getSeverity()) << " " << record.getTid()
-           << " " << record.getFile() << ":" << record.getLine() << "] "
-           << record.getMessage() << "\n";
+        ss << std::setfill(' ') << std::setw(5) << std::left << severityToString(record.getSeverity()) << " "
+           << record.getTid() << " " << record.getFile() << ":" << record.getLine() << "] " << record.getMessage()
+           << "\n";
 
         return ss.str();
     }

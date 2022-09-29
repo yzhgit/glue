@@ -54,8 +54,7 @@ class Logger : public util::Singleton<Logger> {
      */
     bool checkSeverity(Severity severity) { return severity >= m_maxSeverity; }
 
-    void log(Severity severity, size_t line, const char *file,
-             const char *format, ...) {
+    void log(Severity severity, size_t line, const char *file, const char *format, ...) {
         using namespace util;
 
         char *str = NULL;
@@ -74,8 +73,7 @@ class Logger : public util::Singleton<Logger> {
     }
 
     void operator+=(const Record &record) {
-        for (std::vector<LogSink *>::iterator it = m_sinks.begin();
-             it != m_sinks.end(); ++it) {
+        for (std::vector<LogSink *>::iterator it = m_sinks.begin(); it != m_sinks.end(); ++it) {
             (*it)->write(record);
         }
     }
