@@ -288,6 +288,14 @@ class GLUE_API Path {
      */
     bool isRelative() const;
 
+    /// Returns true iff the path references a directory
+    /// (the filename part is empty).
+    bool isDirectory() const;
+
+    /// Returns true iff the path references a file
+    /// (the filename part is not empty).
+    bool isFile() const;
+
     /**
      *  @brief
      *    Resolve relative path from this path
@@ -330,7 +338,62 @@ class GLUE_API Path {
      */
     std::string resolved() const;
 
-  protected:
+    /// Returns the current working directory.
+    static std::string current();
+
+    /**
+     *  @brief
+     *    Get home directory of the current user
+     *
+     *  @return
+     *    Home directory (native path)
+     *
+     *  @remarks
+     *    It is assumed that the home directory doesn't change
+     *    for the process lifetime.
+     */
+    static const std::string &home();
+
+    /// Returns the user's config directory.
+    ///
+    /// On Unix systems, this is the '~/.config/'. On Windows systems,
+    /// this is '%APPDATA%'.
+    static std::string configHome();
+
+    /// Returns the user's data directory.
+    ///
+    /// On Unix systems, this is the '~/.local/share/'. On Windows systems,
+    /// this is '%APPDATA%'.
+    static std::string dataHome();
+
+    /// Returns the user's temp directory.
+    ///
+    /// On Unix systems, this is the '~/.local/temp/'.
+    static std::string tempHome();
+
+    /// Returns the user's cache directory.
+    ///
+    /// On Unix systems, this is the '~/.cache/'. On Windows systems,
+    /// this is '%APPDATA%'.
+    static std::string cacheHome();
+
+    /// Returns the temporary directory.
+    static std::string temp();
+
+    /**
+     *  @brief
+     *    Get the systemwide config directory, On Unix systems, this is the '/etc/'.
+     *
+     *  @return
+     *    Config directory (native path)
+     *
+     *  @remarks
+     *    It is assumed that the config directory doesn't change
+     *    for the process lifetime.
+     */
+    static const std::string &config();
+
+  private:
     /**
      *  @brief
      *    Analyze path and fill in the additional information

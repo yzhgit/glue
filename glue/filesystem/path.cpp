@@ -10,6 +10,26 @@
 namespace glue {
 namespace fs {
 
+namespace {
+
+std::string obtainHomeDir() {
+#if defined(GL_WINDOWS)
+    return std::string(getenv("HOMEPATH"));
+#else
+    return std::string(getenv("HOME"));
+#endif
+}
+
+std::string obtainConfigDir() {
+#if defined(GL_WINDOWS)
+    return std::string(getenv("APPDATA")) + "\\";
+#else
+    return std::string(getenv("HOME")) + "/.config/";
+#endif
+}
+
+} // namespace
+
 Path::Path() : m_path(""), m_pointsToContent(false), m_details(false) {}
 
 Path::Path(const Path &filePath)
@@ -175,6 +195,18 @@ bool Path::isRelative() const {
     analyze();
 
     return !m_absolute;
+}
+
+bool Path::isDirectory() const {
+    analyze();
+
+    return m_filename.empty();
+}
+
+bool Path::isFile() const {
+    analyze();
+
+    return !m_filename.empty();
 }
 
 Path Path::resolve(const Path &path) const {
@@ -359,6 +391,18 @@ void Path::analyze() const {
 
     // Set state
     m_details = true;
+}
+
+const std::string &Path::home() {
+    static const std::string dir = obtainHomeDir();
+
+    return dir;
+}
+
+const std::string &Path::config() {
+    static const std::string dir = obtainConfigDir();
+
+    return dir;
 }
 
 } // namespace fs
