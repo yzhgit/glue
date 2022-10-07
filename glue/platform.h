@@ -12,8 +12,6 @@
     #define GL_WINDOWS 1
 #elif defined(ANDROID)
     #define GL_ANDROID 1
-#elif defined(__FreeBSD__) || (__OpenBSD__)
-    #define GL_BSD 1
 #elif defined(LINUX) || defined(__linux__)
     #define GL_LINUX 1
 #else
@@ -50,7 +48,7 @@
 #endif
 
 //==============================================================================
-#if GL_LINUX || GL_ANDROID || GL_BSD
+#if GL_LINUX || GL_ANDROID
 
     #ifdef _DEBUG
         #define GL_DEBUG 1
