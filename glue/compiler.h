@@ -77,7 +77,7 @@
 // have an implicit 'this' argument, the arguments of such methods
 // should be counted from two, not one."
 #if GL_HAVE_ATTRIBUTE(format) || (defined(__GNUC__) && !defined(__clang__))
-    #define GL_CHECK_FMT(string_index, first_to_check)                         \
+    #define GL_CHECK_FMT(string_index, first_to_check)                                             \
         __attribute__((__format__(__printf__, string_index, first_to_check)))
 #else
     #define GL_CHECK_FMT(string_index, first_to_check)
@@ -86,8 +86,7 @@
 // GL_ALWAYS_INLINE
 //
 // Forces functions to either inline or not inline. Introduced in gcc 3.1.
-#if GL_HAVE_ATTRIBUTE(always_inline) ||                                        \
-    (defined(__GNUC__) && !defined(__clang__))
+#if GL_HAVE_ATTRIBUTE(always_inline) || (defined(__GNUC__) && !defined(__clang__))
     #define GL_ALWAYS_INLINE __attribute__((always_inline))
     #define GL_HAVE_ATTRIBUTE_ALWAYS_INLINE 1
 #else
@@ -102,9 +101,8 @@
 // for further information.
 // The MinGW compiler doesn't complain about the weak attribute until the link
 // step, presumably because Windows doesn't use ELF binaries.
-#if (GL_HAVE_ATTRIBUTE(weak) || (defined(__GNUC__) && !defined(__clang__))) && \
-    (!defined(_WIN32) || (defined(__clang__) && __clang_major__ >= 9)) &&      \
-    !defined(__MINGW32__)
+#if (GL_HAVE_ATTRIBUTE(weak) || (defined(__GNUC__) && !defined(__clang__))) &&                     \
+    (!defined(_WIN32) || (defined(__clang__) && __clang_major__ >= 9)) && !defined(__MINGW32__)
     #undef GL_WEAK
     #define GL_WEAK __attribute__((weak))
     #define GL_HAVE_ATTRIBUTE_WEAK 1
@@ -345,8 +343,7 @@
 // branch in a codebase is likely counterproductive; however, annotating
 // specific branches that are both hot and consistently mispredicted is likely
 // to yield performance improvements.
-#if GL_HAVE_BUILTIN(__builtin_expect) ||                                       \
-    (defined(__GNUC__) && !defined(__clang__))
+#if GL_HAVE_BUILTIN(__builtin_expect) || (defined(__GNUC__) && !defined(__clang__))
     #define GL_UNLIKELY(x) (__builtin_expect(false || (x), false))
     #define GL_LIKELY(x) (__builtin_expect(false || (x), true))
 #else

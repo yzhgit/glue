@@ -91,3 +91,80 @@
 #else
     #error unknown compiler
 #endif
+
+/*
+   flags for compiler features that aren't supported on all platforms.
+*/
+
+//==============================================================================
+// GCC
+#if GL_GCC
+
+    #if (__GNUC__ * 100 + __GNUC_MINOR__) < 500
+        #error "GLUE requires GCC 5.0 or later"
+    #endif
+
+    #ifndef GL_EXCEPTIONS_DISABLED
+        #if !__EXCEPTIONS
+            #define GL_EXCEPTIONS_DISABLED 1
+        #endif
+    #endif
+
+#endif
+
+//==============================================================================
+// Clang
+#if GL_CLANG
+
+    #if (__clang_major__ < 3) || (__clang_major__ == 3 && __clang_minor__ < 4)
+        #error "GLUE requires Clang 3.4 or later"
+    #endif
+
+    #ifndef GL_EXCEPTIONS_DISABLED
+        #if !__has_feature(cxx_exceptions)
+            #define GL_EXCEPTIONS_DISABLED 1
+        #endif
+    #endif
+
+#endif
+
+//==============================================================================
+// MSVC
+#if GL_MSVC
+
+    #if _MSC_FULL_VER < 191025017 // VS2017
+        #error "GLUE requires Visual Studio 2017 or later"
+    #endif
+
+    #ifndef GL_EXCEPTIONS_DISABLED
+        #if !_CPPUNWIND
+            #define GL_EXCEPTIONS_DISABLED 1
+        #endif
+    #endif
+
+#endif
+
+/** Push/pop warnings on MSVC. These macros expand to nothing on other
+    compilers (like clang and gcc).
+*/
+#if GL_MSVC
+    #define GL_IGNORE_MSVC(warnings) __pragma(warning(disable : warnings))
+    #define GL_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC(level, warnings)                                   \
+        __pragma(warning(push, level)) GL_IGNORE_MSVC(warnings)
+    #define GL_BEGIN_IGNORE_WARNINGS_MSVC(warnings) __pragma(warning(push)) GL_IGNORE_MSVC(warnings)
+    #define GL_END_IGNORE_WARNINGS_MSVC __pragma(warning(pop))
+#else
+    #define GL_IGNORE_MSVC(warnings)
+    #define GL_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC(level, warnings)
+    #define GL_BEGIN_IGNORE_WARNINGS_MSVC(warnings)
+    #define GL_END_IGNORE_WARNINGS_MSVC
+#endif
+
+/** This macro defines the C calling convention used as the standard for JUCE calls. */
+#if GL_WINDOWS
+    #define GL_CALLTYPE __stdcall
+    #define GL_CDECL __cdecl
+#else
+    #define GL_CALLTYPE
+    #define GL_CDECL
+#endif

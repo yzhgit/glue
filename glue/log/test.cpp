@@ -3,12 +3,13 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/logging/log.h"
+#include "glue/log/log.h"
 #include <deque>
 
 using namespace glue;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[])
+{
     int a = 10;
     float b = 3.1;
 

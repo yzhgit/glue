@@ -32,8 +32,7 @@
 #endif
 
 #if !defined(GLUE_API)
-    #if !defined(GL_NO_GCC_API_ATTRIBUTE) && defined(__GNUC__) &&              \
-        (__GNUC__ >= 4)
+    #if !defined(GL_NO_GCC_API_ATTRIBUTE) && defined(__GNUC__) && (__GNUC__ >= 4)
         #define GLUE_API __attribute__((visibility("default")))
     #else
         #define GLUE_API

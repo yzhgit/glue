@@ -9,6 +9,9 @@ project(glue VERSION 0.1.0)
 # include(CTest)
 # enable_testing()
 
+# include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+# conan_basic_setup()
+
 # Output directory is correct by default for most build setups. However, when
 # building Falcon as a DLL, it is important to have the DLL in the same
 # directory as the executable using it. Thus, we put all executables in a single

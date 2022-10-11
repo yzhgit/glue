@@ -16,7 +16,7 @@
 
 #include "logger.h"
 #include "ErrorRecorder.h"
-#include "glue/logging.h"
+#include "glue/log.h"
 
 SampleErrorRecorder gRecorder;
 namespace sample

@@ -17,7 +17,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "glue/logging.h"
+#include "glue/log.h"
 
 class SampleErrorRecorder;
 extern SampleErrorRecorder gRecorder;

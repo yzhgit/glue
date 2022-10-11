@@ -7,22 +7,26 @@
 
 #include <new>
 
-namespace glue {
+namespace glue
+{
 
 #if !(DOXYGEN || GL_EXCEPTIONS_DISABLED)
-namespace HeapBlockHelper {
-template <bool shouldThrow>
-struct ThrowOnFail {
-    static void checkPointer(void *) {}
-};
+namespace HeapBlockHelper
+{
+    template <bool shouldThrow>
+    struct ThrowOnFail
+    {
+        static void checkPointer(void*) {}
+    };
 
-template <>
-struct ThrowOnFail<true> {
-    static void checkPointer(void *data) {
-        if (data == nullptr)
-            throw std::bad_alloc();
-    }
-};
+    template <>
+    struct ThrowOnFail<true>
+    {
+        static void checkPointer(void* data)
+        {
+            if (data == nullptr) throw std::bad_alloc();
+        }
+    };
 } // namespace HeapBlockHelper
 #endif
 
@@ -75,14 +79,15 @@ struct ThrowOnFail<true> {
     @tags{Core}
 */
 template <class ElementType, bool throwOnFailure = false>
-class HeapBlock {
-  private:
+class HeapBlock
+{
+private:
     template <class OtherElementType>
-    using AllowConversion =
-        typename std::enable_if<std::is_base_of<typename std::remove_pointer<ElementType>::type,
-                                                typename std::remove_pointer<OtherElementType>::type>::value>::type;
+    using AllowConversion = typename std::enable_if<
+        std::is_base_of<typename std::remove_pointer<ElementType>::type,
+                        typename std::remove_pointer<OtherElementType>::type>::value>::type;
 
-  public:
+public:
     //==============================================================================
     /** Creates a HeapBlock which is initially just a null pointer.
 
@@ -99,9 +104,12 @@ class HeapBlock {
         If you want an array of zero values, you can use the calloc() method or the
         other constructor that takes an InitialisationState parameter.
     */
-    template <typename SizeType, std::enable_if_t<std::is_convertible<SizeType, int>::value, int> = 0>
+    template <typename SizeType,
+              std::enable_if_t<std::is_convertible<SizeType, int>::value, int> = 0>
     explicit HeapBlock(SizeType numElements)
-        : data(static_cast<ElementType *>(std::malloc(static_cast<size_t>(numElements) * sizeof(ElementType)))) {
+        : data(static_cast<ElementType*>(
+              std::malloc(static_cast<size_t>(numElements) * sizeof(ElementType))))
+    {
         throwOnAllocationFailure();
     }
 
@@ -110,11 +118,14 @@ class HeapBlock {
         The initialiseToZero parameter determines whether the new memory should be cleared,
         or left uninitialised.
     */
-    template <typename SizeType, std::enable_if_t<std::is_convertible<SizeType, int>::value, int> = 0>
+    template <typename SizeType,
+              std::enable_if_t<std::is_convertible<SizeType, int>::value, int> = 0>
     HeapBlock(SizeType numElements, bool initialiseToZero)
-        : data(static_cast<ElementType *>(initialiseToZero
-                                              ? std::calloc(static_cast<size_t>(numElements), sizeof(ElementType))
-                                              : std::malloc(static_cast<size_t>(numElements) * sizeof(ElementType)))) {
+        : data(static_cast<ElementType*>(
+              initialiseToZero
+                  ? std::calloc(static_cast<size_t>(numElements), sizeof(ElementType))
+                  : std::malloc(static_cast<size_t>(numElements) * sizeof(ElementType))))
+    {
         throwOnAllocationFailure();
     }
 
@@ -124,10 +135,11 @@ class HeapBlock {
     ~HeapBlock() { std::free(data); }
 
     /** Move constructor */
-    HeapBlock(HeapBlock &&other) noexcept : data(other.data) { other.data = nullptr; }
+    HeapBlock(HeapBlock&& other) noexcept : data(other.data) { other.data = nullptr; }
 
     /** Move assignment operator */
-    HeapBlock &operator=(HeapBlock &&other) noexcept {
+    HeapBlock& operator=(HeapBlock&& other) noexcept
+    {
         std::swap(data, other.data);
         return *this;
     }
@@ -136,9 +148,11 @@ class HeapBlock {
         Only enabled if this is a HeapBlock<Base*> and the other object is a HeapBlock<Derived*>,
         where std::is_base_of<Base, Derived>::value == true.
     */
-    template <class OtherElementType, bool otherThrowOnFailure, typename = AllowConversion<OtherElementType>>
-    HeapBlock(HeapBlock<OtherElementType, otherThrowOnFailure> &&other) noexcept
-        : data(reinterpret_cast<ElementType *>(other.data)) {
+    template <class OtherElementType, bool otherThrowOnFailure,
+              typename = AllowConversion<OtherElementType>>
+    HeapBlock(HeapBlock<OtherElementType, otherThrowOnFailure>&& other) noexcept
+        : data(reinterpret_cast<ElementType*>(other.data))
+    {
         other.data = nullptr;
     }
 
@@ -146,10 +160,12 @@ class HeapBlock {
         Only enabled if this is a HeapBlock<Base*> and the other object is a HeapBlock<Derived*>,
         where std::is_base_of<Base, Derived>::value == true.
     */
-    template <class OtherElementType, bool otherThrowOnFailure, typename = AllowConversion<OtherElementType>>
-    HeapBlock &operator=(HeapBlock<OtherElementType, otherThrowOnFailure> &&other) noexcept {
+    template <class OtherElementType, bool otherThrowOnFailure,
+              typename = AllowConversion<OtherElementType>>
+    HeapBlock& operator=(HeapBlock<OtherElementType, otherThrowOnFailure>&& other) noexcept
+    {
         free();
-        data = reinterpret_cast<ElementType *>(other.data);
+        data = reinterpret_cast<ElementType*>(other.data);
         other.data = nullptr;
         return *this;
     }
@@ -159,44 +175,45 @@ class HeapBlock {
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator ElementType *() const noexcept { return data; }
+    inline operator ElementType*() const noexcept { return data; }
 
     /** Returns a raw pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline ElementType *get() const noexcept { return data; }
+    inline ElementType* get() const noexcept { return data; }
 
     /** Returns a raw pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline ElementType *getData() const noexcept { return data; }
+    inline ElementType* getData() const noexcept { return data; }
 
     /** Returns a void pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator void *() const noexcept { return static_cast<void *>(data); }
+    inline operator void*() const noexcept { return static_cast<void*>(data); }
 
     /** Returns a void pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator const void *() const noexcept { return static_cast<const void *>(data); }
+    inline operator const void*() const noexcept { return static_cast<const void*>(data); }
 
     /** Lets you use indirect calls to the first element in the array.
         Obviously this will cause problems if the array hasn't been initialised, because it'll
         be referencing a null pointer.
     */
-    inline ElementType *operator->() const noexcept { return data; }
+    inline ElementType* operator->() const noexcept { return data; }
 
     /** Returns a reference to one of the data elements.
         Obviously there's no bounds-checking here, as this object is just a dumb pointer and
         has no idea of the size it currently has allocated.
     */
     template <typename IndexType>
-    ElementType &operator[](IndexType index) const noexcept {
+    ElementType& operator[](IndexType index) const noexcept
+    {
         return data[index];
     }
 
@@ -204,7 +221,8 @@ class HeapBlock {
         This is the same as doing pointer arithmetic on the raw pointer itself.
     */
     template <typename IndexType>
-    ElementType *operator+(IndexType index) const noexcept {
+    ElementType* operator+(IndexType index) const noexcept
+    {
         return data + index;
     }
 
@@ -212,12 +230,18 @@ class HeapBlock {
     /** Compares the pointer with another pointer.
         This can be handy for checking whether this is a null pointer.
     */
-    inline bool operator==(const ElementType *otherPointer) const noexcept { return otherPointer == data; }
+    inline bool operator==(const ElementType* otherPointer) const noexcept
+    {
+        return otherPointer == data;
+    }
 
     /** Compares the pointer with another pointer.
         This can be handy for checking whether this is a null pointer.
     */
-    inline bool operator!=(const ElementType *otherPointer) const noexcept { return otherPointer != data; }
+    inline bool operator!=(const ElementType* otherPointer) const noexcept
+    {
+        return otherPointer != data;
+    }
 
     //==============================================================================
     /** Allocates a specified amount of memory.
@@ -233,9 +257,11 @@ class HeapBlock {
         call free() or any of the allocation methods.
     */
     template <typename SizeType>
-    void malloc(SizeType newNumElements, size_t elementSize = sizeof(ElementType)) {
+    void malloc(SizeType newNumElements, size_t elementSize = sizeof(ElementType))
+    {
         std::free(data);
-        data = static_cast<ElementType *>(std::malloc(static_cast<size_t>(newNumElements) * elementSize));
+        data = static_cast<ElementType*>(
+            std::malloc(static_cast<size_t>(newNumElements) * elementSize));
         throwOnAllocationFailure();
     }
 
@@ -243,9 +269,11 @@ class HeapBlock {
         This does the same job as the malloc() method, but clears the memory that it allocates.
     */
     template <typename SizeType>
-    void calloc(SizeType newNumElements, const size_t elementSize = sizeof(ElementType)) {
+    void calloc(SizeType newNumElements, const size_t elementSize = sizeof(ElementType))
+    {
         std::free(data);
-        data = static_cast<ElementType *>(std::calloc(static_cast<size_t>(newNumElements), elementSize));
+        data = static_cast<ElementType*>(
+            std::calloc(static_cast<size_t>(newNumElements), elementSize));
         throwOnAllocationFailure();
     }
 
@@ -254,11 +282,13 @@ class HeapBlock {
         initialiseToZero parameter.
     */
     template <typename SizeType>
-    void allocate(SizeType newNumElements, bool initialiseToZero) {
+    void allocate(SizeType newNumElements, bool initialiseToZero)
+    {
         std::free(data);
-        data = static_cast<ElementType *>(initialiseToZero
-                                              ? std::calloc(static_cast<size_t>(newNumElements), sizeof(ElementType))
-                                              : std::malloc(static_cast<size_t>(newNumElements) * sizeof(ElementType)));
+        data = static_cast<ElementType*>(
+            initialiseToZero
+                ? std::calloc(static_cast<size_t>(newNumElements), sizeof(ElementType))
+                : std::malloc(static_cast<size_t>(newNumElements) * sizeof(ElementType)));
         throwOnAllocationFailure();
     }
 
@@ -268,17 +298,20 @@ class HeapBlock {
         uses realloc() to keep as much of the existing data as possible.
     */
     template <typename SizeType>
-    void realloc(SizeType newNumElements, size_t elementSize = sizeof(ElementType)) {
-        data = static_cast<ElementType *>(data == nullptr
-                                              ? std::malloc(static_cast<size_t>(newNumElements) * elementSize)
-                                              : std::realloc(data, static_cast<size_t>(newNumElements) * elementSize));
+    void realloc(SizeType newNumElements, size_t elementSize = sizeof(ElementType))
+    {
+        data = static_cast<ElementType*>(
+            data == nullptr
+                ? std::malloc(static_cast<size_t>(newNumElements) * elementSize)
+                : std::realloc(data, static_cast<size_t>(newNumElements) * elementSize));
         throwOnAllocationFailure();
     }
 
     /** Frees any currently-allocated data.
         This will free the data and reset this object to be a null pointer.
     */
-    void free() noexcept {
+    void free() noexcept
+    {
         std::free(data);
         data = nullptr;
     }
@@ -287,7 +320,8 @@ class HeapBlock {
         The two objects simply exchange their data pointers.
     */
     template <bool otherBlockThrows>
-    void swapWith(HeapBlock<ElementType, otherBlockThrows> &other) noexcept {
+    void swapWith(HeapBlock<ElementType, otherBlockThrows>& other) noexcept
+    {
         std::swap(data, other.data);
     }
 
@@ -296,20 +330,23 @@ class HeapBlock {
         elements you specify doesn't exceed the allocated size.
     */
     template <typename SizeType>
-    void clear(SizeType numElements) noexcept {
+    void clear(SizeType numElements) noexcept
+    {
         zeromem(data, sizeof(ElementType) * static_cast<size_t>(numElements));
     }
 
     /** This typedef can be used to get the type of the heapblock's elements. */
     using Type = ElementType;
 
-  private:
+private:
     //==============================================================================
-    ElementType *data = nullptr;
+    ElementType* data = nullptr;
 
-    void throwOnAllocationFailure() const {
+    void throwOnAllocationFailure() const
+    {
 #if GL_EXCEPTIONS_DISABLED
-        jassert(data != nullptr); // without exceptions, you'll need to find a better way to handle this failure case.
+        jassert(data != nullptr); // without exceptions, you'll need to find a better way to handle
+                                  // this failure case.
 #else
         HeapBlockHelper::ThrowOnFail<throwOnFailure>::checkPointer(data);
 #endif

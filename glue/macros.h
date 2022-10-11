@@ -3,11 +3,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-#define CHECK_ALIGN(ptr, alignment)                                            \
-    do {                                                                       \
-        constexpr size_t status =                                              \
-            reinterpret_cast<uintptr_t>(ptr) % alignment;                      \
-        static_assert(status == 0, "ptr must be aligned");                     \
+#define CHECK_ALIGN(ptr, alignment)                                                                \
+    do {                                                                                           \
+        constexpr size_t status = reinterpret_cast<uintptr_t>(ptr) % alignment;                    \
+        static_assert(status == 0, "ptr must be aligned");                                         \
     } while (0)
 
 /* Offset of member MEMBER in a struct of type TYPE. */
@@ -26,3 +25,14 @@
         #define GL_DEPRECATED(reason) [[deprecated(reason)]]
     #endif
 #endif
+
+#define GL_DECLARE_NON_COPYABLE(className)                                                         \
+    className(const className&) = delete;                                                          \
+    className& operator=(const className&) = delete;
+
+/** This is a shorthand macro for deleting a class's move constructor and
+    move assignment operator.
+*/
+#define GL_DECLARE_NON_MOVEABLE(className)                                                         \
+    className(className&&) = delete;                                                               \
+    className& operator=(className&&) = delete;

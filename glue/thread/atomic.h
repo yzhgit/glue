@@ -7,18 +7,22 @@
 
 #include <atomic>
 
-namespace glue {
+namespace glue
+{
 
 #ifndef DOXYGEN
-namespace AtomicHelpers {
-template <typename T>
-struct DiffTypeHelper {
-    using Type = T;
-};
-template <typename T>
-struct DiffTypeHelper<T *> {
-    using Type = std::ptrdiff_t;
-};
+namespace AtomicHelpers
+{
+    template <typename T>
+    struct DiffTypeHelper
+    {
+        using Type = T;
+    };
+    template <typename T>
+    struct DiffTypeHelper<T*>
+    {
+        using Type = std::ptrdiff_t;
+    };
 } // namespace AtomicHelpers
 #endif
 
@@ -29,7 +33,8 @@ struct DiffTypeHelper<T *> {
     @tags{Core}
 */
 template <typename Type>
-struct Atomic final {
+struct Atomic final
+{
     using DiffType = typename AtomicHelpers::DiffTypeHelper<Type>::Type;
 
     /** Creates a new value, initialised to zero. */
@@ -39,12 +44,14 @@ struct Atomic final {
     Atomic(Type initialValue) noexcept : value(initialValue) {}
 
     /** Copies another value (atomically). */
-    Atomic(const Atomic &other) noexcept : value(other.get()) {}
+    Atomic(const Atomic& other) noexcept : value(other.get()) {}
 
     /** Destructor. */
-    ~Atomic() noexcept {
+    ~Atomic() noexcept
+    {
 #if __cpp_lib_atomic_is_always_lock_free
-        static_assert(std::atomic<Type>::is_always_lock_free, "This class can only be used for lock-free types");
+        static_assert(std::atomic<Type>::is_always_lock_free,
+                      "This class can only be used for lock-free types");
 #endif
     }
 
@@ -81,18 +88,21 @@ struct Atomic final {
                  the comparison failed and the value was left unchanged.
         @see compareAndSetValue
     */
-    bool compareAndSetBool(Type newValue, Type valueToCompare) noexcept {
+    bool compareAndSetBool(Type newValue, Type valueToCompare) noexcept
+    {
         return value.compare_exchange_strong(valueToCompare, newValue);
     }
 
     /** Copies another value into this one (atomically). */
-    Atomic<Type> &operator=(const Atomic &other) noexcept {
+    Atomic<Type>& operator=(const Atomic& other) noexcept
+    {
         value = other.value.load();
         return *this;
     }
 
     /** Copies another value into this one (atomically). */
-    Atomic<Type> &operator=(Type newValue) noexcept {
+    Atomic<Type>& operator=(Type newValue) noexcept
+    {
         value = newValue;
         return *this;
     }
