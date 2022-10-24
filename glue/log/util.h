@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#ifdef _WIN32
+#if defined(_WIN32)
     #include <Windows.h>
     #include <sys/timeb.h>
 #else
@@ -49,46 +49,12 @@ namespace log
 #endif
         }
 
-#ifdef _WIN32
-        inline int gettimeofday(struct timeval* tp, void* tzp)
-        {
-            LARGE_INTEGER now, freq;
-            QueryPerformanceCounter(&now);
-            QueryPerformanceFrequency(&freq);
-            tp->tv_sec = now.QuadPart / freq.QuadPart;
-            tp->tv_usec = (now.QuadPart % freq.QuadPart) * 1000000 / freq.QuadPart;
-
-            return (0);
-        }
-#endif
-
-#ifdef _WIN32
-        typedef _timeb Time;
-
-        inline void ftime(Time* t) { _ftime(t); }
-#else
-        struct Time
-        {
-            time_t time;
-            unsigned short millitm;
-        };
-
-        inline void ftime(Time* t)
-        {
-            timeval tv;
-            ::gettimeofday(&tv, NULL);
-
-            t->time = tv.tv_sec;
-            t->millitm = static_cast<unsigned short>(tv.tv_usec / 1000);
-        }
-#endif
-
         // Return current thread id as size_t
         // It exists because the std::this_thread::get_id() is much slower(especially
         // under VS 2013)
         inline size_t _thread_id() noexcept
         {
-#ifdef _WIN32
+#if defined(_WIN32)
             return static_cast<size_t>(::GetCurrentThreadId());
 #elif defined(__linux__)
     #if defined(__ANDROID__) && defined(__ANDROID_API__) && (__ANDROID_API__ < 21)
@@ -110,7 +76,7 @@ namespace log
 #endif
         }
 
-#ifdef _WIN32
+#if defined(_WIN32)
         inline int vasprintf(char** strp, const char* format, va_list ap)
         {
             int charCount = _vscprintf(format, ap);

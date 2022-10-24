@@ -35,8 +35,8 @@ namespace log
         static std::string format(const Record& record)
         {
             tm t;
-            useUtcTime ? util::gmtime_s(&t, &record.getTime().time)
-                       : util::localtime_s(&t, &record.getTime().time);
+            useUtcTime ? util::gmtime_s(&t, &record.getTime().tv_sec)
+                       : util::localtime_s(&t, &record.getTime().tv_sec);
 
             std::stringstream ss;
             ss << "[" << t.tm_year + 1900 << "-" << std::setfill('0') << std::setw(2)

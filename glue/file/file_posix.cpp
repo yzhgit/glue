@@ -140,7 +140,7 @@ namespace fs
         if (!exists()) return false;
 
         // Compose new file path
-        std::string path = FilePath(FilePath(m_path).directoryPath()).resolve(filename).fullPath();
+        std::string path = Path(Path(m_path).directoryPath()).resolve(filename).fullPath();
 
         // Rename
         if (::rename(m_path.c_str(), path.c_str()) != 0) { return false; }

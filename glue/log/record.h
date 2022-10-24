@@ -10,6 +10,7 @@
 
 #include <cstdarg>
 #include <string>
+#include <time.h>
 #include <vector>
 
 namespace glue
@@ -24,7 +25,7 @@ namespace log
             : m_severity(severity), m_tid(util::gettid()), m_line(line), m_file(file)
         {
             m_content.reserve(1024);
-            util::ftime(&m_time);
+            timespec_get(&m_time, TIME_UTC);
         }
 
         template <typename T>
@@ -55,7 +56,7 @@ namespace log
         //////////////////////////////////////////////////////////////////////////
         // Getters
 
-        const util::Time& getTime() const { return m_time; }
+        const struct timespec& getTime() const { return m_time; }
 
         Severity getSeverity() const { return m_severity; }
 
@@ -72,7 +73,7 @@ namespace log
         {}
 
     private:
-        util::Time m_time;
+        struct timespec m_time;
         const Severity m_severity;
         const size_t m_tid;
         const size_t m_line;

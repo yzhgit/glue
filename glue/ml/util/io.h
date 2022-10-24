@@ -48,7 +48,7 @@ static void MkDirRecur(const std::string& path) {
   }
 #ifndef LITE_WITH_ARM
 
-#ifdef _WIN32
+#if defined(_WIN32)
   if (system(string_format("md %s", path.c_str()).c_str()) != 0) {
     LOG(ERROR) << "Cann't mkdir " << path;
   }
