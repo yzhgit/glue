@@ -15,18 +15,18 @@
 #pragma once
 
 #ifndef DISALLOW_COPY_AND_ASSIGN
-#define DISALLOW_COPY_AND_ASSIGN(class__) \
-  class__(const class__&) = delete;       \
-  class__& operator=(const class__&) = delete;
+    #define DISALLOW_COPY_AND_ASSIGN(class__)                                                      \
+        class__(const class__&) = delete;                                                          \
+        class__& operator=(const class__&) = delete;
 #endif
 
 #define LITE_UNIMPLEMENTED CHECK(false) << "Not Implemented";
 
 #if defined(_WIN32)
-#define UNUSED
-#define __builtin_expect(EXP, C) (EXP)
+    #define UNUSED
+    #define __builtin_expect(EXP, C) (EXP)
 #else
-#define UNUSED __attribute__((unused))
+    #define UNUSED __attribute__((unused))
 #endif
 
 /*
@@ -41,32 +41,32 @@
  */
 
 #ifdef __CUDACC__
-#define HOSTDEVICE __host__ __device__
-#define DEVICE __device__
-#define HOST __host__
+    #define HOSTDEVICE __host__ __device__
+    #define DEVICE __device__
+    #define HOST __host__
 #else
-#define HOSTDEVICE
-#define DEVICE
-#define HOST
+    #define HOSTDEVICE
+    #define DEVICE
+    #define HOST
 #endif
 
 #if defined(__FLT_MAX__)
-#define FLT_MAX __FLT_MAX__
-#endif  // __FLT_MAX__
+    #define FLT_MAX __FLT_MAX__
+#endif // __FLT_MAX__
 
-#if (defined __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) && \
+#if (defined __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) &&                                    \
     (__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__ < 90000)
-// Thread local storage will be ignored because the linker for iOS 8 does not
-// support it.
-#define LITE_THREAD_LOCAL
+    // Thread local storage will be ignored because the linker for iOS 8 does not
+    // support it.
+    #define LITE_THREAD_LOCAL
 #elif defined(LITE_WITH_SW)
-// sw does not support thread_local
-#define LITE_THREAD_LOCAL
-#elif defined(__cplusplus) && (__cplusplus >= 201103)
-#define LITE_THREAD_LOCAL thread_local
+    // sw does not support thread_local
+    #define LITE_THREAD_LOCAL
+#elif defined(__cplusplus) && (__cplusplus >= 201103L)
+    #define LITE_THREAD_LOCAL thread_local
 #elif defined(_WIN32)
-// The MSVC compiler does not support standards switches for C++11.
-#define LITE_THREAD_LOCAL thread_local
+    // The MSVC compiler does not support standards switches for C++11.
+    #define LITE_THREAD_LOCAL thread_local
 #else
-#error "[Paddle-Lite] C++11 support is required for paddle-lite compilation."
+    #error "[Paddle-Lite] C++11 support is required for paddle-lite compilation."
 #endif
