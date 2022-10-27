@@ -13,22 +13,21 @@ project(glue VERSION 0.1.0)
 # conan_basic_setup()
 
 # Output directory is correct by default for most build setups. However, when
-# building Falcon as a DLL, it is important to have the DLL in the same
+# building as a DLL, it is important to have the DLL in the same
 # directory as the executable using it. Thus, we put all executables in a single
 # /bin directory.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# when absl is included as subproject (i.e. using add_subdirectory(glue))
-# in the source tree of a project that uses it, install rules are disabled.
 if(NOT CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
-  option(GL_ENABLE_INSTALL "Enable install rule" OFF)
+  set(IS_SUBPROJECT TRUE)
+  # option(GL_ENABLE_INSTALL "Enable install rule" OFF)
 else()
-  option(GL_ENABLE_INSTALL "Enable install rule" ON)
+  # option(GL_ENABLE_INSTALL "Enable install rule" ON)
 endif()
 
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
-add_subdirectory(glue)
+add_subdirectory(modules)
 
 # if(GL_ENABLE_INSTALL)
 #   # We don't support system-wide installation
