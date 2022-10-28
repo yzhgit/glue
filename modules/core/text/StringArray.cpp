@@ -5,6 +5,8 @@
 
 #include "text/StringArray.h"
 
+#include "maths/MathsFunctions.h"
+
 namespace glue
 {
 

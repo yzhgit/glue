@@ -5,24 +5,17 @@
 
 #include "text/String.h"
 
+#include "text/StringRef.h"
+
+#include "maths/MathsFunctions.h"
+#include "memory/HeapBlock.h"
+#include "memory/Memory.h"
+#include "memory/ByteOrder.h"
+
 namespace glue
 {
 
 GLUE_BEGIN_IGNORE_WARNINGS_MSVC(4514 4996)
-
-NewLine newLine;
-
-#if defined(GLUE_STRINGS_ARE_UNICODE) && !GLUE_STRINGS_ARE_UNICODE
-    #error "GLUE_STRINGS_ARE_UNICODE is deprecated! All strings are now unicode by default."
-#endif
-
-#if GLUE_NATIVE_WCHAR_IS_UTF8
-using CharPointer_wchar_t = UTF8;
-#elif GLUE_NATIVE_WCHAR_IS_UTF16
-using CharPointer_wchar_t = UTF16;
-#else
-using CharPointer_wchar_t = UTF32;
-#endif
 
 static CharPointer_wchar_t castToCharPointer_wchar_t(const void* t) noexcept
 {
@@ -923,28 +916,6 @@ GLUE_API String& GLUE_CALLTYPE operator<<(String& s1, double number)
     return s1 += String(number);
 }
 
-GLUE_API OutputStream& GLUE_CALLTYPE operator<<(OutputStream& stream, const String& text)
-{
-    return operator<<(stream, StringRef(text));
-}
-
-GLUE_API OutputStream& GLUE_CALLTYPE operator<<(OutputStream& stream, StringRef text)
-{
-    auto numBytes = UTF8::getBytesRequiredFor(text.text);
-
-#if (GLUE_STRING_UTF_TYPE == 8)
-    stream.write(text.text.getAddress(), numBytes);
-#else
-    // (This avoids using toUTF8() to prevent the memory bloat that it would leave behind
-    // if lots of large, persistent strings were to be written to streams).
-    HeapBlock<char> temp(numBytes + 1);
-    UTF8(temp).writeAll(text.text);
-    stream.write(temp, numBytes);
-#endif
-
-    return stream;
-}
-
 //==============================================================================
 int String::indexOfChar(glue_wchar character) const noexcept { return text.indexOf(character); }
 
@@ -1831,10 +1802,6 @@ String String::formattedRaw(const char* pf, ...)
         va_list args;
         va_start(args, pf);
 
-#if GLUE_WINDOWS
-        GLUE_BEGIN_IGNORE_WARNINGS_GCC_LIKE("-Wdeprecated-declarations")
-#endif
-
 #if GLUE_ANDROID
         HeapBlock<char> temp(bufferSize);
         int num = (int) vsnprintf(temp.get(), bufferSize - 1, pf, args);
@@ -1851,9 +1818,6 @@ String String::formattedRaw(const char* pf, ...)
             (temp.get(), bufferSize - 1, wideCharVersion.toWideCharPointer(), args);
 #endif
 
-#if GLUE_WINDOWS
-        GLUE_END_IGNORE_WARNINGS_GCC_LIKE
-#endif
         va_end(args);
 
         if (num > 0) return String(temp.get());
@@ -2191,8 +2155,8 @@ StringRef::StringRef(const char* stringLiteral) noexcept
 
 StringRef::StringRef(String::CharPointerType stringLiteral) noexcept : text(stringLiteral)
 {
-    jassert(stringLiteral.getAddress() !=
-            nullptr); // This must be a valid string literal, not a null pointer!!
+    // This must be a valid string literal, not a null pointer!!
+    jassert(stringLiteral.getAddress() != nullptr);
 }
 
 StringRef::StringRef(const String& string) noexcept : text(string.getCharPointer()) {}

@@ -7,7 +7,6 @@
 
 #include "containers/Array.h"
 #include "text/StringRef.h"
-#include "threads/CriticalSection.h"
 
 namespace glue
 {
@@ -65,7 +64,7 @@ public:
 
 private:
     Array<String> strings;
-    CriticalSection lock;
+    std::mutex mtx;
     uint32 lastGarbageCollectionTime;
 
     void garbageCollectIfNeeded();

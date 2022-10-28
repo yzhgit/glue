@@ -23,16 +23,15 @@ namespace glue
 
     @tags{Core}
 */
-template <class ElementType, class TypeOfCriticalSectionToUse>
-class ArrayBase : public TypeOfCriticalSectionToUse
+template <class ElementType, class _Mutex>
+class ArrayBase : public _Mutex
 {
 private:
     using ParameterType = typename TypeHelpers::ParameterType<ElementType>::type;
 
-    template <class OtherElementType, class OtherCriticalSection>
-    using AllowConversion = typename std::enable_if<
-        !std::is_same<std::tuple<ElementType, TypeOfCriticalSectionToUse>,
-                      std::tuple<OtherElementType, OtherCriticalSection>>::value>::type;
+    template <class OtherElementType, class _Other_Mutex>
+    using AllowConversion = typename std::enable_if<!std::is_same<
+        std::tuple<ElementType, _Mutex>, std::tuple<OtherElementType, _Other_Mutex>>::value>::type;
 
 public:
     //==============================================================================
@@ -65,9 +64,9 @@ public:
         If you see a compile error here, it's probably because you're attempting a conversion that
         HeapBlock won't allow.
     */
-    template <class OtherElementType, class OtherCriticalSection,
-              typename = AllowConversion<OtherElementType, OtherCriticalSection>>
-    ArrayBase(ArrayBase<OtherElementType, OtherCriticalSection>&& other) noexcept
+    template <class OtherElementType, class _Other_Mutex,
+              typename = AllowConversion<OtherElementType, _Other_Mutex>>
+    ArrayBase(ArrayBase<OtherElementType, _Other_Mutex>&& other) noexcept
         : elements(std::move(other.elements))
         , numAllocated(other.numAllocated)
         , numUsed(other.numUsed)
@@ -81,9 +80,9 @@ public:
         If you see a compile error here, it's probably because you're attempting a conversion that
         HeapBlock won't allow.
     */
-    template <class OtherElementType, class OtherCriticalSection,
-              typename = AllowConversion<OtherElementType, OtherCriticalSection>>
-    ArrayBase& operator=(ArrayBase<OtherElementType, OtherCriticalSection>&& other) noexcept
+    template <class OtherElementType, class _Other_Mutex,
+              typename = AllowConversion<OtherElementType, _Other_Mutex>>
+    ArrayBase& operator=(ArrayBase<OtherElementType, _Other_Mutex>&& other) noexcept
     {
         // No need to worry about assignment to *this, because 'other' must be of a different type.
         elements = std::move(other.elements);
@@ -539,7 +538,7 @@ private:
     HeapBlock<ElementType> elements;
     int numAllocated = 0, numUsed = 0;
 
-    template <class OtherElementType, class OtherCriticalSection>
+    template <class OtherElementType, class _Other_Mutex>
     friend class ArrayBase;
 
     GLUE_DECLARE_NON_COPYABLE(ArrayBase)

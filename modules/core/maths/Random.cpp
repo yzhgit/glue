@@ -19,7 +19,7 @@ void Random::setSeed(const int64 newSeed) noexcept
     if (this == &getSystemRandom())
     {
         // Resetting the system Random risks messing up
-        // JUCE's internal state. If you need a predictable
+        // GLUE's internal state. If you need a predictable
         // stream of random numbers you should use a local
         // Random object.
         jassertfalse;
@@ -86,50 +86,6 @@ float Random::nextFloat() noexcept
 double Random::nextDouble() noexcept
 {
     return static_cast<uint32>(nextInt()) / (std::numeric_limits<uint32>::max() + 1.0);
-}
-
-BigInteger Random::nextLargeNumber(const BigInteger& maximumValue)
-{
-    BigInteger n;
-
-    do {
-        fillBitsRandomly(n, 0, maximumValue.getHighestBit() + 1);
-    } while (n >= maximumValue);
-
-    return n;
-}
-
-void Random::fillBitsRandomly(void* const buffer, size_t bytes)
-{
-    int* d = static_cast<int*>(buffer);
-
-    for (; bytes >= sizeof(int); bytes -= sizeof(int)) *d++ = nextInt();
-
-    if (bytes > 0)
-    {
-        const int lastBytes = nextInt();
-        memcpy(d, &lastBytes, bytes);
-    }
-}
-
-void Random::fillBitsRandomly(BigInteger& arrayToChange, int startBit, int numBits)
-{
-    arrayToChange.setBit(startBit + numBits - 1, true); // to force the array to pre-allocate space
-
-    while ((startBit & 31) != 0 && numBits > 0)
-    {
-        arrayToChange.setBit(startBit++, nextBool());
-        --numBits;
-    }
-
-    while (numBits >= 32)
-    {
-        arrayToChange.setBitRangeAsInt(startBit, 32, (unsigned int) nextInt());
-        startBit += 32;
-        numBits -= 32;
-    }
-
-    while (--numBits >= 0) arrayToChange.setBit(startBit + numBits, nextBool());
 }
 
 } // namespace glue

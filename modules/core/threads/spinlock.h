@@ -5,9 +5,7 @@
 
 #pragma once
 
-#include "glue/precompiled.h"
-
-#include <atomic>
+#include "StandardHeader.h"
 
 namespace glue
 {
@@ -36,13 +34,13 @@ public:
         It's strongly recommended that you never call this method directly - instead use the
         ScopedLockType class to manage the locking using an RAII pattern instead.
     */
-    void lock() const noexcept;
+    void lock() noexcept;
 
     /** Attempts to acquire the lock, return immediately true if this was successful. */
-    bool tryLock() const noexcept;
+    bool try_lock() noexcept;
 
     /** Releases the lock. */
-    void unlock() const noexcept;
+    void unlock() noexcept;
 
 private:
     mutable std::atomic<bool> m_flag{false};

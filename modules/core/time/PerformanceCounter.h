@@ -5,8 +5,8 @@
 
 #pragma once
 
+#include "files/File.h"
 #include "memory/LeakedObjectDetector.h"
-#include "text/StringRef.h"
 #include "time/Time.h"
 
 namespace glue

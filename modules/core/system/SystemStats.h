@@ -20,7 +20,7 @@ class GLUE_API SystemStats final
 {
 public:
     //==============================================================================
-    /** Returns the current version of JUCE,
+    /** Returns the current version of GLUE,
         See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
     */
     static String getVersion();
@@ -85,23 +85,6 @@ public:
     /** Returns the host-name of the computer. */
     static String getComputerName();
 
-    /** Returns the language of the user's locale.
-        The return value is a 2 or 3 letter language code (ISO 639-1 or ISO 639-2)
-    */
-    static String getUserLanguage();
-
-    /** Returns the region of the user's locale.
-        The return value is a 2 letter country code (ISO 3166-1 alpha-2).
-    */
-    static String getUserRegion();
-
-    /** Returns the user's display language.
-        The return value is a 2 or 3 letter language code (ISO 639-1 or ISO 639-2).
-        Note that depending on the OS and region, this may also be followed by a dash
-        and a sub-region code, e.g "en-GB"
-    */
-    static String getDisplayLanguage();
-
     /** This will attempt to return some kind of string describing the device.
         If no description is available, it'll just return an empty string. You may
         want to use this for things like determining the type of phone/iPad, etc.
@@ -112,13 +95,6 @@ public:
         If no description is available, it'll just return an empty string.
     */
     static String getDeviceManufacturer();
-
-    /** This method calculates some IDs to uniquely identify the device.
-
-        The first choice for an ID is a filesystem ID for the user's home folder or
-        windows directory. If that fails then this function returns the MAC addresses.
-    */
-    static StringArray getDeviceIdentifiers();
 
     //==============================================================================
     // CPU and memory information..
@@ -193,26 +169,6 @@ public:
         This is only used by programmers with beards.
     */
     static int getPageSize();
-
-    //==============================================================================
-    /** Returns a backtrace of the current call-stack.
-        The usefulness of the result will depend on the level of debug symbols
-        that are available in the executable.
-    */
-    static String getStackBacktrace();
-
-    /** A function type for use in setApplicationCrashHandler().
-        When called, its void* argument will contain platform-specific data about the crash.
-    */
-    using CrashHandlerFunction = void (*)(void*);
-
-    /** Sets up a global callback function that will be called if the application
-        executes some kind of illegal instruction.
-
-        You may want to call getStackBacktrace() in your handler function, to find out
-        where the problem happened and log it, etc.
-    */
-    static void setApplicationCrashHandler(CrashHandlerFunction);
 
 private:
     SystemStats() = delete; // uses only static methods

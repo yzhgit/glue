@@ -31,6 +31,7 @@
 #include <cmath>
 #include <condition_variable>
 #include <cstddef>
+#include <ctime>
 #include <functional>
 #include <iomanip>
 #include <iostream>
@@ -43,6 +44,8 @@
 #include <queue>
 #include <set>
 #include <sstream>
+#include <stdarg.h>
+#include <thread>
 #include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
@@ -59,10 +62,12 @@ GLUE_BEGIN_IGNORE_WARNINGS_MSVC(4514 4245 4100)
 
 #if GLUE_MSVC
     #include <intrin.h>
+    #include <windows.h>
 #endif
 
 #if GLUE_MSVC && GLUE_DEBUG
     #include <crtdbg.h>
+    #include <debugapi.h>
 #endif
 
 #if GLUE_LINUX
@@ -205,6 +210,26 @@ using ssize_t = pointer_sized_int;
 #endif
 
 //==============================================================================
+/** Config: GLUE_LOG_ASSERTIONS
+
+    If this flag is enabled, the jassert and jassertfalse macros will always use
+   Logger::writeToLog() to write a message when an assertion happens.
+
+    Enabling it will also leave this turned on in release builds. When it's disabled,
+    however, the jassert and jassertfalse macros will not be compiled in a
+    release build.
+
+    @see jassert, jassertfalse, Logger
+*/
+#ifndef GLUE_LOG_ASSERTIONS
+    #if GLUE_ANDROID
+        #define GLUE_LOG_ASSERTIONS 1
+    #else
+        #define GLUE_LOG_ASSERTIONS 0
+    #endif
+#endif
+
+//==============================================================================
 /** Config: GLUE_CHECK_MEMORY_LEAKS
 
     Enables a memory-leak check for certain objects when the app terminates. See the
@@ -214,3 +239,10 @@ using ssize_t = pointer_sized_int;
 #if GLUE_DEBUG && !defined(GLUE_CHECK_MEMORY_LEAKS)
     #define GLUE_CHECK_MEMORY_LEAKS 1
 #endif
+
+namespace glue
+{
+
+GLUE_API bool GLUE_CALLTYPE glue_isRunningUnderDebugger() noexcept;
+
+}

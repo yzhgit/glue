@@ -5,10 +5,7 @@
 
 #pragma once
 
-#include "glue/precompiled.h"
-
-#include <condition_variable>
-#include <mutex>
+#include "StandardHeader.h"
 
 namespace glue
 {

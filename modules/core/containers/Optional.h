@@ -43,14 +43,14 @@ GLUE_BEGIN_IGNORE_WARNINGS_MSVC(4702)
 
     Has similar (not necessarily identical!) semantics to std::optional.
 
-    This is intended to stand-in for std::optional while JUCE's minimum
+    This is intended to stand-in for std::optional while GLUE's minimum
     supported language standard is lower than C++17. When the minimum language
     standard moves to C++17, this class will probably be deprecated, in much
     the same way that glue::ScopedPointer was deprecated in favour of
     std::unique_ptr after C++11.
 
-    This isn't really intended to be used by JUCE clients. Instead, it's to be
-    used internally in JUCE code, with an API close-enough to std::optional
+    This isn't really intended to be used by GLUE clients. Instead, it's to be
+    used internally in GLUE code, with an API close-enough to std::optional
     that the types can be swapped with fairly minor disruption at some point in
     the future, but *without breaking any public APIs*.
 

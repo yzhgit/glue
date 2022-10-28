@@ -40,25 +40,6 @@ struct GlueVersionPrinter
 static GlueVersionPrinter glueVersionPrinter;
 #endif
 
-StringArray SystemStats::getDeviceIdentifiers()
-{
-    StringArray ids;
-
-#if GLUE_WINDOWS
-    File f(File::getSpecialLocation(File::windowsSystemDirectory));
-#else
-    File f("~");
-#endif
-    if (auto num = f.getFileIdentifier()) { ids.add(String::toHexString((int64) num)); }
-    else
-    {
-        for (auto& address : MACAddress::getAllAddresses()) ids.add(address.toString());
-    }
-
-    jassert(!ids.isEmpty()); // Failed to create any IDs!
-    return ids;
-}
-
 //==============================================================================
 struct CPUInformation
 {
@@ -108,94 +89,27 @@ bool SystemStats::hasAVX512VL() noexcept { return getCPUInformation().hasAVX512V
 bool SystemStats::hasAVX512VPOPCNTDQ() noexcept { return getCPUInformation().hasAVX512VPOPCNTDQ; }
 bool SystemStats::hasNeon() noexcept { return getCPUInformation().hasNeon; }
 
-//==============================================================================
-String SystemStats::getStackBacktrace()
-{
-    String result;
-
-#if GLUE_ANDROID || GLUE_MINGW
-    jassertfalse; // sorry, not implemented yet!
-
-#elif GLUE_WINDOWS
-    HANDLE process = GetCurrentProcess();
-    SymInitialize(process, nullptr, TRUE);
-
-    void* stack[128];
-    int frames = (int) CaptureStackBackTrace(0, numElementsInArray(stack), stack, nullptr);
-
-    HeapBlock<SYMBOL_INFO> symbol;
-    symbol.calloc(sizeof(SYMBOL_INFO) + 256, 1);
-    symbol->MaxNameLen = 255;
-    symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
-
-    for (int i = 0; i < frames; ++i)
-    {
-        DWORD64 displacement = 0;
-
-        if (SymFromAddr(process, (DWORD64) stack[i], &displacement, symbol))
-        {
-            result << i << ": ";
-
-            IMAGEHLP_MODULE64 moduleInfo;
-            zerostruct(moduleInfo);
-            moduleInfo.SizeOfStruct = sizeof(moduleInfo);
-
-            if (::SymGetModuleInfo64(process, symbol->ModBase, &moduleInfo))
-                result << moduleInfo.ModuleName << ": ";
-
-            result << symbol->Name << " + 0x" << String::toHexString((int64) displacement)
-                   << newLine;
-        }
-    }
-
-#else
-    void* stack[128];
-    auto frames = backtrace(stack, numElementsInArray(stack));
-    char** frameStrings = backtrace_symbols(stack, frames);
-
-    for (int i = 0; i < frames; ++i) result << frameStrings[i] << newLine;
-
-    ::free(frameStrings);
-#endif
-
-    return result;
-}
-
-//==============================================================================
-static SystemStats::CrashHandlerFunction globalCrashHandler = nullptr;
-
-#if GLUE_WINDOWS
-static LONG WINAPI handleCrash(LPEXCEPTION_POINTERS ep)
-{
-    globalCrashHandler(ep);
-    return EXCEPTION_EXECUTE_HANDLER;
-}
-#else
-static void handleCrash(int signum)
-{
-    globalCrashHandler((void*) (pointer_sized_int) signum);
-    ::kill(getpid(), SIGKILL);
-}
-
-int glue_siginterrupt(int sig, int flag);
-#endif
-
-void SystemStats::setApplicationCrashHandler(CrashHandlerFunction handler)
-{
-    jassert(handler != nullptr); // This must be a valid function.
-    globalCrashHandler = handler;
-
-#if GLUE_WINDOWS
-    SetUnhandledExceptionFilter(handleCrash);
-#else
-    const int signals[] = {SIGFPE, SIGILL, SIGSEGV, SIGBUS, SIGABRT, SIGSYS};
-
-    for (int i = 0; i < numElementsInArray(signals); ++i)
-    {
-        ::signal(signals[i], handleCrash);
-        glue_siginterrupt(signals[i], 1);
-    }
-#endif
-}
-
 } // namespace glue
+
+//==============================================================================
+#if GLUE_LINUX || GLUE_ANDROID
+String readPosixConfigFileValue(const char* file, const char* key)
+{
+    StringArray lines;
+    File(file).readLines(lines);
+
+    for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
+        if (lines[i].upToFirstOccurrenceOf(":", false, false).trim().equalsIgnoreCase(key))
+            return lines[i].fromFirstOccurrenceOf(":", false, false).trim();
+
+    return {};
+}
+#endif
+
+#if GLUE_WINDOWS
+    #include "system/SystemStats_win32.cpp"
+#elif GLUE_ANDROID
+    #include "system/SystemStats_android.cpp"
+#else
+    #include "system/SystemStats_linux.cpp"
+#endif

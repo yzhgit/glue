@@ -6,7 +6,7 @@
 #include "files/TemporaryFile.h"
 
 #include "maths/Random.h"
-#include "threads/CriticalSection.h"
+#include "threads/Thread.h"
 
 namespace glue
 {
@@ -17,12 +17,12 @@ class LockedRandom
 public:
     int nextInt()
     {
-        const ScopedLock lock(mutex);
+        std::lock_guard<std::mutex> sl(mtx);
         return random.nextInt();
     }
 
 private:
-    CriticalSection mutex;
+    std::mutex mtx;
     Random random;
 };
 

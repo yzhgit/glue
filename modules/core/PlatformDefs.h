@@ -30,7 +30,7 @@
     #define GLUE_END_IGNORE_WARNINGS_MSVC
 #endif
 
-/** This macro defines the C calling convention used as the standard for JUCE calls. */
+/** This macro defines the C calling convention used as the standard for GLUE_ calls. */
 #if GLUE_WINDOWS
     #define GLUE_CALLTYPE __stdcall
     #define GLUE_CDECL __cdecl
@@ -44,7 +44,7 @@
 
 #ifndef GLUE_LOG_CURRENT_ASSERTION
     #if GLUE_LOG_ASSERTIONS || GLUE_DEBUG
-        #define GLUE_LOG_CURRENT_ASSERTION glue::logAssertion(__FILE__, __LINE__);
+        #define GLUE_LOG_CURRENT_ASSERTION glue::LogFatal(__FILE__, __LINE__);
     #else
         #define GLUE_LOG_CURRENT_ASSERTION
     #endif
@@ -101,6 +101,26 @@ inline void __attribute__((analyzer_noreturn)) glue_assert_noreturn() {}
 
 #ifndef GLUE_ANALYZER_NORETURN
     #define GLUE_ANALYZER_NORETURN
+#endif
+
+/** Used to silence Wimplicit-fallthrough on Clang and GCC where available
+    as there are a few places in the codebase where we need to do this
+    deliberately and want to ignore the warning.
+*/
+#if GLUE_CLANG
+    #if __has_cpp_attribute(clang::fallthrough)
+        #define GLUE_FALLTHROUGH [[clang::fallthrough]];
+    #else
+        #define GLUE_FALLTHROUGH
+    #endif
+#elif GLUE_GCC
+    #if __GNUC__ >= 7
+        #define GLUE_FALLTHROUGH [[gnu::fallthrough]];
+    #else
+        #define GLUE_FALLTHROUGH
+    #endif
+#else
+    #define GLUE_FALLTHROUGH
 #endif
 
 //==============================================================================

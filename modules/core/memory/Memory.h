@@ -132,11 +132,10 @@ inline const Type* addBytesToPointer(const Type* basePointer, IntegerType bytes)
    across to another where it is deleted. By piggy-backing on the GLUE_LEAK_DETECTOR macro, these
    allocators can be injected into most glue classes.
 */
-#if GLUE_MSVC && (defined(GLUE_DLL) || defined(GLUE_DLL_BUILD)) &&                                 \
-    !(GLUE_DISABLE_DLL_ALLOCATORS || DOXYGEN)
+#if GLUE_MSVC && defined(GLUE_DLL) && !(GLUE_DISABLE_DLL_ALLOCATORS || DOXYGEN)
 
-extern GLUE_API void* glueDLL_malloc(size_t);
-extern GLUE_API void glueDLL_free(void*);
+GLUE_API void* glueDLL_malloc(size_t);
+GLUE_API void glueDLL_free(void*);
 
     #define GLUE_LEAK_DETECTOR(OwnerClass)                                                         \
     public:                                                                                        \

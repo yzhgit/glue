@@ -15,9 +15,17 @@ namespace glue
 
 class StringRef;
 
+#if GLUE_NATIVE_WCHAR_IS_UTF8
+using CharPointer_wchar_t = UTF8;
+#elif GLUE_NATIVE_WCHAR_IS_UTF16
+using CharPointer_wchar_t = UTF16;
+#else
+using CharPointer_wchar_t = UTF32;
+#endif
+
 //==============================================================================
 /**
-    The JUCE String class!
+    The GLUE String class!
 
     Using a reference-counted internal representation, these strings are fast
     and efficient, and there are methods to do just about any operation you'll ever

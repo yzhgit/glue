@@ -3,23 +3,23 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/thread/latch.h"
+#include "threads/CountDownLatch.h"
 
-#include "glue/log/log.h"
+#include "logging/Log.h"
 
 namespace glue
 {
 
-Latch::Latch(int initial_count)
+CountDownLatch::CountDownLatch(int initial_count)
     : m_done(initial_count == 0 ? true : false), m_num_waiting(0), m_count(initial_count)
 {
-    LOGF_IF(initial_count < 0, "Latch initial_count negative");
+    if (initial_count < 0) { LogFatal("", "initial_count negative"); }
 }
 
-bool Latch::countDown() noexcept
+bool CountDownLatch::countDown() noexcept
 {
     int count = m_count.fetch_sub(1, std::memory_order_acq_rel) - 1;
-    LOGF_IF(count < 0, "Latch::countDown() called too many times");
+    if (count < 0) { LogFatal("", "called too many times"); }
     if (count == 0)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
@@ -30,13 +30,14 @@ bool Latch::countDown() noexcept
     return false;
 }
 
-void Latch::wait() noexcept
+void CountDownLatch::wait() noexcept
 {
     std::unique_lock<std::mutex> lock(m_mutex);
 
     // only one thread may call wait(). To support more than one thread,
     // implement a counter num_to_exit, like in the Barrier class.
-    LOGF_IF(m_num_waiting != 0, "multiple threads called wait()");
+    if (m_num_waiting != 0) { LogFatal("", "multiple threads called wait()"); }
+
     m_num_waiting++;
 
     m_cond.wait(lock, [this] { return m_done; });

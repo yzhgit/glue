@@ -5,6 +5,8 @@
 
 #include "text/StringPool.h"
 
+#include "time/Time.h"
+
 namespace glue
 {
 
@@ -86,7 +88,7 @@ String StringPool::getPooledString(const char* const newString)
 {
     if (newString == nullptr || *newString == 0) return {};
 
-    const ScopedLock sl(lock);
+    std::lock_guard<std::mutex> sl(mtx);
     garbageCollectIfNeeded();
     return addPooledString(strings, UTF8(newString));
 }
@@ -95,7 +97,7 @@ String StringPool::getPooledString(String::CharPointerType start, String::CharPo
 {
     if (start.isEmpty() || start == end) return {};
 
-    const ScopedLock sl(lock);
+    std::lock_guard<std::mutex> sl(mtx);
     garbageCollectIfNeeded();
     return addPooledString(strings, StartEndString(start, end));
 }
@@ -104,7 +106,7 @@ String StringPool::getPooledString(StringRef newString)
 {
     if (newString.isEmpty()) return {};
 
-    const ScopedLock sl(lock);
+    std::lock_guard<std::mutex> sl(mtx);
     garbageCollectIfNeeded();
     return addPooledString(strings, newString.text);
 }
@@ -113,7 +115,7 @@ String StringPool::getPooledString(const String& newString)
 {
     if (newString.isEmpty()) return {};
 
-    const ScopedLock sl(lock);
+    std::lock_guard<std::mutex> sl(mtx);
     garbageCollectIfNeeded();
     return addPooledString(strings, newString);
 }
@@ -128,7 +130,7 @@ void StringPool::garbageCollectIfNeeded()
 
 void StringPool::garbageCollect()
 {
-    const ScopedLock sl(lock);
+    std::lock_guard<std::mutex> sl(mtx);
 
     for (int i = strings.size(); --i >= 0;)
         if (strings.getReference(i).getReferenceCount() == 1) strings.remove(i);

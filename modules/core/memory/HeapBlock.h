@@ -355,7 +355,7 @@ private:
     template <class OtherElementType, bool otherThrowOnFailure>
     friend class HeapBlock;
 
-#if !(defined(GLUE_DLL) || defined(GL_DLL_BUILD))
+#if !defined(GLUE_DLL)
     GLUE_DECLARE_NON_COPYABLE(HeapBlock)
     GLUE_PREVENT_HEAP_ALLOCATION // Creating a 'new HeapBlock' would be missing the point!
 #endif

@@ -5,11 +5,7 @@
 
 #pragma once
 
-#include "glue/precompiled.h"
-
-#include <atomic>
-#include <condition_variable>
-#include <mutex>
+#include "StandardHeader.h"
 
 namespace glue
 {
@@ -37,7 +33,7 @@ public:
     // Blocks until either the event's "notified" state is `true` (which
     // may occur immediately) or the timeout has elapsed, returning the value of
     // its "notified" state in either case.
-    bool wait(long milliseconds) const;
+    bool wait(int64 milliseconds) const;
 
     // Sets the "notified" state of this event to `true` and wakes waiting
     // threads. Note: do not call `notify()` multiple times on the same

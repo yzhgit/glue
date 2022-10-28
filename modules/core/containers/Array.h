@@ -6,6 +6,7 @@
 #pragma once
 
 #include "containers/ArrayBase.h"
+#include "threads/Mutex.h"
 
 namespace glue
 {
@@ -30,15 +31,14 @@ namespace glue
     For holding lists of strings, you can use Array\<String\>, but it's usually better to use the
     specialised class StringArray, which provides more useful functions.
 
-    To make all the array's methods thread-safe, pass in "CriticalSection" as the templated
-    TypeOfCriticalSectionToUse parameter, instead of the default DummyCriticalSection.
+    To make all the array's methods thread-safe, pass in "Mutex" as the templated
+    LockType parameter, instead of the default EmptyMutex.
 
-    @see OwnedArray, ReferenceCountedArray, StringArray, CriticalSection
+    @see OwnedArray, ReferenceCountedArray, StringArray, Mutex
 
     @tags{Core}
 */
-template <typename ElementType, typename TypeOfCriticalSectionToUse = DummyCriticalSection,
-          int minimumAllocatedSize = 0>
+template <typename ElementType, typename LockType = EmptyMutex, int minimumAllocatedSize = 0>
 class Array
 {
 private:
@@ -1043,25 +1043,25 @@ public:
     void sort(ElementComparator& comparator, bool retainOrderOfEquivalentItems = false)
     {
         const ScopedLockType lock(getLock());
-        ignoreUnused(
-            comparator); // if you pass in an object with a static compareElements() method, this
-                         // avoids getting warning messages about the parameter being unused
+        // if you pass in an object with a static compareElements() method, this
+        // avoids getting warning messages about the parameter being unused
+        ignoreUnused(comparator);
         sortArray(comparator, values.begin(), 0, size() - 1, retainOrderOfEquivalentItems);
     }
 
     //==============================================================================
-    /** Returns the CriticalSection that locks this array.
-        To lock, you can call getLock().enter() and getLock().exit(), or preferably use
+    /** Returns the Mutex that locks this array.
+        To lock, you can call getLock().lock() and getLock().unlock(), or preferably use
         an object of ScopedLockType as an RAII lock for it.
     */
-    inline const TypeOfCriticalSectionToUse& getLock() const noexcept { return values; }
+    inline const LockType& getLock() const noexcept { return values; }
 
     /** Returns the type of scoped lock to use for locking this array */
-    using ScopedLockType = typename TypeOfCriticalSectionToUse::ScopedLockType;
+    using ScopedLockType = typename LockType::ScopedLock;
 
 private:
     //==============================================================================
-    ArrayBase<ElementType, TypeOfCriticalSectionToUse> values;
+    ArrayBase<ElementType, LockType> values;
 
     void removeInternal(int indexToRemove)
     {

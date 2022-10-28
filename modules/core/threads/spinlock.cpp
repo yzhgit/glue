@@ -4,9 +4,8 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/thread/spinlock.h"
+#include "threads/SpinLock.h"
 
-#include <thread>
 #if defined(_MSC_VER)
     #include <windows.h>
 #elif defined(__i386__) || defined(__x86_64__)
@@ -60,10 +59,10 @@ void SpinLock::lock() const noexcept
     }
 }
 
-bool SpinLock::tryLock() const noexcept
+bool SpinLock::try_lock() const noexcept
 {
     // First do a relaxed load to check if lock is free in order to prevent
-    // unnecessary cache misses if someone does while(!tryLock())
+    // unnecessary cache misses if someone does while(!try_lock())
     return !m_flag.load(std::memory_order_relaxed) &&
            !m_flag.exchange(true, std::memory_order_acquire);
 }

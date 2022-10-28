@@ -5,181 +5,291 @@
 
 #pragma once
 
-#include "glue/precompiled.h"
+#include "StandardHeader.h"
 
 namespace glue
 {
 
-/**
-    Encapsulates a thread.
+/// \class Thread
+/// \brief A threaded base class with a built in mutex for convenience.
+///
+/// Users can extend this base class by public inheritance like this:
+///
+///     class MyThreadedClass: public Thread
+///     {
+///         public:
+///         /// ...
+///         void run()
+///         {
+///             while(isThreadRunning())
+///             {
+///                 /// Threaded function here.
+///             }
+///         }
+///     };
+///
 
-    Subclasses derive from Thread and implement the run() method, in which they
-    do their business. The thread can then be started with the start() method
-    and controlled with various other methods.
-
-    This class also contains some thread-related static methods, such
-    as sleep(), yield(), getCurrentThreadId() etc.
-
-    @see CriticalSection, WaitableEvent, Process, ThreadWithProgressWindow,
-         MessageManagerLock
-
-    @tags{Core}
-*/
-class GLUE_API Thread
+class Thread
 {
 public:
-    typedef void* ThreadID;
-
-    enum Priority
-    {
-        IdlePriority,
-
-        LowestPriority,
-        LowPriority,
-        NormalPriority,
-        HighPriority,
-        HighestPriority,
-
-        TimeCriticalPriority,
-
-        InheritPriority
-    };
-
-    /**
-        Creates a thread.
-
-        When first created, the thread is not running. Use the start()
-        method to start it.
-    */
+    /// \brief Create an Thread.
     Thread();
 
-    explicit Thread(const std::string& name);
+    /// \brief Check the running status of the thread.
+    /// \returns true iff the thread is currently running.
+    bool isThreadRunning() const;
 
-    /** Destructor.
+    /// \brief Get the unique thread id.
+    /// \note This is NOT the the same as the operating thread id!
+    std::thread::id getThreadId() const;
 
-        You must never attempt to delete a Thread object while it's still running -
-        always call stop() and make sure your thread has stopped before deleting
-        the object. Failing to do so will throw an assertion, and put you firmly into
-        undefined behaviour territory.
-    */
-    virtual ~Thread();
+    /// \brief Get the unique thread name, in the form of "Thread id#"
+    /// \returns the Thread ID string.
+    std::string getThreadName() const;
 
-    /// Returns the name of the thread.
-    std::string name() const;
+    void setThreadName(const std::string& name);
 
-    /** Changes the thread's priority.
+    /// \brief Start the thread.
+    /// \note Subclasses can directly access the mutex and employ thier
+    ///       own locking strategy.
+    void startThread();
 
-        May return false if for some reason the priority can't be changed.
-
-        @param priority     the new priority, in the range 0 (lowest) to 10 (highest). A priority
-                            of 5 is normal.
-        @see realtimeAudioPriority
-    */
-    void setPriority(Priority priority);
-
-    /** Returns the priority for a running thread.
-
-      If the thread is not running, this function returns InheritPriority.
-     */
-    Priority priority() const;
-
-    /// Sets the thread's stack size in bytes.
-    /// Setting the stack size to 0 will use the default stack size.
-    /// Typically, the real stack size is rounded up to the nearest
-    /// page size multiple.
-    void setStackSize(unsigned size);
-
-    /// Returns the thread's stack size in bytes.
-    /// If the default stack size is used, 0 is returned.
-    unsigned int stackSize() const;
-
-    /** Returns true if the thread is currently active */
-    bool isRunning() const;
-
-    /// Starts the thread with the given target.
+    /// \brief Lock the mutex.
     ///
-    /// Note that the given Runnable object must remain
-    /// valid during the entire lifetime of the thread, as
-    /// only a reference to it is stored internally.
-    void start(Priority priority = InheritPriority);
+    /// If the thread was started startThread(true), then this call will wait
+    /// until the mutex is available and return true.  If the thread was started
+    /// startThread(false), this call will return true iff the mutex is
+    /// was successfully acquired.
+    ///
+    /// \returns true if the lock was successfully acquired.
+    bool lock();
 
-    /** Attempts to stop the thread running.
+    /// \brief Tries to lock the mutex.
+    ///
+    /// If the thread was started startThread(true), then this call will wait
+    /// until the mutex is available and return true.  If the thread was started
+    /// startThread(false), this call will return true iff the mutex is
+    /// was successfully acquired.
+    ///
+    /// \returns true if the lock was successfully acquired.
+    bool tryLock();
 
-        This method will cause the threadShouldExit() method to return true
-        and call notify() in case the thread is currently waiting.
+    /// \brief Unlock the mutex.
+    ///
+    /// This will only unlocks the mutex if it was previously by the same
+    /// calling thread.
+    void unlock();
 
-        Hopefully the thread will then respond to this by exiting cleanly, and
-        the stop method will wait for a given time-period for this to
-        happen.
+    /// \brief Stop the thread.
+    ///
+    /// This does immediately stop the thread from processing, but
+    /// will only set a flag that must be checked from within your
+    /// threadedFunction() by calling isThreadRunning().  If the user wants
+    /// to both stop the thread AND wait for the thread to finish
+    /// processing, the user should call waitForThread(true, ...).
+    void stopThread();
 
-        If the thread is stuck and fails to respond after the timeout, it gets
-        forcibly killed, which is a very bad thing to happen, as it could still
-        be holding locks, etc. which are needed by other parts of your program.
-    */
-    void terminate();
+    /// \brief Wait for the thread to exit (aka "joining" the thread).
+    ///
+    /// This method waits for a thread will "block" and wait for the
+    /// thread (aka "join" the thread) before it returns.  This allows the
+    /// user to be sure that the thread is properly cleaned up.  An example
+    /// of when this might be particularly important is if the
+    /// threadedFunction() is opening a set of network sockets, or
+    /// downloading data from the web.  Destroying an Thread subclass
+    /// without releasing those sockets (or other resources), may result in
+    /// segmentation faults, error signals or other undefined behaviors.
+    ///
+    /// \param callStopThread Set stop to true if you want to signal the thread
+    ///     to exit before waiting.  This is the equivalent to calling
+    ///     stopThread(). If you your threadedFunction uses a while-loop that
+    ///     depends on isThreadRunning() and you do not call stopThread() or set
+    ///     stop == true, waitForThread will hang indefinitely.  Set stop ==
+    ///     false ONLY if you have already called stopThread() and you simply
+    ///     need to be sure your thread has finished its tasks.
+    ///
+    /// \param milliseconds If millseconds is set to INFINITE_JOIN_TIMEOUT, the
+    ///     waitForThread will wait indefinitely for the thread to complete.  If
+    ///     milliseconds is set to a lower number (e.g. 10000 for 10 seconds),
+    ///     waitForThread will wait for 10000 milliseconds and if the thread has
+    ///     not yet stopped it will return and log an error message.  Users are
+    ///     encouraged to use the default INFINITE_JOIN_TIMEOUT.  If the user is
+    ///     unhappy with the amount of time it takes to join a thread, the user
+    ///     is encouraged to seek more expedient ways of signalling their desire
+    ///     for a thread to complete via other signalling methods such as
+    ///     Poco::Event, Poco::Condition, or Poco::Semaphore.
+    /// \sa http://pocoproject.org/slides/090-NotificationsEvents.pdf
+    /// \sa http://pocoproject.org/docs/Poco.Condition.html
+    /// \sa http://pocoproject.org/docs/Poco.Event.html
+    /// \sa http://pocoproject.org/docs/Poco.Semaphore.html
+    void waitForThread(bool callStopThread = true, long milliseconds = INFINITE_JOIN_TIMEOUT);
 
-    /** Waits for the thread to stop.
-        This will wait until isRunning() is false or until a timeout expires.
+    /// \brief Tell the thread to sleep for a certain amount of milliseconds.
+    ///
+    /// This is useful inside the threadedFunction() when a thread is waiting
+    /// for input to process:
+    ///
+    ///     void MyThreadedClass::threadedFunction()
+    ///     {
+    ///		    // start
+    ///		    while(isThreadRunning())
+    ///         {
+    ///             // bReadyToProcess can be set from outside the threadedFuntion.
+    ///             // perhaps by another thread that downloads data, or loads
+    ///             // some media, etc.
+    ///
+    ///		    	if(bReadyToProcess == true)
+    ///             {
+    ///		    		// do some time intensive processing
+    ///		    		bReadyToProcess = false;
+    ///		    	}
+    ///             else
+    ///             {
+    ///		    		// sleep the thread to give up some cpu
+    ///		    		sleep(20);
+    ///		    	}
+    ///		    }
+    ///		    // done
+    ///     }
+    ///
+    /// If the user does not give the thread a chance to sleep, the
+    /// thread may take 100% of the CPU core while it's looping as it
+    /// waits for something to do.  This may lead to poor application
+    /// performance.
+    ///
+    /// \param milliseconds The number of milliseconds to sleep.
+    static void sleep(long milliseconds);
 
-        @param timeOutMilliseconds  the time to wait, in milliseconds. If this value
-                                    is less than zero, it will wait forever.
-        @returns    true if the thread exits, or false if the timeout expires first.
-    */
-    bool wait(unsigned long timeOutMilliseconds = ULONG_MAX);
-
-    /** Returns an id that identifies the caller thread.
-
-        To find the ID of a particular thread object, use getThreadId().
-
-        @returns    a unique identifier that identifies the calling thread.
-        @see getThreadId
-    */
-    static ThreadID currentThreadId();
-
-    /** Finds the thread object that is currently running.
-
-        Note that the main UI thread (or other non-JUCE threads) don't have a Thread
-        object associated with them, so this will return nullptr.
-    */
-    static Thread* currentThread();
-
-    /** Suspends the execution of the current thread until the specified timeout period
-        has elapsed (note that this may not be exact).
-
-        The timeout period must not be negative and whilst sleeping the thread cannot
-        be woken up so it should only be used for short periods of time and when other
-        methods such as using a WaitableEvent or CriticalSection are not possible.
-    */
-    static void sleep(int milliseconds);
-
-    /** Yields the current thread's CPU time-slot and allows a new thread to run.
-
-        If there are no other threads of equal or higher priority currently running then
-        this will return immediately and the current thread will continue to run.
-    */
+    /// \brief Tell the thread to give up its CPU time other threads.
+    ///
+    /// This method is similar to sleep() and can often be used in
+    /// the same way.  The main difference is that 1 millisecond
+    /// (the minimum sleep time available with sleep()) is a very
+    /// long time on modern processors and yield() simply gives up
+    /// processing time to the next thread, instead of waiting for
+    /// number of milliseconds. In some cases, this behavior will
+    /// be preferred.
     static void yield();
 
-    virtual void run() = 0;
+    /// \brief Query whether the current thread is active.
+    ///
+    /// In multithreaded situations, it can be useful to know which
+    /// thread is currently running some code in order to make sure
+    /// only certain threads can do certain things.  For example,
+    /// OpenGL can only run in the main execution thread.  Thus,
+    /// situations where a thread is responsible for interacting
+    /// with graphics resources may need to prevent graphics updates
+    /// unless the main thread is accessing or updating resources
+    /// shared with this Thread (or its subclass).
+    ///
+    ///     if(myThread.isCurrentThread())
+    ///     {
+    ///         // do some myThread things,
+    ///         // but keep your hands off my resources!
+    ///     }
+    ///     else if(Thread::isMainThread())
+    ///     {
+    ///         // pheew! ok, update those graphics resources
+    ///     }
+    ///
+    /// By way of another example, a subclass of Thread may have
+    /// an update() method that is called from ofBaseApp during the
+    /// execution of the main application thread.  In these cases,
+    /// the Thread subclass might want to ask itself whether it
+    /// can, for instance, call update() on an ofImage, in order to
+    /// send copy some ofPixels to an ofTexture on the graphics
+    /// card.
+    ///
+    /// \returns True iff this Thread the currently active thread.
+    bool isCurrentThread() const;
+
+    /// \brief Get a reference to the underlying Poco thread.
+    ///
+    /// Poco::Thread provides a clean cross-platform wrapper for
+    /// threads.  On occasion, it may be useful to interact with the
+    /// underlying Poco::Thread directly.
+    ///
+    /// \returns A reference to the backing Poco thread.
+    std::thread& getNativeThread();
+
+    /// \brief Get a const reference to the underlying Poco thread.
+    ///
+    /// Poco::Thread provides a clean cross-platform wrapper for
+    /// threads.  On occasion, it may be useful to interact with the
+    /// underlying Poco::Thread directly.
+    ///
+    /// \returns A reference to the backing Poco thread.
+    const std::thread& getNativeThread() const;
+
+    enum
+    {
+        INFINITE_JOIN_TIMEOUT = -1
+        ///< \brief A sentinal value for an infinite join timeout.
+        ///<
+        ///< Primarily used with the waitForThread() method.
+    };
+
+protected:
+    /// \brief The thread's run function.
+    ///
+    /// Users must overide this in your their derived class
+    /// and then implement their threaded activity inside the loop.
+    /// If the the users's threadedFunction does not have a loop,
+    /// the contents of the threadedFunction will be executed once
+    /// and the thread will then exit.
+    ///
+    /// For tasks that must be repeated, the user can use a while
+    /// loop that will run repeatedly until the thread's
+    /// threadRunning is set to false via the stopThread() method.
+    ///
+    ///     void MyThreadedClass::threadedFunction()
+    ///     {
+    ///         // Start the loop and continue until
+    ///         // isThreadRunning() returns false.
+    ///         while(isThreadRunning())
+    ///         {
+    ///             // Do activity repeatedly here:
+    ///
+    ///             // int j = 1 + 1;
+    ///
+    ///             // This while loop will run as fast as it possibly
+    ///             // can, consuming as much processor speed as it can.
+    ///             // To help the processor stay cool, users are
+    ///             // encouraged to let the while loop sleep via the
+    ///             // sleep() method, or call the yield() method to let
+    ///             // other threads have a turn.  See the sleep() and
+    ///             // yield() methods for more information.
+    ///
+    ///             // sleep(100);
+    ///         }
+    ///     }
+    ///
+    virtual void run();
+
+    /// \brief The Poco::Thread that runs the Poco::Runnable.
+    std::thread thread;
+
+    /// \brief The internal mutex called through lock() & unlock().
+    ///
+    /// This mutext can also be used with std::unique_lock or lock_guard
+    /// within the threaded function by calling:
+    ///
+    ///     std::unique_lock<std::mutex> lock(mutex);
+    ///
+    mutable std::mutex mutex;
 
 private:
-    std::string makeName();
-    /// Creates a unique name for a thread.
+    void threadEntry();
 
-    static unsigned int uniqueId();
-    /// Creates and returns a unique id for a thread.
+    ///< \brief Is the thread running?
+    std::atomic<bool> threadRunning;
+    std::atomic<bool> threadDone;
 
-    void threadCleanup();
+    ///< \brief Should the mutex block?
+    std::atomic<bool> mutexBlocks;
 
-private:
-    struct ThreadData;
-    std::unique_ptr<ThreadData> d_ptr;
-
-    static thread_local Thread* m_thread;
-    static thread_local Thread* m_threadId;
-
-    friend class PooledThread;
-
-    GLUE_DECLARE_NON_COPYABLE(Thread)
+    std::string name;
+    std::condition_variable condition;
 };
 
 } // namespace glue
