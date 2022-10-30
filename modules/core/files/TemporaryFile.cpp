@@ -8,6 +8,10 @@
 #include "maths/Random.h"
 #include "threads/Thread.h"
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <fileapi.h>
+
 namespace glue
 {
 

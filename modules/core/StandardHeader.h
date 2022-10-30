@@ -70,16 +70,17 @@ GLUE_BEGIN_IGNORE_WARNINGS_MSVC(4514 4245 4100)
     #include <debugapi.h>
 #endif
 
-#if GLUE_LINUX
-    #include <cstring>
-    #include <signal.h>
-#endif
-
 GLUE_END_IGNORE_WARNINGS_MSVC
 
 #if GLUE_MINGW
     #include <cstring>
     #include <sys/types.h>
+#endif
+
+#if GLUE_LINUX
+    #include <cstring>
+    #include <signal.h>
+    #include <sys/stat.h>
 #endif
 
 #if GLUE_ANDROID

@@ -80,7 +80,7 @@ public:
     /** Checks whether the file actually exists.
 
         @returns    true if the file exists, either as a file or a directory.
-        @see existsAsFile, isDirectory
+        @see isFile, isDirectory
     */
     bool exists() const;
 
@@ -90,13 +90,13 @@ public:
                     or doesn't exist
         @see exists, isDirectory
     */
-    bool existsAsFile() const;
+    bool isFile() const;
 
     /** Checks whether the file is a directory that exists.
 
         @returns    true only if the file is a directory which actually exists, so
                     false if it's a file or doesn't exist at all
-        @see exists, existsAsFile
+        @see exists, isFile
     */
     bool isDirectory() const;
 
@@ -114,13 +114,6 @@ public:
     */
     int64 getSize() const;
 
-    /** Utility function to convert a file size in bytes to a neat string description.
-
-        So for example 100 would return "100 bytes", 2000 would return "2 KB",
-        2000000 would produce "2 MB", etc.
-    */
-    static String descriptionOfSizeInBytes(int64 bytes);
-
     //==============================================================================
     /** Returns the complete, absolute path of this file.
 
@@ -131,7 +124,7 @@ public:
         If you just want the file's name, you should use getFileName() or
         getFileNameWithoutExtension().
 
-        @see getFileName, getRelativePathFrom
+        @see getFileName
     */
     const String& getFullPathName() const noexcept { return fullPath; }
 
@@ -150,23 +143,6 @@ public:
     */
     String getFileName() const;
 
-    /** Creates a relative path that refers to a file relatively to a given directory.
-
-        e.g. File ("/moose/foo.txt").getRelativePathFrom (File ("/moose/fish/haddock"))
-             would return "../../foo.txt".
-
-        If it's not possible to navigate from one file to the other, an absolute
-        path is returned. If the paths are invalid, an empty string may also be
-        returned.
-
-        @param directoryToBeRelativeTo  the directory which the resultant string will
-                                        be relative to. If this is actually a file rather than
-                                        a directory, its parent directory will be used instead.
-                                        If it doesn't exist, it's assumed to be a directory.
-        @see getChildFile, isAbsolutePath
-    */
-    String getRelativePathFrom(const File& directoryToBeRelativeTo) const;
-
     //==============================================================================
     /** Returns the file's extension.
 
@@ -174,7 +150,7 @@ public:
 
         e.g. "/moose/fish/foo.txt" would return ".txt"
 
-        @see hasFileExtension, withFileExtension, getFileNameWithoutExtension
+        @see hasFileExtension, setFileExtension, getFileNameWithoutExtension
     */
     String getFileExtension() const;
 
@@ -187,13 +163,13 @@ public:
                                 so, for example: hasFileExtension (".jpeg;png;gif") would return
                                 true if the file has any of those three extensions.
 
-        @see getFileExtension, withFileExtension, getFileNameWithoutExtension
+        @see getFileExtension, setFileExtension, getFileNameWithoutExtension
     */
     bool hasFileExtension(StringRef extensionToTest) const;
 
     /** Returns a version of this file with a different file extension.
 
-        e.g. File ("/moose/fish/foo.txt").withFileExtension ("html") returns "/moose/fish/foo.html"
+        e.g. File ("/moose/fish/foo.txt").setFileExtension ("html") returns "/moose/fish/foo.html"
 
         @param newExtension     the new extension, either with or without a dot at the start (this
                                 doesn't make any difference). To get remove a file's extension
@@ -201,13 +177,13 @@ public:
 
         @see getFileName, getFileExtension, hasFileExtension, getFileNameWithoutExtension
     */
-    File withFileExtension(StringRef newExtension) const;
+    File setFileExtension(StringRef newExtension) const;
 
     /** Returns the last part of the filename, without its file extension.
 
         e.g. for "/moose/fish/foo.txt" this will return "foo".
 
-        @see getFileName, getFileExtension, hasFileExtension, withFileExtension
+        @see getFileName, getFileExtension, hasFileExtension, setFileExtension
     */
     String getFileNameWithoutExtension() const;
 
@@ -240,7 +216,7 @@ public:
         If the string is actually an absolute path, it will be treated as such, e.g.
             File ("/moose/fish").getChildFile ("/foo.txt") will produce "/foo.txt"
 
-        @see getSiblingFile, getParentDirectory, getRelativePathFrom, isAChildOf
+        @see getSiblingFile, getParentDirectory
     */
     File getChildFile(StringRef relativeOrAbsolutePath) const;
 
@@ -261,17 +237,6 @@ public:
         return the root directory.
     */
     File getParentDirectory() const;
-
-    /** Checks whether a file is somewhere inside a directory.
-
-        Returns true if this file is somewhere inside a subdirectory of the directory
-        that is passed in. Neither file actually has to exist, because the function
-        just checks the paths for similarities.
-
-        e.g. File ("/moose/fish/foo.txt").isAChildOf ("/moose") is true.
-             File ("/moose/fish/foo.txt").isAChildOf ("/moose/fish") is also true.
-    */
-    bool isAChildOf(const File& potentialParentDirectory) const;
 
     //==============================================================================
     /** Chooses a filename relative to this one that doesn't already exist.
@@ -305,62 +270,10 @@ public:
     */
     File getNonexistentSibling(bool putNumbersInBrackets = true) const;
 
-    //==============================================================================
     /** Compares the pathnames for two files. */
     bool operator==(const File&) const;
     /** Compares the pathnames for two files. */
     bool operator!=(const File&) const;
-    /** Compares the pathnames for two files. */
-    bool operator<(const File&) const;
-    /** Compares the pathnames for two files. */
-    bool operator>(const File&) const;
-
-    //==============================================================================
-    /** Checks whether a file can be created or written to.
-
-        @returns    true if it's possible to create and write to this file. If the file
-                    doesn't already exist, this will check its parent directory to
-                    see if writing is allowed.
-        @see setReadOnly
-    */
-    bool hasWriteAccess() const;
-
-    /** Checks whether a file can be read.
-
-        @returns    true if it's possible to read this file.
-    */
-    bool hasReadAccess() const;
-
-    /** Changes the write-permission of a file or directory.
-
-        @param shouldBeReadOnly     whether to add or remove write-permission
-        @param applyRecursively     if the file is a directory and this is true, it will
-                                    recurse through all the subfolders changing the permissions
-                                    of all files
-        @returns    true if it manages to change the file's permissions.
-        @see hasWriteAccess
-    */
-    bool setReadOnly(bool shouldBeReadOnly, bool applyRecursively = false) const;
-
-    /** Changes the execute-permissions of a file.
-
-        @param shouldBeExecutable   whether to add or remove execute-permission
-        @returns    true if it manages to change the file's permissions.
-    */
-    bool setExecutePermission(bool shouldBeExecutable) const;
-
-    /** Returns true if this file is a hidden or system file.
-        The criteria for deciding whether a file is hidden are platform-dependent.
-    */
-    bool isHidden() const;
-
-    /** Returns a unique identifier for the file, if one is available.
-
-        Depending on the OS and file-system, this may be a unix inode number or
-        a win32 file identifier, or 0 if it fails to find one. The number will
-        be unique on the filesystem, but not globally.
-    */
-    uint64 getFileIdentifier() const;
 
     //==============================================================================
     /** Creates an empty file if it doesn't already exist.
@@ -377,7 +290,7 @@ public:
                     or an error message if it failed.
         @see createDirectory
     */
-    Result create() const;
+    bool create() const;
 
     /** Creates a new directory for this filename.
 
@@ -388,7 +301,7 @@ public:
                     an error message if it failed.
         @see create
     */
-    Result createDirectory() const;
+    bool createDirectory() const;
 
     /** Deletes a file.
 
@@ -417,14 +330,6 @@ public:
         @see deleteFile
     */
     bool deleteRecursively(bool followSymlinks = false) const;
-
-    /** Moves this file or folder to the trash.
-
-        @returns true if the operation succeeded. It could fail if the trash is full, or
-                 if the file is write-protected, so you should check the return value
-                 and act appropriately.
-    */
-    bool moveToTrash() const;
 
     /** Moves or renames a file.
 
@@ -526,7 +431,7 @@ public:
         @param followSymlinks           the method that should be used to handle symbolic links
         @returns                        the set of files that were found
 
-        @see getNumberOfChildFiles, RangedDirectoryIterator
+        @see RangedDirectoryIterator
     */
     Array<File> findChildFiles(int whatToLookFor, bool searchRecursively,
                                const String& wildCardPattern = "*",
@@ -540,244 +445,6 @@ public:
     int findChildFiles(Array<File>& results, int whatToLookFor, bool searchRecursively,
                        const String& wildCardPattern = "*",
                        FollowSymlinks followSymlinks = FollowSymlinks::yes) const;
-
-    /** Searches inside a directory and counts how many files match a wildcard pattern.
-
-        Assuming that this file is a directory, this method will search it
-        for either files or subdirectories whose names match a filename pattern,
-        and will return the number of matches found.
-
-        This isn't a recursive call, and will only search this directory, not
-        its children.
-
-        @param whatToLookFor    a value from the TypesOfFileToFind enum, specifying whether to
-                                count files, directories, or both. If the ignoreHiddenFiles flag
-                                is also added to this value, hidden files won't be counted
-        @param wildCardPattern  the filename pattern to search for, e.g. "*.txt"
-        @returns                the number of matches found
-
-        @see findChildFiles, RangedDirectoryIterator
-    */
-    int getNumberOfChildFiles(int whatToLookFor, const String& wildCardPattern = "*") const;
-
-    /** Returns true if this file is a directory that contains one or more subdirectories.
-        @see isDirectory, findChildFiles
-    */
-    bool containsSubDirectories() const;
-
-    //==============================================================================
-    /** Creates a stream to read from this file.
-
-        Note that this is an old method, and actually it's usually best to avoid it and
-        instead use an RAII pattern with an FileInputStream directly, e.g.
-        @code
-        FileInputStream input (fileToOpen);
-
-        if (input.openedOk())
-        {
-            input.read (etc...
-        }
-        @endcode
-
-        @returns    a stream that will read from this file (initially positioned at the
-                    start of the file), or nullptr if the file can't be opened for some reason
-        @see createOutputStream, loadFileAsData
-    */
-    std::unique_ptr<FileInputStream> createInputStream() const;
-
-    /** Creates a stream to write to this file.
-
-        Note that this is an old method, and actually it's usually best to avoid it and
-        instead use an RAII pattern with an FileOutputStream directly, e.g.
-        @code
-        FileOutputStream output (fileToOpen);
-
-        if (output.openedOk())
-        {
-            output.read etc...
-        }
-        @endcode
-
-        If the file exists, the stream that is returned will be positioned ready for
-        writing at the end of the file. If you want to write to the start of the file,
-        replacing the existing content, then you can do the following:
-        @code
-        FileOutputStream output (fileToOverwrite);
-
-        if (output.openedOk())
-        {
-            output.setPosition (0);
-            output.truncate();
-            ...
-        }
-        @endcode
-
-        @returns    a stream that will write to this file (initially positioned at the
-                    end of the file), or nullptr if the file can't be opened for some reason
-        @see createInputStream, appendData, appendText
-    */
-    std::unique_ptr<FileOutputStream> createOutputStream(size_t bufferSize = 0x8000) const;
-
-    //==============================================================================
-    /** Loads a file's contents into memory as a block of binary data.
-
-        Of course, trying to load a very large file into memory will blow up, so
-        it's better to check first.
-
-        @param result   the data block to which the file's contents should be appended - note
-                        that if the memory block might already contain some data, you
-                        might want to clear it first
-        @returns        true if the file could all be read into memory
-    */
-    bool loadFileAsData(MemoryBlock& result) const;
-
-    /** Reads a file into memory as a string.
-
-        Attempts to load the entire file as a zero-terminated string.
-
-        This makes use of InputStream::readEntireStreamAsString, which can
-        read either UTF-16 or UTF-8 file formats.
-    */
-    String loadFileAsString() const;
-
-    /** Reads the contents of this file as text and splits it into lines, which are
-        appended to the given StringArray.
-    */
-    void readLines(StringArray& destLines) const;
-
-    //==============================================================================
-    /** Appends a block of binary data to the end of the file.
-
-        This will try to write the given buffer to the end of the file.
-
-        @returns false if it can't write to the file for some reason
-    */
-    bool appendData(const void* dataToAppend, size_t numberOfBytes) const;
-
-    /** Replaces this file's contents with a given block of data.
-
-        This will delete the file and replace it with the given data.
-
-        A nice feature of this method is that it's safe - instead of deleting
-        the file first and then re-writing it, it creates a new temporary file,
-        writes the data to that, and then moves the new file to replace the existing
-        file. This means that if the power gets pulled out or something crashes,
-        you're a lot less likely to end up with a corrupted or unfinished file..
-
-        Returns true if the operation succeeds, or false if it fails.
-
-        @see appendText
-    */
-    bool replaceWithData(const void* dataToWrite, size_t numberOfBytes) const;
-
-    /** Appends a string to the end of the file.
-
-        This will try to append a text string to the file, as either 16-bit unicode
-        or 8-bit characters in the default system encoding.
-
-        It can also write the 'ff fe' unicode header bytes before the text to indicate
-        the endianness of the file.
-
-        If lineEndings is nullptr, then line endings in the text won't be modified. If you
-        pass "\\n" or "\\r\\n" then this function will replace any existing line feeds.
-
-        @see replaceWithText
-    */
-    bool appendText(const String& textToAppend, bool asUnicode = false,
-                    bool writeUnicodeHeaderBytes = false, const char* lineEndings = "\r\n") const;
-
-    /** Replaces this file's contents with a given text string.
-
-        This will delete the file and replace it with the given text.
-
-        A nice feature of this method is that it's safe - instead of deleting
-        the file first and then re-writing it, it creates a new temporary file,
-        writes the text to that, and then moves the new file to replace the existing
-        file. This means that if the power gets pulled out or something crashes,
-        you're a lot less likely to end up with an empty file..
-
-        For an explanation of the parameters here, see the appendText() method.
-
-        Returns true if the operation succeeds, or false if it fails.
-
-        @see appendText
-    */
-    bool replaceWithText(const String& textToWrite, bool asUnicode = false,
-                         bool writeUnicodeHeaderBytes = false,
-                         const char* lineEndings = "\r\n") const;
-
-    /** Attempts to scan the contents of this file and compare it to another file, returning
-        true if this is possible and they match byte-for-byte.
-    */
-    bool hasIdenticalContentTo(const File& other) const;
-
-    //==============================================================================
-    /** Creates a set of files to represent each file root.
-
-        e.g. on Windows this will create files for "c:\", "d:\" etc according
-        to which ones are available. On the Mac/Linux, this will probably
-        just add a single entry for "/".
-    */
-    static void findFileSystemRoots(Array<File>& results);
-
-    /** Finds the name of the drive on which this file lives.
-        @returns the volume label of the drive, or an empty string if this isn't possible
-    */
-    String getVolumeLabel() const;
-
-    /** Returns the serial number of the volume on which this file lives.
-        @returns the serial number, or zero if there's a problem doing this
-    */
-    int getVolumeSerialNumber() const;
-
-    /** Returns the number of bytes free on the drive that this file lives on.
-
-        @returns the number of bytes free, or 0 if there's a problem finding this out
-        @see getVolumeTotalSize
-    */
-    int64 getBytesFreeOnVolume() const;
-
-    /** Returns the total size of the drive that contains this file.
-
-        @returns the total number of bytes that the volume can hold
-        @see getBytesFreeOnVolume
-    */
-    int64 getVolumeTotalSize() const;
-
-    /** Returns true if this file is on a CD or DVD drive. */
-    bool isOnCDRomDrive() const;
-
-    /** Returns true if this file is on a hard disk.
-
-        This will fail if it's a network drive, but will still be true for
-        removable hard-disks.
-    */
-    bool isOnHardDisk() const;
-
-    /** Returns true if this file is on a removable disk drive.
-
-        This might be a usb-drive, a CD-rom, or maybe a network drive.
-    */
-    bool isOnRemovableDrive() const;
-
-    //==============================================================================
-    /** Launches the file as a process.
-
-        - if the file is executable, this will run it.
-
-        - if it's a document of some kind, it will launch the document with its
-        default viewer application.
-
-        - if it's a folder, it will be opened in Explorer, Finder, or equivalent.
-
-        @see revealToUser
-    */
-    bool startAsProcess(const String& parameters = String()) const;
-
-    /** Opens Finder, Explorer, or whatever the OS uses, to show the user this file's location.
-        @see startAsProcess
-    */
-    void revealToUser() const;
 
     //==============================================================================
     /** A set of types of location that can be passed to the getSpecialLocation() method.
@@ -904,13 +571,6 @@ public:
     static File GLUE_CALLTYPE getSpecialLocation(const SpecialLocationType type);
 
     //==============================================================================
-    /** Returns a temporary file in the system's temp directory.
-        This will try to return the name of a non-existent temp file.
-        To get the temp folder, you can use getSpecialLocation (File::tempDirectory).
-    */
-    static File createTempFile(StringRef fileNameEnding);
-
-    //==============================================================================
     /** Returns the current working directory.
         @see setAsCurrentWorkingDirectory
     */
@@ -936,32 +596,6 @@ public:
     */
     static StringRef getSeparatorString();
 
-    //==============================================================================
-    /** Returns a version of a filename with any illegal characters removed.
-
-        This will return a copy of the given string after removing characters
-        that are not allowed in a legal filename, and possibly shortening the
-        string if it's too long.
-
-        Because this will remove slashes, don't use it on an absolute pathname - use
-        createLegalPathName() for that.
-
-        @see createLegalPathName
-    */
-    static String createLegalFileName(const String& fileNameToFix);
-
-    /** Returns a version of a path with any illegal characters removed.
-
-        Similar to createLegalFileName(), but this won't remove slashes, so can
-        be used on a complete pathname.
-
-        @see createLegalFileName
-    */
-    static String createLegalPathName(const String& pathNameToFix);
-
-    /** Indicates whether filenames are case-sensitive on the current operating system. */
-    static bool areFileNamesCaseSensitive();
-
     /** Returns true if the string seems to be a fully-specified absolute path. */
     static bool isAbsolutePath(StringRef path);
 
@@ -975,72 +609,18 @@ public:
     /** Adds a separator character to the end of a path if it doesn't already have one. */
     static String addTrailingSeparator(const String& path);
 
-    //==============================================================================
-    /** Tries to create a symbolic link and returns a boolean to indicate success */
-    bool createSymbolicLink(const File& linkFileToCreate, bool overwriteExisting) const;
-
-    /** Returns true if this file is a link or alias that can be followed using getLinkedTarget().
+    /** Returns true if this file is a link.
      */
     bool isSymbolicLink() const;
 
-    /** If this file is a link or alias, this returns the file that it points to.
-        If the file isn't actually link, it'll just return itself.
-    */
-    File getLinkedTarget() const;
-
-    /** Create a symbolic link to a native path and return a boolean to indicate success.
-
-        Use this method if you want to create a link to a relative path or a special native
-        file path (such as a device file on Windows).
-    */
-    static bool createSymbolicLink(const File& linkFileToCreate, const String& nativePathOfTarget,
-                                   bool overwriteExisting);
-
-    /** This returns the native path that the symbolic link points to. The returned path
-        is a native path of the current OS and can be a relative, absolute or special path. */
-    String getNativeLinkedTarget() const;
-
-#if GLUE_WINDOWS || DOXYGEN
-    /** Windows ONLY - Creates a win32 .LNK shortcut file that links to this file. */
-    bool createShortcut(const String& description, const File& linkFileToCreate) const;
-
-    /** Windows ONLY - Returns true if this is a win32 .LNK file. */
-    bool isShortcut() const;
-#else
-
-#endif
-
-    //==============================================================================
-    /** Comparator for files */
-    struct NaturalFileComparator
-    {
-        NaturalFileComparator(bool shouldPutFoldersFirst) noexcept
-            : foldersFirst(shouldPutFoldersFirst)
-        {}
-
-        int compareElements(const File& firstFile, const File& secondFile) const
-        {
-            if (foldersFirst && (firstFile.isDirectory() != secondFile.isDirectory()))
-                return firstFile.isDirectory() ? -1 : 1;
-
-#if NAMES_ARE_CASE_SENSITIVE
-            return firstFile.getFullPathName().compareNatural(secondFile.getFullPathName(), true);
-#else
-            return firstFile.getFullPathName().compareNatural(secondFile.getFullPathName(), false);
-#endif
-        }
-
-        bool foldersFirst;
-    };
-
 private:
     //==============================================================================
-    String fullPath;
+    String m_fullPath;
 
     static String parseAbsolutePath(const String&);
     String getPathUpToLastSlash() const;
 
-    Result createDirectoryInternal(const String&) const;
+    bool createDirectoryInternal(const String&) const;
     bool copyInternal(const File&) const;
     bool moveInternal(const File&) const;
     bool replaceInternal(const File&) const;

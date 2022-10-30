@@ -12,34 +12,34 @@
 namespace glue
 {
 
-File::File(const String& fullPathName) : fullPath(parseAbsolutePath(fullPathName)) {}
+File::File(const String& fullPathName) : m_fullPath(parseAbsolutePath(fullPathName)) {}
 
 File File::createFileWithoutCheckingPath(const String& path) noexcept
 {
     File f;
-    f.fullPath = path;
+    f.m_fullPath = path;
     return f;
 }
 
-File::File(const File& other) : fullPath(other.fullPath) {}
+File::File(const File& other) : m_fullPath(other.m_fullPath) {}
 
 File& File::operator=(const String& newPath)
 {
-    fullPath = parseAbsolutePath(newPath);
+    m_fullPath = parseAbsolutePath(newPath);
     return *this;
 }
 
 File& File::operator=(const File& other)
 {
-    fullPath = other.fullPath;
+    m_fullPath = other.m_fullPath;
     return *this;
 }
 
-File::File(File&& other) noexcept : fullPath(std::move(other.fullPath)) {}
+File::File(File&& other) noexcept : m_fullPath(std::move(other.m_fullPath)) {}
 
 File& File::operator=(File&& other) noexcept
 {
-    fullPath = std::move(other.fullPath);
+    m_fullPath = std::move(other.m_fullPath);
     return *this;
 }
 
@@ -101,7 +101,63 @@ static String normaliseSeparators(const String& path)
     return uncPath ? doubleSeparator + normalisedPath : normalisedPath;
 }
 
-bool File::isRoot() const { return fullPath.isNotEmpty() && *this == getParentDirectory(); }
+//==============================================================================
+bool File::exists() const
+{
+    if (m_fullPath.isEmpty()) return false;
+
+#if GLUE_WINDOWS
+    DWORD attr = GetFileAttributesW(m_fullPath.toWideCharPointer());
+    return (attr != INVALID_FILE_ATTRIBUTES);
+#else
+    struct stat st;
+    return stat(m_fullPath.toUTF8(), &st) == 0;
+#endif
+}
+
+bool File::isFile() const
+{
+    if (m_fullPath.isEmpty()) return false;
+
+#if GLUE_WINDOWS
+    DWORD attr = GetFileAttributesW(m_fullPath.toWideCharPointer());
+    return (attr != INVALID_FILE_ATTRIBUTES) && (attr & FILE_ATTRIBUTE_DIRECTORY) == 0;
+#else
+    struct stat st;
+    return (stat(m_fullPath.toUTF8(), &st) == 0) && S_ISREG(st.st_mode);
+#endif
+}
+
+bool File::isDirectory() const
+{
+    if (m_fullPath.isEmpty()) return false;
+
+#if GLUE_WINDOWS
+    DWORD attr = GetFileAttributesW(m_fullPath.toWideCharPointer());
+    return (attr != INVALID_FILE_ATTRIBUTES) && (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
+#else
+    struct stat st;
+    return (stat(m_fullPath.toUTF8(), &st) == 0) && S_ISDIR(st.st_mode);
+#endif
+}
+
+bool File::isRoot() const { return m_fullPath.isNotEmpty() && *this == getParentDirectory(); }
+
+int64 File::getSize() const
+{
+    if (m_fullPath.isEmpty()) return 0;
+
+#if GLUE_WINDOWS
+    WIN32_FILE_ATTRIBUTE_DATA attributes;
+    if (GetFileAttributesEx(m_fullPath.toWideCharPointer(), GetFileExInfoStandard, &attributes))
+        return (((int64) attributes.nFileSizeHigh) << 32) | attributes.nFileSizeLow;
+#else
+    struct stat st;
+    if (stat(m_fullPath.toUTF8(), &st) == 0) return st.st_size;
+#endif
+
+    return 0;
+}
 
 String File::parseAbsolutePath(const String& p)
 {
@@ -210,18 +266,9 @@ String File::addTrailingSeparator(const String& path)
 }
 
 //==============================================================================
-#if GLUE_LINUX || GLUE_BSD
+#if JUCE_LINUX || JUCE_BSD
     #define NAMES_ARE_CASE_SENSITIVE 1
 #endif
-
-bool File::areFileNamesCaseSensitive()
-{
-#if NAMES_ARE_CASE_SENSITIVE
-    return true;
-#else
-    return false;
-#endif
-}
 
 static int compareFilenames(const String& name1, const String& name2) noexcept
 {
@@ -234,36 +281,11 @@ static int compareFilenames(const String& name1, const String& name2) noexcept
 
 bool File::operator==(const File& other) const
 {
-    return compareFilenames(fullPath, other.fullPath) == 0;
+    return compareFilenames(m_fullPath, other.m_fullPath) == 0;
 }
 bool File::operator!=(const File& other) const
 {
-    return compareFilenames(fullPath, other.fullPath) != 0;
-}
-bool File::operator<(const File& other) const
-{
-    return compareFilenames(fullPath, other.fullPath) < 0;
-}
-bool File::operator>(const File& other) const
-{
-    return compareFilenames(fullPath, other.fullPath) > 0;
-}
-
-//==============================================================================
-bool File::setReadOnly(const bool shouldBeReadOnly, const bool applyRecursively) const
-{
-    bool worked = true;
-
-    if (applyRecursively && isDirectory())
-        for (auto& f : findChildFiles(File::findFilesAndDirectories, false))
-            worked = f.setReadOnly(shouldBeReadOnly, true) && worked;
-
-    return setFileReadOnlyInternal(shouldBeReadOnly) && worked;
-}
-
-bool File::setExecutePermission(bool shouldBeExecutable) const
-{
-    return setFileExecutableInternal(shouldBeExecutable);
+    return compareFilenames(m_fullPath, other.m_fullPath) != 0;
 }
 
 bool File::deleteRecursively(bool followSymlinks) const
@@ -279,7 +301,7 @@ bool File::deleteRecursively(bool followSymlinks) const
 
 bool File::moveFileTo(const File& newFile) const
 {
-    if (newFile.fullPath == fullPath) return true;
+    if (newFile.m_fullPath == m_fullPath) return true;
 
     if (!exists()) return false;
 
@@ -298,7 +320,7 @@ bool File::copyFileTo(const File& newFile) const
 
 bool File::replaceFileIn(const File& newFile) const
 {
-    if (newFile.fullPath == fullPath) return true;
+    if (newFile.m_fullPath == m_fullPath) return true;
 
     if (!newFile.exists()) return moveFileTo(newFile);
 
@@ -327,13 +349,13 @@ bool File::copyDirectoryTo(const File& newDirectory) const
 //==============================================================================
 String File::getPathUpToLastSlash() const
 {
-    auto lastSlash = fullPath.lastIndexOfChar(getSeparatorChar());
+    auto lastSlash = m_fullPath.lastIndexOfChar(getSeparatorChar());
 
-    if (lastSlash > 0) return fullPath.substring(0, lastSlash);
+    if (lastSlash > 0) return m_fullPath.substring(0, lastSlash);
 
     if (lastSlash == 0) return getSeparatorString();
 
-    return fullPath;
+    return m_fullPath;
 }
 
 File File::getParentDirectory() const
@@ -344,34 +366,21 @@ File File::getParentDirectory() const
 //==============================================================================
 String File::getFileName() const
 {
-    return fullPath.substring(fullPath.lastIndexOfChar(getSeparatorChar()) + 1);
+    return m_fullPath.substring(m_fullPath.lastIndexOfChar(getSeparatorChar()) + 1);
 }
 
 String File::getFileNameWithoutExtension() const
 {
-    auto lastSlash = fullPath.lastIndexOfChar(getSeparatorChar()) + 1;
-    auto lastDot = fullPath.lastIndexOfChar('.');
+    auto lastSlash = m_fullPath.lastIndexOfChar(getSeparatorChar()) + 1;
+    auto lastDot = m_fullPath.lastIndexOfChar('.');
 
-    if (lastDot > lastSlash) return fullPath.substring(lastSlash, lastDot);
+    if (lastDot > lastSlash) return m_fullPath.substring(lastSlash, lastDot);
 
-    return fullPath.substring(lastSlash);
+    return m_fullPath.substring(lastSlash);
 }
 
-bool File::isAChildOf(const File& potentialParent) const
-{
-    if (potentialParent.fullPath.isEmpty()) return false;
-
-    auto ourPath = getPathUpToLastSlash();
-
-    if (compareFilenames(potentialParent.fullPath, ourPath) == 0) return true;
-
-    if (potentialParent.fullPath.length() >= ourPath.length()) return false;
-
-    return getParentDirectory().isAChildOf(potentialParent);
-}
-
-int File::hashCode() const { return fullPath.hashCode(); }
-int64 File::hashCode64() const { return fullPath.hashCode64(); }
+int File::hashCode() const { return m_fullPath.hashCode(); }
+int64 File::hashCode64() const { return m_fullPath.hashCode64(); }
 
 //==============================================================================
 bool File::isAbsolutePath(StringRef path)
@@ -397,7 +406,7 @@ File File::getChildFile(StringRef relativePath) const
         return getChildFile(String(r).replaceCharacter('/', '\\'));
 #endif
 
-    auto path = fullPath;
+    auto path = m_fullPath;
     auto separatorChar = getSeparatorChar();
 
     while (*r == '.')
@@ -447,88 +456,50 @@ File File::getSiblingFile(StringRef fileName) const
 }
 
 //==============================================================================
-String File::descriptionOfSizeInBytes(const int64 bytes)
+bool File::create() const
 {
-    const char* suffix;
-    double divisor = 0;
-
-    if (bytes == 1) { suffix = " byte"; }
-    else if (bytes < 1024)
-    {
-        suffix = " bytes";
-    }
-    else if (bytes < 1024 * 1024)
-    {
-        suffix = " KB";
-        divisor = 1024.0;
-    }
-    else if (bytes < 1024 * 1024 * 1024)
-    {
-        suffix = " MB";
-        divisor = 1024.0 * 1024.0;
-    }
-    else
-    {
-        suffix = " GB";
-        divisor = 1024.0 * 1024.0 * 1024.0;
-    }
-
-    return (divisor > 0 ? String((double) bytes / divisor, 1) : String(bytes)) + suffix;
-}
-
-//==============================================================================
-Result File::create() const
-{
-    if (exists()) return Result::ok();
+    if (exists()) return true;
 
     auto parentDir = getParentDirectory();
 
-    if (parentDir == *this) return Result::fail("Cannot create parent directory");
+    if (parentDir == *this) return false;
+
+    return parentDir.createDirectory();
+}
+
+bool File::createDirectory() const
+{
+    if (isDirectory()) return true;
+
+    auto parentDir = getParentDirectory();
+
+    if (parentDir == *this) return false;
 
     auto r = parentDir.createDirectory();
 
-    if (r.wasOk())
-    {
-        FileOutputStream fo(*this, 8);
-        r = fo.getStatus();
-    }
+    if (r) r = createDirectoryInternal(m_fullPath.trimCharactersAtEnd(getSeparatorString()));
 
     return r;
 }
 
-Result File::createDirectory() const
+bool File::deleteFile() const
 {
-    if (isDirectory()) return Result::ok();
+#if GLUE_WINDOWS
+    if (!exists()) return true;
 
-    auto parentDir = getParentDirectory();
+    return isDirectory() ? RemoveDirectory(m_fullPath.toWideCharPointer()) != 0
+                         : DeleteFile(m_fullPath.toWideCharPointer()) != 0;
+#else
+    if (!isSymbolicLink())
+    {
+        if (!exists()) return true;
 
-    if (parentDir == *this) return Result::fail("Cannot create parent directory");
+        if (isDirectory()) return rmdir(m_fullPath.toUTF8()) == 0;
+    }
 
-    auto r = parentDir.createDirectory();
-
-    if (r.wasOk()) r = createDirectoryInternal(fullPath.trimCharactersAtEnd(getSeparatorString()));
-
-    return r;
+    return remove(m_fullPath.toUTF8()) == 0;
+#endif
 }
-
-//==============================================================================
-bool File::loadFileAsData(MemoryBlock& destBlock) const
-{
-    if (!existsAsFile()) return false;
-
-    FileInputStream in(*this);
-    return in.openedOk() && getSize() == (int64) in.readIntoMemoryBlock(destBlock);
-}
-
-String File::loadFileAsString() const
-{
-    if (!existsAsFile()) return {};
-
-    FileInputStream in(*this);
-    return in.openedOk() ? in.readEntireStreamAsString() : String();
-}
-
-void File::readLines(StringArray& destLines) const { destLines.addLines(loadFileAsString()); }
 
 //==============================================================================
 Array<File> File::findChildFiles(int whatToLookFor, bool searchRecursively, const String& wildcard,
@@ -552,20 +523,6 @@ int File::findChildFiles(Array<File>& results, int whatToLookFor, bool searchRec
     }
 
     return total;
-}
-
-int File::getNumberOfChildFiles(const int whatToLookFor, const String& wildCardPattern) const
-{
-    return std::accumulate(RangedDirectoryIterator(*this, false, wildCardPattern, whatToLookFor),
-                           RangedDirectoryIterator(), 0,
-                           [](int acc, const DirectoryEntry&) { return acc + 1; });
-}
-
-bool File::containsSubDirectories() const
-{
-    if (!isDirectory()) return false;
-
-    return RangedDirectoryIterator(*this, false, "*", findDirectories) != RangedDirectoryIterator();
 }
 
 //==============================================================================
@@ -626,10 +583,10 @@ File File::getNonexistentSibling(const bool putNumbersInBrackets) const
 //==============================================================================
 String File::getFileExtension() const
 {
-    auto indexOfDot = fullPath.lastIndexOfChar('.');
+    auto indexOfDot = m_fullPath.lastIndexOfChar('.');
 
-    if (indexOfDot > fullPath.lastIndexOfChar(getSeparatorChar()))
-        return fullPath.substring(indexOfDot);
+    if (indexOfDot > m_fullPath.lastIndexOfChar(getSeparatorChar()))
+        return m_fullPath.substring(indexOfDot);
 
     return {};
 }
@@ -637,7 +594,7 @@ String File::getFileExtension() const
 bool File::hasFileExtension(StringRef possibleSuffix) const
 {
     if (possibleSuffix.isEmpty())
-        return fullPath.lastIndexOfChar('.') <= fullPath.lastIndexOfChar(getSeparatorChar());
+        return m_fullPath.lastIndexOfChar('.') <= m_fullPath.lastIndexOfChar(getSeparatorChar());
 
     auto semicolon = possibleSuffix.text.indexOf((glue_wchar) ';');
 
@@ -645,21 +602,21 @@ bool File::hasFileExtension(StringRef possibleSuffix) const
         return hasFileExtension(String(possibleSuffix.text).substring(0, semicolon).trimEnd()) ||
                hasFileExtension((possibleSuffix.text + (semicolon + 1)).findEndOfWhitespace());
 
-    if (fullPath.endsWithIgnoreCase(possibleSuffix))
+    if (m_fullPath.endsWithIgnoreCase(possibleSuffix))
     {
         if (possibleSuffix.text[0] == '.') return true;
 
-        auto dotPos = fullPath.length() - possibleSuffix.length() - 1;
+        auto dotPos = m_fullPath.length() - possibleSuffix.length() - 1;
 
-        if (dotPos >= 0) return fullPath[dotPos] == '.';
+        if (dotPos >= 0) return m_fullPath[dotPos] == '.';
     }
 
     return false;
 }
 
-File File::withFileExtension(StringRef newExtension) const
+File File::setFileExtension(StringRef newExtension) const
 {
-    if (fullPath.isEmpty()) return {};
+    if (m_fullPath.isEmpty()) return {};
 
     auto filePart = getFileName();
 
@@ -670,310 +627,6 @@ File File::withFileExtension(StringRef newExtension) const
     if (newExtension.isNotEmpty() && newExtension.text[0] != '.') filePart << '.';
 
     return getSiblingFile(filePart + newExtension);
-}
-
-//==============================================================================
-bool File::startAsProcess(const String& parameters) const
-{
-    return exists() && Process::openDocument(fullPath, parameters);
-}
-
-//==============================================================================
-std::unique_ptr<FileInputStream> File::createInputStream() const
-{
-    auto fin = std::make_unique<FileInputStream>(*this);
-
-    if (fin->openedOk()) return fin;
-
-    return nullptr;
-}
-
-std::unique_ptr<FileOutputStream> File::createOutputStream(size_t bufferSize) const
-{
-    auto fout = std::make_unique<FileOutputStream>(*this, bufferSize);
-
-    if (fout->openedOk()) return fout;
-
-    return nullptr;
-}
-
-//==============================================================================
-bool File::appendData(const void* const dataToAppend, const size_t numberOfBytes) const
-{
-    jassert(((ssize_t) numberOfBytes) >= 0);
-
-    if (numberOfBytes == 0) return true;
-
-    FileOutputStream fout(*this, 8192);
-    return fout.openedOk() && fout.write(dataToAppend, numberOfBytes);
-}
-
-bool File::replaceWithData(const void* const dataToWrite, const size_t numberOfBytes) const
-{
-    if (numberOfBytes == 0) return deleteFile();
-
-    TemporaryFile tempFile(*this, TemporaryFile::useHiddenFile);
-    tempFile.getFile().appendData(dataToWrite, numberOfBytes);
-    return tempFile.overwriteTargetFileWithTemporary();
-}
-
-bool File::appendText(const String& text, bool asUnicode, bool writeHeaderBytes,
-                      const char* lineFeed) const
-{
-    FileOutputStream fout(*this);
-
-    if (fout.failedToOpen()) return false;
-
-    return fout.writeText(text, asUnicode, writeHeaderBytes, lineFeed);
-}
-
-bool File::replaceWithText(const String& textToWrite, bool asUnicode, bool writeHeaderBytes,
-                           const char* lineFeed) const
-{
-    TemporaryFile tempFile(*this, TemporaryFile::useHiddenFile);
-    tempFile.getFile().appendText(textToWrite, asUnicode, writeHeaderBytes, lineFeed);
-    return tempFile.overwriteTargetFileWithTemporary();
-}
-
-bool File::hasIdenticalContentTo(const File& other) const
-{
-    if (other == *this) return true;
-
-    if (getSize() == other.getSize() && existsAsFile() && other.existsAsFile())
-    {
-        FileInputStream in1(*this), in2(other);
-
-        if (in1.openedOk() && in2.openedOk())
-        {
-            const int bufferSize = 4096;
-            HeapBlock<char> buffer1(bufferSize), buffer2(bufferSize);
-
-            for (;;)
-            {
-                auto num1 = in1.read(buffer1, bufferSize);
-                auto num2 = in2.read(buffer2, bufferSize);
-
-                if (num1 != num2) break;
-
-                if (num1 <= 0) return true;
-
-                if (memcmp(buffer1, buffer2, (size_t) num1) != 0) break;
-            }
-        }
-    }
-
-    return false;
-}
-
-//==============================================================================
-String File::createLegalPathName(const String& original)
-{
-    auto s = original;
-    String start;
-
-    if (s.isNotEmpty() && s[1] == ':')
-    {
-        start = s.substring(0, 2);
-        s = s.substring(2);
-    }
-
-    return start + s.removeCharacters("\"#@,;:<>*^|?").substring(0, 1024);
-}
-
-String File::createLegalFileName(const String& original)
-{
-    auto s = original.removeCharacters("\"#@,;:<>*^|?\\/");
-
-    const int maxLength = 128; // only the length of the filename, not the whole path
-    auto len = s.length();
-
-    if (len > maxLength)
-    {
-        auto lastDot = s.lastIndexOfChar('.');
-
-        if (lastDot > jmax(0, len - 12))
-        {
-            s = s.substring(0, maxLength - (len - lastDot)) + s.substring(lastDot);
-        }
-        else
-        {
-            s = s.substring(0, maxLength);
-        }
-    }
-
-    return s;
-}
-
-//==============================================================================
-static int countNumberOfSeparators(String::CharPointerType s)
-{
-    int num = 0;
-
-    for (;;)
-    {
-        auto c = s.getAndAdvance();
-
-        if (c == 0) break;
-
-        if (c == File::getSeparatorChar()) ++num;
-    }
-
-    return num;
-}
-
-String File::getRelativePathFrom(const File& dir) const
-{
-    if (dir == *this) return ".";
-
-    auto thisPath = fullPath;
-
-    while (thisPath.endsWithChar(getSeparatorChar())) thisPath = thisPath.dropLastCharacters(1);
-
-    auto dirPath = addTrailingSeparator(
-        dir.existsAsFile() ? dir.getParentDirectory().getFullPathName() : dir.fullPath);
-
-    int commonBitLength = 0;
-    auto thisPathAfterCommon = thisPath.getCharPointer();
-    auto dirPathAfterCommon = dirPath.getCharPointer();
-
-    {
-        auto thisPathIter = thisPath.getCharPointer();
-        auto dirPathIter = dirPath.getCharPointer();
-
-        for (int i = 0;;)
-        {
-            auto c1 = thisPathIter.getAndAdvance();
-            auto c2 = dirPathIter.getAndAdvance();
-
-#if NAMES_ARE_CASE_SENSITIVE
-            if (c1 != c2
-#else
-            if ((c1 != c2 &&
-                 CharacterFunctions::toLowerCase(c1) != CharacterFunctions::toLowerCase(c2))
-#endif
-                || c1 == 0)
-                break;
-
-            ++i;
-
-            if (c1 == getSeparatorChar())
-            {
-                thisPathAfterCommon = thisPathIter;
-                dirPathAfterCommon = dirPathIter;
-                commonBitLength = i;
-            }
-        }
-    }
-
-    // if the only common bit is the root, then just return the full path..
-    if (commonBitLength == 0 || (commonBitLength == 1 && thisPath[1] == getSeparatorChar()))
-        return fullPath;
-
-    auto numUpDirectoriesNeeded = countNumberOfSeparators(dirPathAfterCommon);
-
-    if (numUpDirectoriesNeeded == 0) return thisPathAfterCommon;
-
-#if GLUE_WINDOWS
-    auto s = String::repeatedString("..\\", numUpDirectoriesNeeded);
-#else
-    auto s = String::repeatedString("../", numUpDirectoriesNeeded);
-#endif
-    s.appendCharPointer(thisPathAfterCommon);
-    return s;
-}
-
-//==============================================================================
-File File::createTempFile(StringRef fileNameEnding)
-{
-    auto tempFile =
-        getSpecialLocation(tempDirectory)
-            .getChildFile("temp_" + String::toHexString(Random::getSystemRandom().nextInt()))
-            .withFileExtension(fileNameEnding);
-
-    if (tempFile.exists()) return createTempFile(fileNameEnding);
-
-    return tempFile;
-}
-
-bool File::createSymbolicLink(const File& linkFileToCreate, const String& nativePathOfTarget,
-                              bool overwriteExisting)
-{
-    if (linkFileToCreate.exists())
-    {
-        if (!linkFileToCreate.isSymbolicLink())
-        {
-            // user has specified an existing file / directory as the link
-            // this is bad! the user could end up unintentionally destroying data
-            jassertfalse;
-            return false;
-        }
-
-        if (overwriteExisting) linkFileToCreate.deleteFile();
-    }
-
-#if GLUE_MAC || GLUE_LINUX
-    // one common reason for getting an error here is that the file already exists
-    if (symlink(nativePathOfTarget.toRawUTF8(), linkFileToCreate.getFullPathName().toRawUTF8()) ==
-        -1)
-    {
-        jassertfalse;
-        return false;
-    }
-
-    return true;
-#elif GLUE_MSVC
-    File targetFile(linkFileToCreate.getSiblingFile(nativePathOfTarget));
-
-    return CreateSymbolicLink(linkFileToCreate.getFullPathName().toWideCharPointer(),
-                              nativePathOfTarget.toWideCharPointer(),
-                              targetFile.isDirectory() ? SYMBOLIC_LINK_FLAG_DIRECTORY : 0) != FALSE;
-#else
-    ignoreUnused(nativePathOfTarget);
-    jassertfalse; // symbolic links not supported on this platform!
-    return false;
-#endif
-}
-
-bool File::createSymbolicLink(const File& linkFileToCreate, bool overwriteExisting) const
-{
-    return createSymbolicLink(linkFileToCreate, getFullPathName(), overwriteExisting);
-}
-
-#if !GLUE_WINDOWS
-File File::getLinkedTarget() const
-{
-    if (isSymbolicLink()) return getSiblingFile(getNativeLinkedTarget());
-
-    return *this;
-}
-#endif
-
-//==============================================================================
-#if GLUE_ALLOW_STATIC_NULL_VARIABLES
-
-GLUE_BEGIN_IGNORE_WARNINGS_GCC_LIKE("-Wdeprecated-declarations")
-GLUE_BEGIN_IGNORE_WARNINGS_MSVC(4996)
-
-const File File::nonexistent{};
-
-GLUE_END_IGNORE_WARNINGS_GCC_LIKE
-GLUE_END_IGNORE_WARNINGS_MSVC
-
-#endif
-
-//==============================================================================
-MemoryMappedFile::MemoryMappedFile(const File& file, MemoryMappedFile::AccessMode mode,
-                                   bool exclusive)
-    : range(0, file.getSize())
-{
-    openInternal(file, mode, exclusive);
-}
-
-MemoryMappedFile::MemoryMappedFile(const File& file, const Range<int64>& fileRange, AccessMode mode,
-                                   bool exclusive)
-    : range(fileRange.getIntersectionWith(Range<int64>(0, file.getSize())))
-{
-    openInternal(file, mode, exclusive);
 }
 
 } // namespace glue

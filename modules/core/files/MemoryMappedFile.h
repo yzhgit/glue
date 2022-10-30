@@ -76,25 +76,25 @@ public:
     /** Returns the address at which this file has been mapped, or a null pointer if
         the file couldn't be successfully mapped.
     */
-    void* getData() const noexcept { return address; }
+    void* getData() const noexcept { return m_address; }
 
     /** Returns the number of bytes of data that are available for reading or writing.
         This will normally be the size of the file.
     */
-    size_t getSize() const noexcept { return (size_t) range.getLength(); }
+    size_t getSize() const noexcept { return (size_t) m_range.getLength(); }
 
     /** Returns the section of the file at which the mapped memory represents. */
-    Range<int64> getRange() const noexcept { return range; }
+    Range<int64> getRange() const noexcept { return m_range; }
 
 private:
     //==============================================================================
-    void* address = nullptr;
-    Range<int64> range;
+    void* m_address = nullptr;
+    Range<int64> m_range;
 
 #if GLUE_WINDOWS
-    void* fileHandle = nullptr;
+    void* m_fileHandle = nullptr;
 #else
-    int fileHandle = 0;
+    int m_fileHandle = 0;
 #endif
 
     void openInternal(const File&, AccessMode, bool);

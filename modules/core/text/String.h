@@ -1295,38 +1295,10 @@ public:
     */
     void swapWith(String& other) noexcept;
 
-    //==============================================================================
-#if GLUE_MAC || GLUE_IOS || DOXYGEN
-    /** OSX ONLY - Creates a String from an OSX CFString. */
-    static String fromCFString(CFStringRef cfString);
-
-    /** OSX ONLY - Converts this string to a CFString.
-        Remember that you must use CFRelease() to free the returned string when you're
-        finished with it.
-    */
-    CFStringRef toCFString() const;
-
-    /** OSX ONLY - Returns a copy of this string in which any decomposed unicode characters have
-        been converted to their precomposed equivalents. */
-    String convertToPrecomposedUnicode() const;
-#endif
-
     /** Returns the number of String objects which are currently sharing the same internal
         data as this one.
     */
     int getReferenceCount() const noexcept;
-
-    //==============================================================================
-#if GLUE_ALLOW_STATIC_NULL_VARIABLES && !defined(DOXYGEN)
-    [[deprecated("This was a static empty string object, but is now deprecated as it's too easy to "
-                 "accidentally "
-                 "use it indirectly during a static constructor, leading to hard-to-find "
-                 "order-of-initialisation "
-                 "problems. If you need an empty String object, just use String() or {}. For "
-                 "returning an empty "
-                 "String from a function by reference, use a function-local static String object "
-                 "and return that.")]] static const String empty;
-#endif
 
 private:
     //==============================================================================
