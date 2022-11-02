@@ -345,7 +345,7 @@ private:
     void throwOnAllocationFailure() const
     {
 #if GLUE_EXCEPTIONS_DISABLED
-        jassert(data != nullptr); // without exceptions, you'll need to find a better way to handle
+        GLUE_ASSERT(data != nullptr); // without exceptions, you'll need to find a better way to handle
                                   // this failure case.
 #else
         HeapBlockHelper::ThrowOnFail<throwOnFailure>::checkPointer(data);

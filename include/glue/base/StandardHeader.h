@@ -193,46 +193,6 @@ using ssize_t = pointer_sized_int;
 #endif
 
 //==============================================================================
-/** Config: GLUE_LOG_ASSERTIONS
-
-    If this flag is enabled, the jassert and jassertfalse macros will always use
-   Logger::writeToLog() to write a message when an assertion happens.
-
-    Enabling it will also leave this turned on in release builds. When it's disabled,
-    however, the jassert and jassertfalse macros will not be compiled in a
-    release build.
-
-    @see jassert, jassertfalse, Logger
-*/
-#ifndef GLUE_LOG_ASSERTIONS
-    #if GLUE_ANDROID
-        #define GLUE_LOG_ASSERTIONS 1
-    #else
-        #define GLUE_LOG_ASSERTIONS 0
-    #endif
-#endif
-
-//==============================================================================
-/** Config: GLUE_LOG_ASSERTIONS
-
-    If this flag is enabled, the jassert and jassertfalse macros will always use
-   Logger::writeToLog() to write a message when an assertion happens.
-
-    Enabling it will also leave this turned on in release builds. When it's disabled,
-    however, the jassert and jassertfalse macros will not be compiled in a
-    release build.
-
-    @see jassert, jassertfalse, Logger
-*/
-#ifndef GLUE_LOG_ASSERTIONS
-    #if GLUE_ANDROID
-        #define GLUE_LOG_ASSERTIONS 1
-    #else
-        #define GLUE_LOG_ASSERTIONS 0
-    #endif
-#endif
-
-//==============================================================================
 /** Config: GLUE_CHECK_MEMORY_LEAKS
 
     Enables a memory-leak check for certain objects when the app terminates. See the

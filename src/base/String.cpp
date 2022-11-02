@@ -270,7 +270,7 @@ String::String(const char* const t) : text(StringHolderUtils::createFromCharPoin
         any unicode string to a valid C++ string literal, creating ascii escape sequences that will
         work in any compiler.
     */
-    jassert(t == nullptr || ASCII::isValidString(t, std::numeric_limits<int>::max()));
+    GLUE_ASSERT(t == nullptr || ASCII::isValidString(t, std::numeric_limits<int>::max()));
 }
 
 String::String(const char* const t, const size_t maxChars)
@@ -293,7 +293,7 @@ String::String(const char* const t, const size_t maxChars)
         any unicode string to a valid C++ string literal, creating ascii escape sequences that will
         work in any compiler.
     */
-    jassert(t == nullptr || ASCII::isValidString(t, (int) maxChars));
+    GLUE_ASSERT(t == nullptr || ASCII::isValidString(t, (int) maxChars));
 }
 
 String::String(const wchar_t* const t)
@@ -431,7 +431,7 @@ namespace NumberToStringConverters
     {
         StackArrayStream strm(buffer);
         len = strm.writeDouble(n, numDecPlaces, useScientificNotation);
-        jassert(len <= charsNeededForDouble);
+        GLUE_ASSERT(len <= charsNeededForDouble);
         return buffer;
     }
 
@@ -493,7 +493,7 @@ size_t String::getByteOffsetOfEnd() const noexcept { return findByteOffsetOfEnd(
 
 glue_wchar String::operator[](int index) const noexcept
 {
-    jassert(index == 0 || (index > 0 && index <= (int) text.lengthUpTo((size_t) index + 1)));
+    GLUE_ASSERT(index == 0 || (index > 0 && index <= (int) text.lengthUpTo((size_t) index + 1)));
     return text[index];
 }
 
@@ -644,7 +644,7 @@ static int stringCompareRight(String::CharPointerType s1, String::CharPointerTyp
 
         if (c1 != c2 && bias == 0) bias = c1 < c2 ? -1 : 1;
 
-        jassert(c1 != 0 && c2 != 0);
+        GLUE_ASSERT(c1 != 0 && c2 != 0);
     }
 }
 
@@ -721,7 +721,7 @@ static int naturalStringCompare(String::CharPointerType s1, String::CharPointerT
             return c1 < c2 ? -1 : 1;
         }
 
-        jassert(c1 != 0 && c2 != 0);
+        GLUE_ASSERT(c1 != 0 && c2 != 0);
     }
 }
 
@@ -745,12 +745,12 @@ void String::appendCharPointer(const CharPointerType textToAppend)
 void String::appendCharPointer(const CharPointerType startOfTextToAppend,
                                const CharPointerType endOfTextToAppend)
 {
-    jassert(startOfTextToAppend.getAddress() != nullptr &&
+    GLUE_ASSERT(startOfTextToAppend.getAddress() != nullptr &&
             endOfTextToAppend.getAddress() != nullptr);
 
     auto extraBytesNeeded =
         getAddressDifference(endOfTextToAppend.getAddress(), startOfTextToAppend.getAddress());
-    jassert(extraBytesNeeded >= 0);
+    GLUE_ASSERT(extraBytesNeeded >= 0);
 
     if (extraBytesNeeded > 0)
     {
@@ -1184,7 +1184,7 @@ String String::repeatedString(StringRef stringToRepeat, int numberOfTimesToRepea
 
 String String::paddedLeft(const glue_wchar padCharacter, int minimumLength) const
 {
-    jassert(padCharacter != 0);
+    GLUE_ASSERT(padCharacter != 0);
 
     auto extraChars = minimumLength;
     auto end = text;
@@ -1211,7 +1211,7 @@ String String::paddedLeft(const glue_wchar padCharacter, int minimumLength) cons
 
 String String::paddedRight(const glue_wchar padCharacter, int minimumLength) const
 {
-    jassert(padCharacter != 0);
+    GLUE_ASSERT(padCharacter != 0);
 
     auto extraChars = minimumLength;
     CharPointerType end(text);
@@ -1389,7 +1389,7 @@ String String::replaceCharacters(StringRef charactersToReplace,
 {
     // Each character in the first string must have a matching one in the
     // second, so the two strings must be the same length.
-    jassert(charactersToReplace.length() == charactersToInsertInstead.length());
+    GLUE_ASSERT(charactersToReplace.length() == charactersToInsertInstead.length());
 
     StringCreationHelper builder(text);
 
@@ -1421,14 +1421,14 @@ bool String::startsWithIgnoreCase(StringRef other) const noexcept
 
 bool String::startsWithChar(const glue_wchar character) const noexcept
 {
-    jassert(character != 0); // strings can't contain a null character!
+    GLUE_ASSERT(character != 0); // strings can't contain a null character!
 
     return *text == character;
 }
 
 bool String::endsWithChar(const glue_wchar character) const noexcept
 {
-    jassert(character != 0); // strings can't contain a null character!
+    GLUE_ASSERT(character != 0); // strings can't contain a null character!
 
     if (text.isEmpty()) return false;
 
@@ -2071,7 +2071,7 @@ struct StringCopier
                                typename CharPointerType_Dest::CharType* const buffer,
                                const size_t maxBufferSizeBytes)
     {
-        jassert(((ssize_t) maxBufferSizeBytes) >= 0); // keep this value positive!
+        GLUE_ASSERT(((ssize_t) maxBufferSizeBytes) >= 0); // keep this value positive!
 
         if (buffer == nullptr)
             return CharPointerType_Dest::getBytesRequiredFor(source) +
@@ -2107,7 +2107,7 @@ String String::fromUTF8(const char* const buffer, int bufferSizeBytes)
 
         if (bufferSizeBytes > 0)
         {
-            jassert(UTF8::isValidString(buffer, bufferSizeBytes));
+            GLUE_ASSERT(UTF8::isValidString(buffer, bufferSizeBytes));
             return String(UTF8(buffer), UTF8(buffer + bufferSizeBytes));
         }
     }
@@ -2133,7 +2133,7 @@ StringRef::StringRef(const char* stringLiteral) noexcept
     text = stringCopy.getCharPointer();
 #endif
 
-    jassert(stringLiteral != nullptr); // This must be a valid string literal, not a null pointer!!
+    GLUE_ASSERT(stringLiteral != nullptr); // This must be a valid string literal, not a null pointer!!
 
 #if GLUE_NATIVE_WCHAR_IS_UTF8
     /*  If you get an assertion here, then you're trying to create a string from 8-bit data
@@ -2149,14 +2149,14 @@ StringRef::StringRef(const char* stringLiteral) noexcept
         because there's no other way to represent these strings in a way that isn't dependent on
         the compiler, source code editor and platform.
     */
-    jassert(ASCII::isValidString(stringLiteral, std::numeric_limits<int>::max()));
+    GLUE_ASSERT(ASCII::isValidString(stringLiteral, std::numeric_limits<int>::max()));
 #endif
 }
 
 StringRef::StringRef(String::CharPointerType stringLiteral) noexcept : text(stringLiteral)
 {
     // This must be a valid string literal, not a null pointer!!
-    jassert(stringLiteral.getAddress() != nullptr);
+    GLUE_ASSERT(stringLiteral.getAddress() != nullptr);
 }
 
 StringRef::StringRef(const String& string) noexcept : text(string.getCharPointer()) {}

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "glue/base/ArrayBase.h"
+#include "glue/base/Log.h"
 #include "glue/base/Mutex.h"
 
 namespace glue
@@ -490,18 +491,19 @@ public:
     */
     void set(int indexToChange, ParameterType newValue)
     {
-        if (indexToChange >= 0)
-        {
-            const ScopedLockType lock(getLock());
+        if indexToChange
+            >= 0
+            {
+                const ScopedLockType lock(getLock());
 
-            if (indexToChange < values.size())
-                values[indexToChange] = newValue;
-            else
-                values.add(newValue);
-        }
+                if (indexToChange < values.size())
+                    values[indexToChange] = newValue;
+                else
+                    values.add(newValue);
+            }
         else
         {
-            jassertfalse;
+            LogWarn("base") << "indexToChange >= 0";
         }
     }
 
@@ -517,7 +519,7 @@ public:
     void setUnchecked(int indexToChange, ParameterType newValue)
     {
         const ScopedLockType lock(getLock());
-        jassert(isPositiveAndBelow(indexToChange, values.size()));
+        GLUE_ASSERT(isPositiveAndBelow(indexToChange, values.size()));
         values[indexToChange] = newValue;
     }
 
@@ -614,7 +616,7 @@ public:
     */
     void resize(int targetNumItems)
     {
-        jassert(targetNumItems >= 0);
+        GLUE_ASSERT(targetNumItems >= 0);
         auto numToAdd = targetNumItems - values.size();
 
         if (numToAdd > 0)
@@ -751,15 +753,15 @@ public:
     */
     void remove(const ElementType* elementToRemove)
     {
-        jassert(elementToRemove != nullptr);
+        GLUE_ASSERT(elementToRemove != nullptr);
         const ScopedLockType lock(getLock());
 
-        jassert(values.begin() != nullptr);
+        GLUE_ASSERT(values.begin() != nullptr);
         auto indexToRemove = (int) (elementToRemove - values.begin());
 
         if (!isPositiveAndBelow(indexToRemove, values.size()))
         {
-            jassertfalse;
+            LogWarn("base") << "isPositiveAndBelow";
             return;
         }
 
@@ -881,7 +883,7 @@ public:
     */
     void removeLast(int howManyToRemove = 1)
     {
-        jassert(howManyToRemove >= 0);
+        GLUE_ASSERT(howManyToRemove >= 0);
 
         if (howManyToRemove > 0)
         {

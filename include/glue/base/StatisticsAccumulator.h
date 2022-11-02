@@ -29,7 +29,7 @@ public:
     */
     void addValue(FloatType v) noexcept
     {
-        jassert(glue_isfinite(v));
+        GLUE_ASSERT(glue_isfinite(v));
 
         sum += v;
         sumSquares += v * v;

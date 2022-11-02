@@ -5,7 +5,6 @@
 
 #include "glue/base/TemporaryFile.h"
 
-#include "glue/base/Random.h"
 #include "glue/base/Thread.h"
 
 #include <stdlib.h>
@@ -14,23 +13,6 @@
 
 namespace glue
 {
-
-// Using Random::getSystemRandom() can be a bit dangerous in multithreaded contexts!
-class LockedRandom
-{
-public:
-    int nextInt()
-    {
-        std::lock_guard<std::mutex> sl(mtx);
-        return random.nextInt();
-    }
-
-private:
-    std::mutex mtx;
-    Random random;
-};
-
-static LockedRandom lockedRandom;
 
 static File createTempFile(const File& parentDirectory, String name, const String& suffix,
                            int optionFlags)
@@ -56,7 +38,7 @@ TemporaryFile::TemporaryFile(const File& target, const int optionFlags)
     , targetFile(target)
 {
     // If you use this constructor, you need to give it a valid target file!
-    jassert(targetFile != File());
+    GLUE_ASSERT(targetFile != File());
 }
 
 TemporaryFile::TemporaryFile(const File& target, const File& temporary)
@@ -84,7 +66,7 @@ bool TemporaryFile::overwriteTargetFileWithTemporary() const
 {
     // This method only works if you created this object with the constructor
     // that takes a target file!
-    jassert(targetFile != File());
+    GLUE_ASSERT(targetFile != File());
 
     if (temporaryFile.exists())
     {

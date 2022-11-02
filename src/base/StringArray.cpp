@@ -114,7 +114,7 @@ bool StringArray::addIfNotAlreadyThere(const String& newString, bool ignoreCase)
 
 void StringArray::addArray(const StringArray& otherArray, int startIndex, int numElementsToAdd)
 {
-    jassert(this != &otherArray); // can't add from our own elements!
+    GLUE_ASSERT(this != &otherArray); // can't add from our own elements!
 
     if (startIndex < 0)
     {
@@ -130,7 +130,7 @@ void StringArray::addArray(const StringArray& otherArray, int startIndex, int nu
 
 void StringArray::mergeArray(const StringArray& otherArray, bool ignoreCase)
 {
-    jassert(this != &otherArray); // can't add from our own elements!
+    GLUE_ASSERT(this != &otherArray); // can't add from our own elements!
 
     for (auto& s : otherArray) addIfNotAlreadyThere(s, ignoreCase);
 }

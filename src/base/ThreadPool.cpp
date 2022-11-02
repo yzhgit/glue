@@ -57,7 +57,7 @@ void PooledThread::start(Runnable& target)
 {
     FastMutex::ScopedLock lock(m_mutex);
 
-    jassert(m_pTarget == 0);
+    GLUE_ASSERT(m_pTarget == 0);
 
     m_pTarget = &target;
     m_targetReady.set();
@@ -77,7 +77,7 @@ void PooledThread::start(Runnable& target, const std::string& name)
     }
     m_thread.setName(fullName);
 
-    jassert(m_pTarget == 0);
+    GLUE_ASSERT(m_pTarget == 0);
 
     m_pTarget = &target;
     m_targetReady.set();
@@ -108,7 +108,7 @@ void PooledThread::activate()
 {
     FastMutex::ScopedLock lock(m_mutex);
 
-    jassert(m_idle);
+    GLUE_ASSERT(m_idle);
     m_idle = false;
     m_targetCompleted.reset();
 }
@@ -173,7 +173,7 @@ ThreadPool::ThreadPool(int minCapacity, int maxCapacity, int idleTime)
     , m_serial(0)
     , m_age(0)
 {
-    jassert(minCapacity >= 1 && maxCapacity >= minCapacity && idleTime > 0);
+    GLUE_ASSERT(minCapacity >= 1 && maxCapacity >= minCapacity && idleTime > 0);
 
     for (int i = 0; i < m_minCapacity; i++)
     {
@@ -191,7 +191,7 @@ ThreadPool::ThreadPool(const std::string& name, int minCapacity, int maxCapacity
     , m_serial(0)
     , m_age(0)
 {
-    jassert(minCapacity >= 1 && maxCapacity >= minCapacity && idleTime > 0);
+    GLUE_ASSERT(minCapacity >= 1 && maxCapacity >= minCapacity && idleTime > 0);
 
     for (int i = 0; i < m_minCapacity; i++)
     {
@@ -216,7 +216,7 @@ void ThreadPool::addCapacity(int n)
 {
     FastMutex::ScopedLock lock(m_mutex);
 
-    jassert(m_maxCapacity + n >= m_minCapacity);
+    GLUE_ASSERT(m_maxCapacity + n >= m_minCapacity);
     m_maxCapacity += n;
     housekeep();
 }

@@ -467,7 +467,7 @@ public:
     static bool isByteOrderMarkBigEndian(const void* possibleByteOrder) noexcept
     {
         GLUE_BEGIN_IGNORE_WARNINGS_MSVC(28182)
-        jassert(possibleByteOrder != nullptr);
+        GLUE_ASSERT(possibleByteOrder != nullptr);
         auto c = static_cast<const uint8*>(possibleByteOrder);
 
         return c[0] == (uint8) byteOrderMarkBE1 && c[1] == (uint8) byteOrderMarkBE2;
@@ -480,7 +480,7 @@ public:
     static bool isByteOrderMarkLittleEndian(const void* possibleByteOrder) noexcept
     {
         GLUE_BEGIN_IGNORE_WARNINGS_MSVC(28182)
-        jassert(possibleByteOrder != nullptr);
+        GLUE_ASSERT(possibleByteOrder != nullptr);
         auto c = static_cast<const uint8*>(possibleByteOrder);
 
         return c[0] == (uint8) byteOrderMarkLE1 && c[1] == (uint8) byteOrderMarkLE2;

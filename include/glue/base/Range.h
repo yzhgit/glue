@@ -51,7 +51,7 @@ public:
     GLUE_NODISCARD static Range withStartAndLength(const ValueType startValue,
                                                    const ValueType length) noexcept
     {
-        jassert(length >= ValueType());
+        GLUE_ASSERT(length >= ValueType());
         return Range(startValue, startValue + length);
     }
 

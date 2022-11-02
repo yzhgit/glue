@@ -88,7 +88,7 @@ MemoryMappedFile::~MemoryMappedFile()
 
 void MemoryMappedFile::openInternal(const File& file, AccessMode mode, bool exclusive)
 {
-    jassert(mode == readOnly || mode == readWrite);
+    GLUE_ASSERT(mode == readOnly || mode == readWrite);
 
     if (m_range.getStart() > 0)
     {

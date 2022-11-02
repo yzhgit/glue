@@ -231,7 +231,7 @@ public:
     template <class CharPointer>
     void appendCharPointer(CharPointer startOfTextToAppend, CharPointer endOfTextToAppend)
     {
-        jassert(startOfTextToAppend.getAddress() != nullptr &&
+        GLUE_ASSERT(startOfTextToAppend.getAddress() != nullptr &&
                 endOfTextToAppend.getAddress() != nullptr);
 
         size_t extraBytesNeeded = 0, numChars = 1;
@@ -1104,7 +1104,7 @@ public:
     static String toDecimalStringWithSignificantFigures(DecimalType number,
                                                         int numberOfSignificantFigures)
     {
-        jassert(numberOfSignificantFigures > 0);
+        GLUE_ASSERT(numberOfSignificantFigures > 0);
 
         if (number == 0)
         {

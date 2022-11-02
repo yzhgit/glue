@@ -32,20 +32,20 @@ Identifier& Identifier::operator=(const Identifier& other) noexcept
 Identifier::Identifier(const String& nm) : name(StringPool::getGlobalPool().getPooledString(nm))
 {
     // An Identifier cannot be created from an empty string!
-    jassert(nm.isNotEmpty());
+    GLUE_ASSERT(nm.isNotEmpty());
 }
 
 Identifier::Identifier(const char* nm) : name(StringPool::getGlobalPool().getPooledString(nm))
 {
     // An Identifier cannot be created from an empty string!
-    jassert(nm != nullptr && nm[0] != 0);
+    GLUE_ASSERT(nm != nullptr && nm[0] != 0);
 }
 
 Identifier::Identifier(String::CharPointerType start, String::CharPointerType end)
     : name(StringPool::getGlobalPool().getPooledString(start, end))
 {
     // An Identifier cannot be created from an empty string!
-    jassert(start < end);
+    GLUE_ASSERT(start < end);
 }
 
 Identifier Identifier::null;

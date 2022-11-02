@@ -98,7 +98,7 @@ public:
     /** Moves this pointer along to the next character in the string. */
     UTF8& operator++() noexcept
     {
-        jassert(*data != 0); // trying to advance past the end of the string?
+        GLUE_ASSERT(*data != 0); // trying to advance past the end of the string?
         auto n = (signed char) *data++;
 
         if (n < 0)
@@ -253,7 +253,7 @@ public:
     size_t sizeInBytes() const noexcept
     {
         GLUE_BEGIN_IGNORE_WARNINGS_MSVC(6387)
-        jassert(data != nullptr);
+        GLUE_ASSERT(data != nullptr);
         return strlen(data) + 1;
         GLUE_END_IGNORE_WARNINGS_MSVC
     }
@@ -538,7 +538,7 @@ public:
     static bool isByteOrderMark(const void* possibleByteOrder) noexcept
     {
         GLUE_BEGIN_IGNORE_WARNINGS_MSVC(28182)
-        jassert(possibleByteOrder != nullptr);
+        GLUE_ASSERT(possibleByteOrder != nullptr);
         auto c = static_cast<const uint8*>(possibleByteOrder);
 
         return c[0] == (uint8) byteOrderMark1 && c[1] == (uint8) byteOrderMark2 &&

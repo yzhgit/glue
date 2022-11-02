@@ -233,7 +233,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     const auto build = versionInfo.dwBuildNumber;
 #endif
 
-    jassert(major <= 10); // need to add support for new version!
+    GLUE_ASSERT(major <= 10); // need to add support for new version!
 
     if (major == 10 && build >= 22000) return Windows11;
     if (major == 10) return Windows10;
@@ -379,7 +379,7 @@ public:
 #if GLUE_WIN32_TIMER_PERIOD > 0
         auto res = timeBeginPeriod(GLUE_WIN32_TIMER_PERIOD);
         ignoreUnused(res);
-        jassert(res == TIMERR_NOERROR);
+        GLUE_ASSERT(res == TIMERR_NOERROR);
 #endif
 
         LARGE_INTEGER f;

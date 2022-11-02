@@ -97,7 +97,7 @@ public:
     */
     void decReferenceCount() noexcept
     {
-        jassert(getReferenceCount() > 0);
+        GLUE_ASSERT(getReferenceCount() > 0);
 
         if (--refCount == 0) delete this;
     }
@@ -108,7 +108,7 @@ public:
     */
     bool decReferenceCountWithoutDeleting() noexcept
     {
-        jassert(getReferenceCount() > 0);
+        GLUE_ASSERT(getReferenceCount() > 0);
         return --refCount == 0;
     }
 
@@ -133,7 +133,7 @@ protected:
     virtual ~ReferenceCountedObject()
     {
         // it's dangerous to delete an object that's still referenced by something else!
-        jassert(getReferenceCount() == 0);
+        GLUE_ASSERT(getReferenceCount() == 0);
     }
 
     /** Resets the reference count to zero without deleting the object.
@@ -317,7 +317,7 @@ public:
     // the -> operator is called on the referenced object
     ReferencedType* operator->() const noexcept
     {
-        jassert(referencedObject != nullptr); // null pointer method call!
+        GLUE_ASSERT(referencedObject != nullptr); // null pointer method call!
         return referencedObject;
     }
 
@@ -326,7 +326,7 @@ public:
     */
     ReferencedType& operator*() const noexcept
     {
-        jassert(referencedObject != nullptr);
+        GLUE_ASSERT(referencedObject != nullptr);
         return *referencedObject;
     }
 

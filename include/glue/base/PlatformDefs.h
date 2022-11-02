@@ -40,22 +40,11 @@
 #endif
 
 //==============================================================================
-// Debugging and assertion macros
-
-#ifndef GLUE_LOG_CURRENT_ASSERTION
-    #if GLUE_LOG_ASSERTIONS || GLUE_DEBUG
-        #define GLUE_LOG_CURRENT_ASSERTION glue::LogFatal(__FILE__, __LINE__);
-    #else
-        #define GLUE_LOG_CURRENT_ASSERTION
-    #endif
-#endif
-
-//==============================================================================
 #if GLUE_LINUX || GLUE_BSD
     /** This will try to break into the debugger if the app is currently being debugged.
         If called by an app that's not being debugged, the behaviour isn't defined - it may
         crash or not, depending on the platform.
-        @see jassert()
+        @see GLUE_ASSERT()
     */
     #define GLUE_BREAK_IN_DEBUGGER                                                                 \
         {                                                                                          \
@@ -121,73 +110,6 @@ inline void __attribute__((analyzer_noreturn)) glue_assert_noreturn() {}
     #endif
 #else
     #define GLUE_FALLTHROUGH
-#endif
-
-//==============================================================================
-#if GLUE_MSVC && !defined(DOXYGEN)
-    #define GLUE_BLOCK_WITH_FORCED_SEMICOLON(x)                                                    \
-        __pragma(warning(push)) __pragma(warning(disable : 4127)) do { x }                         \
-        while (false) __pragma(warning(pop))
-#else
-    /** This is the good old C++ trick for creating a macro that forces the user to put
-       a semicolon after it when they use it.
-    */
-    #define GLUE_BLOCK_WITH_FORCED_SEMICOLON(x)                                                    \
-        do {                                                                                       \
-            x                                                                                      \
-        } while (false)
-#endif
-
-//==============================================================================
-#if (GLUE_DEBUG && !GLUE_DISABLE_ASSERTIONS) || DOXYGEN
-    //==============================================================================
-    /** This will always cause an assertion failure.
-        It is only compiled in a debug build, (unless GLUE_LOG_ASSERTIONS is enabled for your
-       build).
-        @see jassert
-    */
-    #define jassertfalse                                                                           \
-        GLUE_BLOCK_WITH_FORCED_SEMICOLON(GLUE_LOG_CURRENT_ASSERTION;                               \
-                                         if (glue::glue_isRunningUnderDebugger())                  \
-                                             GLUE_BREAK_IN_DEBUGGER;                               \
-                                         GLUE_ANALYZER_NORETURN)
-
-    //==============================================================================
-    /** Platform-independent assertion macro.
-
-        This macro gets turned into a no-op when you're building with debugging turned off, so be
-        careful that the expression you pass to it doesn't perform any actions that are vital for
-       the correct behaviour of your program!
-        @see jassertfalse
-    */
-    #define jassert(expression) GLUE_BLOCK_WITH_FORCED_SEMICOLON(if (!(expression)) jassertfalse;)
-
-    /** Platform-independent assertion macro which suppresses ignored-variable
-        warnings in all build modes. You should probably use a plain jassert()
-        by default, and only replace it with jassertquiet() once you've
-        convinced yourself that any unused-variable warnings emitted by the
-        compiler are harmless.
-    */
-    #define jassertquiet(expression)                                                               \
-        GLUE_BLOCK_WITH_FORCED_SEMICOLON(if (!(expression)) jassertfalse;)
-
-#else
-//==============================================================================
-// If debugging is disabled, these dummy debug and assertion macros are used..
-
-    #define jassertfalse GLUE_BLOCK_WITH_FORCED_SEMICOLON(GLUE_LOG_CURRENT_ASSERTION)
-
-    #if GLUE_LOG_ASSERTIONS
-        #define jassert(expression)                                                                \
-            GLUE_BLOCK_WITH_FORCED_SEMICOLON(if (!(expression)) jassertfalse;)
-        #define jassertquiet(expression)                                                           \
-            GLUE_BLOCK_WITH_FORCED_SEMICOLON(if (!(expression)) jassertfalse;)
-    #else
-        #define jassert(expression) GLUE_BLOCK_WITH_FORCED_SEMICOLON(;)
-        #define jassertquiet(expression)                                                           \
-            GLUE_BLOCK_WITH_FORCED_SEMICOLON(if (false)(void)(expression);)
-    #endif
-
 #endif
 
 //==============================================================================
@@ -564,14 +486,14 @@ private:                                                                        
     #endif
 #endif
 
-// GLUE_LIKELY, GLUE_UNLIKELY
+// GLUE_PREDICT_TRUE, GLUE_PREDICT_FALSE
 //
 // Enables the compiler to prioritize compilation using static analysis for
 // likely paths within a boolean branch.
 //
 // Example:
 //
-//   if (GLUE_LIKELY(expression)) {
+//   if (GLUE_PREDICT_TRUE(expression)) {
 //     return result;                        // Faster if more likely
 //   } else {
 //     return 0;
@@ -587,11 +509,31 @@ private:                                                                        
 // specific branches that are both hot and consistently mispredicted is likely
 // to yield performance improvements.
 #if GLUE_HAVE_BUILTIN(__builtin_expect) || (defined(__GNUC__) && !defined(__clang__))
-    #define GLUE_UNLIKELY(x) (__builtin_expect(false || (x), false))
-    #define GLUE_LIKELY(x) (__builtin_expect(false || (x), true))
+    #define GLUE_PREDICT_FALSE(x) (__builtin_expect(false || (x), false))
+    #define GLUE_PREDICT_TRUE(x) (__builtin_expect(false || (x), true))
 #else
-    #define GLUE_UNLIKELY(x) (x)
-    #define GLUE_LIKELY(x) (x)
+    #define GLUE_PREDICT_FALSE(x) (x)
+    #define GLUE_PREDICT_TRUE(x) (x)
+#endif
+
+// GLUE_ASSERT()
+//
+// In C++11, `assert` can't be used portably within constexpr functions.
+// GLUE_ASSERT functions as a runtime assert but works in C++11 constexpr
+// functions.  Example:
+//
+// constexpr double Divide(double a, double b) {
+//   return GLUE_ASSERT(b != 0), a / b;
+// }
+//
+// This macro is inspired by
+// https://akrzemi1.wordpress.com/2017/05/18/asserts-in-constexpr-functions/
+#if defined(NDEBUG)
+    #define GLUE_ASSERT(expr) (false ? static_cast<void>(expr) : static_cast<void>(0))
+#else
+    #define GLUE_ASSERT(expr)                                                                      \
+        (GLUE_PREDICT_TRUE((expr)) ? static_cast<void>(0)                                          \
+                                   : [] { assert(false && #expr); }()) // NOLINT
 #endif
 
 /*

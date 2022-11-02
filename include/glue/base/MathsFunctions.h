@@ -78,7 +78,7 @@ template <typename Type>
 Type jmap(Type sourceValue, Type sourceRangeMin, Type sourceRangeMax, Type targetRangeMin,
           Type targetRangeMax)
 {
-    jassert(sourceRangeMax != sourceRangeMin); // mapping from a range of zero will produce NaN!
+    GLUE_ASSERT(sourceRangeMax != sourceRangeMin); // mapping from a range of zero will produce NaN!
     return targetRangeMin + ((targetRangeMax - targetRangeMin) * (sourceValue - sourceRangeMin)) /
                                 (sourceRangeMax - sourceRangeMin);
 }
@@ -96,8 +96,8 @@ Type jmap(Type sourceValue, Type sourceRangeMin, Type sourceRangeMax, Type targe
 template <typename Type>
 Type mapToLog10(Type value0To1, Type logRangeMin, Type logRangeMax)
 {
-    jassert(logRangeMin > 0);
-    jassert(logRangeMax > 0);
+    GLUE_ASSERT(logRangeMin > 0);
+    GLUE_ASSERT(logRangeMax > 0);
 
     auto logMin = std::log10(logRangeMin);
     auto logMax = std::log10(logRangeMax);
@@ -118,8 +118,8 @@ Type mapToLog10(Type value0To1, Type logRangeMin, Type logRangeMax)
 template <typename Type>
 Type mapFromLog10(Type valueInLogRange, Type logRangeMin, Type logRangeMax)
 {
-    jassert(logRangeMin > 0);
-    jassert(logRangeMax > 0);
+    GLUE_ASSERT(logRangeMin > 0);
+    GLUE_ASSERT(logRangeMax > 0);
 
     auto logMin = std::log10(logRangeMin);
     auto logMax = std::log10(logRangeMax);
@@ -211,7 +211,7 @@ void findMinAndMax(const Type* values, int numValues, Type& lowest, Type& highes
 template <typename Type>
 Type jlimit(Type lowerLimit, Type upperLimit, Type valueToConstrain) noexcept
 {
-    jassert(lowerLimit <=
+    GLUE_ASSERT(lowerLimit <=
             upperLimit); // if these are in the wrong order, results are unpredictable..
 
     return valueToConstrain < lowerLimit
@@ -227,7 +227,7 @@ Type jlimit(Type lowerLimit, Type upperLimit, Type valueToConstrain) noexcept
 template <typename Type1, typename Type2>
 bool isPositiveAndBelow(Type1 valueToTest, Type2 upperLimit) noexcept
 {
-    jassert(
+    GLUE_ASSERT(
         Type1() <=
         static_cast<Type1>(
             upperLimit)); // makes no sense to call this if the upper limit is itself below zero..
@@ -237,7 +237,7 @@ bool isPositiveAndBelow(Type1 valueToTest, Type2 upperLimit) noexcept
 template <typename Type>
 bool isPositiveAndBelow(int valueToTest, Type upperLimit) noexcept
 {
-    jassert(upperLimit >=
+    GLUE_ASSERT(upperLimit >=
             0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast<unsigned int>(valueToTest) < static_cast<unsigned int>(upperLimit);
 }
@@ -250,7 +250,7 @@ bool isPositiveAndBelow(int valueToTest, Type upperLimit) noexcept
 template <typename Type1, typename Type2>
 bool isPositiveAndNotGreaterThan(Type1 valueToTest, Type2 upperLimit) noexcept
 {
-    jassert(
+    GLUE_ASSERT(
         Type1() <=
         static_cast<Type1>(
             upperLimit)); // makes no sense to call this if the upper limit is itself below zero..
@@ -260,7 +260,7 @@ bool isPositiveAndNotGreaterThan(Type1 valueToTest, Type2 upperLimit) noexcept
 template <typename Type>
 bool isPositiveAndNotGreaterThan(int valueToTest, Type upperLimit) noexcept
 {
-    jassert(upperLimit >=
+    GLUE_ASSERT(upperLimit >=
             0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast<unsigned int>(valueToTest) <= static_cast<unsigned int>(upperLimit);
 }
@@ -471,8 +471,8 @@ inline int roundToIntAccurate(double value) noexcept
 template <typename FloatType>
 unsigned int truncatePositiveToUnsignedInt(FloatType value) noexcept
 {
-    jassert(value >= static_cast<FloatType>(0));
-    jassert(static_cast<FloatType>(value) <=
+    GLUE_ASSERT(value >= static_cast<FloatType>(0));
+    GLUE_ASSERT(static_cast<FloatType>(value) <=
             static_cast<FloatType>(std::numeric_limits<unsigned int>::max()));
 
     return static_cast<unsigned int>(value);
@@ -527,7 +527,7 @@ inline int countNumberOfBits(uint64 n) noexcept
 template <typename IntegerType>
 IntegerType negativeAwareModulo(IntegerType dividend, const IntegerType divisor) noexcept
 {
-    jassert(divisor > 0);
+    GLUE_ASSERT(divisor > 0);
     dividend %= divisor;
     return (dividend < 0) ? (dividend + divisor) : dividend;
 }

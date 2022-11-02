@@ -118,15 +118,15 @@ public:
     //==============================================================================
     inline ElementType& operator[](const int index) noexcept
     {
-        jassert(elements != nullptr);
-        jassert(isPositiveAndBelow(index, numUsed));
+        GLUE_ASSERT(elements != nullptr);
+        GLUE_ASSERT(isPositiveAndBelow(index, numUsed));
         return elements[index];
     }
 
     inline const ElementType& operator[](const int index) const noexcept
     {
-        jassert(elements != nullptr);
-        jassert(isPositiveAndBelow(index, numUsed));
+        GLUE_ASSERT(elements != nullptr);
+        GLUE_ASSERT(isPositiveAndBelow(index, numUsed));
         return elements[index];
     }
 
@@ -165,7 +165,7 @@ public:
     //==============================================================================
     void setAllocatedSize(int numElements)
     {
-        jassert(numElements >= numUsed);
+        GLUE_ASSERT(numElements >= numUsed);
 
         if (numAllocated != numElements)
         {
@@ -183,7 +183,7 @@ public:
         if (minNumElements > numAllocated)
             setAllocatedSize((minNumElements + minNumElements / 2 + 8) & ~7);
 
-        jassert(numAllocated <= 0 || elements != nullptr);
+        GLUE_ASSERT(numAllocated <= 0 || elements != nullptr);
     }
 
     void shrinkToNoMoreThan(int maxNumElements)
@@ -243,8 +243,8 @@ public:
     template <class OtherArrayType>
     void addArray(const OtherArrayType& arrayToAddFrom)
     {
-        jassert((const void*) this !=
-                (const void*) &arrayToAddFrom); // can't add from our own elements!
+        GLUE_ASSERT((const void*) this !=
+                    (const void*) &arrayToAddFrom); // can't add from our own elements!
         ensureAllocatedSize(numUsed + (int) arrayToAddFrom.size());
 
         for (auto& e : arrayToAddFrom) addAssumingCapacityIsReady(e);
@@ -254,12 +254,12 @@ public:
     typename std::enable_if<!std::is_pointer<OtherArrayType>::value, int>::type
     addArray(const OtherArrayType& arrayToAddFrom, int startIndex, int numElementsToAdd = -1)
     {
-        jassert((const void*) this !=
-                (const void*) &arrayToAddFrom); // can't add from our own elements!
+        GLUE_ASSERT((const void*) this !=
+                    (const void*) &arrayToAddFrom); // can't add from our own elements!
 
         if (startIndex < 0)
         {
-            jassertfalse;
+            LogWarn("base") << "startIndex < 0";
             startIndex = 0;
         }
 
@@ -294,9 +294,9 @@ public:
     //==============================================================================
     void removeElements(int indexToRemoveAt, int numElementsToRemove)
     {
-        jassert(indexToRemoveAt >= 0);
-        jassert(numElementsToRemove >= 0);
-        jassert(indexToRemoveAt + numElementsToRemove <= numUsed);
+        GLUE_ASSERT(indexToRemoveAt >= 0);
+        GLUE_ASSERT(numElementsToRemove >= 0);
+        GLUE_ASSERT(indexToRemoveAt + numElementsToRemove <= numUsed);
 
         if (numElementsToRemove > 0)
         {
@@ -531,7 +531,7 @@ private:
         // be deleted indirectly during the reallocation operation! To work around this,
         // make a local copy of the item you're trying to add (and maybe use std::move to
         // move it into the add() method to avoid any extra overhead)
-        jassertquiet(std::addressof(element) < begin() || end() <= std::addressof(element));
+        GLUE_ASSERT(std::addressof(element) < begin() || end() <= std::addressof(element));
     }
 
     //==============================================================================
