@@ -25,9 +25,9 @@ else()
   # option(GL_ENABLE_INSTALL "Enable install rule" ON)
 endif()
 
-include_directories(${CMAKE_CURRENT_LIST_DIR})
+include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
 
-add_subdirectory(modules)
+add_subdirectory(src)
 
 # if(GL_ENABLE_INSTALL)
 #   # We don't support system-wide installation
