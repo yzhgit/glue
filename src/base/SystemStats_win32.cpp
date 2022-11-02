@@ -483,7 +483,7 @@ bool Time::setSystemTimeToThisTime() const
     st.wHour = (WORD) getHours();
     st.wMinute = (WORD) getMinutes();
     st.wSecond = (WORD) getSeconds();
-    st.wMilliseconds = (WORD) (millisSinceEpoch % 1000);
+    st.wMilliseconds = (WORD) (m_millisSinceEpoch % 1000);
 
     // do this twice because of daylight saving conversion problems - the
     // first one sets it up, the second one kicks it in.

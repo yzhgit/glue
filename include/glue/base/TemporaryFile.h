@@ -109,10 +109,10 @@ public:
 
     //==============================================================================
     /** Returns the temporary file. */
-    const File& getFile() const noexcept { return temporaryFile; }
+    const File& getFile() const noexcept { return m_temporaryFile; }
 
     /** Returns the target file that was specified in the constructor. */
-    const File& getTargetFile() const noexcept { return targetFile; }
+    const File& getTargetFile() const noexcept { return m_targetFile; }
 
     /** Tries to move the temporary file to overwrite the target file that was
         specified in the constructor.
@@ -139,7 +139,7 @@ public:
 
 private:
     //==============================================================================
-    const File temporaryFile, targetFile;
+    const File m_temporaryFile, m_targetFile;
 
     GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TemporaryFile)
 };

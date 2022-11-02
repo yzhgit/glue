@@ -469,7 +469,7 @@ public:
     template <class T>
     Log& operator<<(const T& value)
     {
-        message << value << getPadding();
+        m_message << value << getPadding();
         return *this;
     }
 
@@ -482,7 +482,7 @@ public:
     /// \returns A reference to itself.
     Log& operator<<(std::ostream& (*func)(std::ostream&) )
     {
-        func(message);
+        func(m_message);
         return *this;
     }
 
@@ -491,9 +491,9 @@ public:
 protected:
     /// \cond INTERNAL
 
-    LogLevel level;     ///< Log level.
-    bool bPrinted;      ///< Has the message been printed in the constructor?
-    std::string module; ///< The destination module for this message.
+    LogLevel m_level;     ///< Log level.
+    bool m_bPrinted;      ///< Has the message been printed in the constructor?
+    std::string m_module; ///< The destination module for this message.
 
     /// \brief Print a log line.
     /// \param level The log level.
@@ -512,9 +512,9 @@ protected:
     /// \endcond
 
 private:
-    std::stringstream message; ///< Temporary buffer.
+    std::stringstream m_message; ///< Temporary buffer.
 
-    static bool bAutoSpace; ///< Should space be added between messages?
+    static bool m_bAutoSpace; ///< Should space be added between messages?
 
     Log(Log const&) {}                          // not defined, not copyable
     Log& operator=(Log& from) { return *this; } // not defined, not assignable

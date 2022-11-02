@@ -176,7 +176,7 @@ namespace TimeHelpers
 } // namespace TimeHelpers
 
 //==============================================================================
-Time::Time(int64 ms) noexcept : millisSinceEpoch(ms) {}
+Time::Time(int64 ms) noexcept : m_millisSinceEpoch(ms) {}
 
 Time::Time(int year, int month, int day, int hours, int minutes, int seconds, int milliseconds,
            bool useLocalTime) noexcept
@@ -190,7 +190,7 @@ Time::Time(int year, int month, int day, int hours, int minutes, int seconds, in
     t.tm_sec = seconds;
     t.tm_isdst = -1;
 
-    millisSinceEpoch =
+    m_millisSinceEpoch =
         1000 * (useLocalTime ? (int64) mktime(&t) : TimeHelpers::mktime_utc(t)) + milliseconds;
 }
 
@@ -304,40 +304,40 @@ String Time::toString(bool includeDate, bool includeTime, bool includeSeconds,
 
 String Time::formatted(const String& format) const
 {
-    std::tm t(TimeHelpers::millisToLocal(millisSinceEpoch));
+    std::tm t(TimeHelpers::millisToLocal(m_millisSinceEpoch));
     return TimeHelpers::formatString(format, &t);
 }
 
 //==============================================================================
 int Time::getYear() const noexcept
 {
-    return TimeHelpers::millisToLocal(millisSinceEpoch).tm_year + 1900;
+    return TimeHelpers::millisToLocal(m_millisSinceEpoch).tm_year + 1900;
 }
-int Time::getMonth() const noexcept { return TimeHelpers::millisToLocal(millisSinceEpoch).tm_mon; }
+int Time::getMonth() const noexcept { return TimeHelpers::millisToLocal(m_millisSinceEpoch).tm_mon; }
 int Time::getDayOfYear() const noexcept
 {
-    return TimeHelpers::millisToLocal(millisSinceEpoch).tm_yday;
+    return TimeHelpers::millisToLocal(m_millisSinceEpoch).tm_yday;
 }
 int Time::getDayOfMonth() const noexcept
 {
-    return TimeHelpers::millisToLocal(millisSinceEpoch).tm_mday;
+    return TimeHelpers::millisToLocal(m_millisSinceEpoch).tm_mday;
 }
 int Time::getDayOfWeek() const noexcept
 {
-    return TimeHelpers::millisToLocal(millisSinceEpoch).tm_wday;
+    return TimeHelpers::millisToLocal(m_millisSinceEpoch).tm_wday;
 }
-int Time::getHours() const noexcept { return TimeHelpers::millisToLocal(millisSinceEpoch).tm_hour; }
+int Time::getHours() const noexcept { return TimeHelpers::millisToLocal(m_millisSinceEpoch).tm_hour; }
 int Time::getMinutes() const noexcept
 {
-    return TimeHelpers::millisToLocal(millisSinceEpoch).tm_min;
+    return TimeHelpers::millisToLocal(m_millisSinceEpoch).tm_min;
 }
 int Time::getSeconds() const noexcept
 {
-    return TimeHelpers::extendedModulo(millisSinceEpoch / 1000, 60);
+    return TimeHelpers::extendedModulo(m_millisSinceEpoch / 1000, 60);
 }
 int Time::getMilliseconds() const noexcept
 {
-    return TimeHelpers::extendedModulo(millisSinceEpoch, 1000);
+    return TimeHelpers::extendedModulo(m_millisSinceEpoch, 1000);
 }
 
 int Time::getHoursInAmPmFormat() const noexcept
@@ -354,7 +354,7 @@ bool Time::isAfternoon() const noexcept { return getHours() >= 12; }
 
 bool Time::isDaylightSavingTime() const noexcept
 {
-    return TimeHelpers::millisToLocal(millisSinceEpoch).tm_isdst != 0;
+    return TimeHelpers::millisToLocal(m_millisSinceEpoch).tm_isdst != 0;
 }
 
 String Time::getTimeZone() const
@@ -393,7 +393,7 @@ String Time::getTimeZone() const
 
 int Time::getUTCOffsetSeconds() const noexcept
 {
-    return TimeHelpers::getUTCOffsetSeconds(millisSinceEpoch);
+    return TimeHelpers::getUTCOffsetSeconds(m_millisSinceEpoch);
 }
 
 String Time::getUTCOffsetString(bool includeSemiColon) const
@@ -534,12 +534,12 @@ String Time::getWeekdayName(int day, const bool threeLetterVersion)
 //==============================================================================
 Time& Time::operator+=(RelativeTime delta) noexcept
 {
-    millisSinceEpoch += delta.inMilliseconds();
+    m_millisSinceEpoch += delta.inMilliseconds();
     return *this;
 }
 Time& Time::operator-=(RelativeTime delta) noexcept
 {
-    millisSinceEpoch -= delta.inMilliseconds();
+    m_millisSinceEpoch -= delta.inMilliseconds();
     return *this;
 }
 

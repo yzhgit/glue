@@ -76,7 +76,7 @@ public:
                     midnight Jan 1st 1970 UTC.
         @see getMilliseconds
     */
-    int64 toMilliseconds() const noexcept { return millisSinceEpoch; }
+    int64 toMilliseconds() const noexcept { return m_millisSinceEpoch; }
 
     /** Returns the year (in this machine's local timezone).
         A 4-digit format is used, e.g. 2004.
@@ -354,7 +354,7 @@ public:
 
 private:
     //==============================================================================
-    int64 millisSinceEpoch = 0;
+    int64 m_millisSinceEpoch = 0;
 };
 
 //==============================================================================

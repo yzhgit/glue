@@ -51,18 +51,18 @@ public:
         otherwise there are no guarantees what will happen! Best just to use it
         as a local stack object, rather than creating one with the new() operator.
     */
-    inline explicit ScopedLock(const LockType& lock) noexcept : lock_(lock) { lock.lock(); }
+    inline explicit ScopedLock(const LockType& lock) noexcept : m_lock(lock) { m_lock.lock(); }
 
     /** Destructor.
         The lock will be released when the destructor is called.
         Make sure this object is created and deleted by the same thread, otherwise there are
         no guarantees what will happen!
     */
-    inline ~ScopedLock() noexcept { lock_.unlock(); }
+    inline ~ScopedLock() noexcept { m_lock.unlock(); }
 
 private:
     //==============================================================================
-    const LockType& lock_;
+    const LockType& m_lock;
 
     GLUE_DECLARE_NON_COPYABLE(ScopedLock)
 };
@@ -122,7 +122,7 @@ public:
         otherwise there are no guarantees what will happen! Best just to use it
         as a local stack object, rather than creating one with the new() operator.
     */
-    inline explicit ScopedUnlock(const LockType& lock) noexcept : lock_(lock) { lock.unlock(); }
+    inline explicit ScopedUnlock(const LockType& lock) noexcept : m_lock(lock) { lock.unlock(); }
 
     /** Destructor.
 
@@ -131,14 +131,13 @@ public:
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
     */
-    inline ~ScopedUnlock() noexcept { lock_.lock(); }
+    inline ~ScopedUnlock() noexcept { m_lock.lock(); }
 
 private:
     //==============================================================================
-    const LockType& lock_;
+    const LockType& m_lock;
 
     GLUE_DECLARE_NON_COPYABLE(ScopedUnlock)
 };
-
 
 } // namespace glue

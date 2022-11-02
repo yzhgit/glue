@@ -13,36 +13,36 @@ namespace glue
 Identifier::Identifier() noexcept {}
 Identifier::~Identifier() noexcept {}
 
-Identifier::Identifier(const Identifier& other) noexcept : name(other.name) {}
+Identifier::Identifier(const Identifier& other) noexcept : m_name(other.m_name) {}
 
-Identifier::Identifier(Identifier&& other) noexcept : name(std::move(other.name)) {}
+Identifier::Identifier(Identifier&& other) noexcept : m_name(std::move(other.m_name)) {}
 
 Identifier& Identifier::operator=(Identifier&& other) noexcept
 {
-    name = std::move(other.name);
+    m_name = std::move(other.m_name);
     return *this;
 }
 
 Identifier& Identifier::operator=(const Identifier& other) noexcept
 {
-    name = other.name;
+    m_name = other.m_name;
     return *this;
 }
 
-Identifier::Identifier(const String& nm) : name(StringPool::getGlobalPool().getPooledString(nm))
+Identifier::Identifier(const String& nm) : m_name(StringPool::getGlobalPool().getPooledString(nm))
 {
     // An Identifier cannot be created from an empty string!
     GLUE_ASSERT(nm.isNotEmpty());
 }
 
-Identifier::Identifier(const char* nm) : name(StringPool::getGlobalPool().getPooledString(nm))
+Identifier::Identifier(const char* nm) : m_name(StringPool::getGlobalPool().getPooledString(nm))
 {
     // An Identifier cannot be created from an empty string!
     GLUE_ASSERT(nm != nullptr && nm[0] != 0);
 }
 
 Identifier::Identifier(String::CharPointerType start, String::CharPointerType end)
-    : name(StringPool::getGlobalPool().getPooledString(start, end))
+    : m_name(StringPool::getGlobalPool().getPooledString(start, end))
 {
     // An Identifier cannot be created from an empty string!
     GLUE_ASSERT(start < end);

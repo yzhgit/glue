@@ -24,25 +24,25 @@ static File createTempFile(const File& parentDirectory, String name, const Strin
 }
 
 TemporaryFile::TemporaryFile(const String& suffix, const int optionFlags)
-    : temporaryFile(createTempFile(File::getSpecialLocation(File::tempDirectory),
+    : m_temporaryFile(createTempFile(File::getSpecialLocation(File::tempDirectory),
                                    "temp_" + String::toHexString(lockedRandom.nextInt()), suffix,
                                    optionFlags))
-    , targetFile()
+    , m_targetFile()
 {}
 
 TemporaryFile::TemporaryFile(const File& target, const int optionFlags)
-    : temporaryFile(createTempFile(target.getParentDirectory(),
+    : m_temporaryFile(createTempFile(target.getParentDirectory(),
                                    target.getFileNameWithoutExtension() + "_temp" +
                                        String::toHexString(lockedRandom.nextInt()),
                                    target.getFileExtension(), optionFlags))
-    , targetFile(target)
+    , m_targetFile(target)
 {
     // If you use this constructor, you need to give it a valid target file!
-    GLUE_ASSERT(targetFile != File());
+    GLUE_ASSERT(m_targetFile != File());
 }
 
 TemporaryFile::TemporaryFile(const File& target, const File& temporary)
-    : temporaryFile(temporary), targetFile(target)
+    : m_temporaryFile(temporary), m_targetFile(target)
 {}
 
 TemporaryFile::~TemporaryFile()
@@ -66,14 +66,14 @@ bool TemporaryFile::overwriteTargetFileWithTemporary() const
 {
     // This method only works if you created this object with the constructor
     // that takes a target file!
-    GLUE_ASSERT(targetFile != File());
+    GLUE_ASSERT(m_targetFile != File());
 
-    if (temporaryFile.exists())
+    if (m_temporaryFile.exists())
     {
         // Have a few attempts at overwriting the file before giving up..
         for (int i = 5; --i >= 0;)
         {
-            if (temporaryFile.replaceFileIn(targetFile)) return true;
+            if (m_temporaryFile.replaceFileIn(m_targetFile)) return true;
 
             Thread::sleep(100);
         }
@@ -93,7 +93,7 @@ bool TemporaryFile::deleteTemporaryFile() const
     // Have a few attempts at deleting the file before giving up..
     for (int i = 5; --i >= 0;)
     {
-        if (temporaryFile.deleteFile())
+        if (m_temporaryFile.deleteFile())
             return true;
 
         Thread::sleep(50);

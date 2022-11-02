@@ -31,6 +31,7 @@
 #include <cmath>
 #include <condition_variable>
 #include <cstddef>
+#include <cassert>
 #include <ctime>
 #include <fstream>
 #include <functional>

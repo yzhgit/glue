@@ -99,9 +99,10 @@ public:
 
 private:
     //==============================================================================
-    Statistics stats;
-    int64 runsPerPrint, startTime;
-    File outputFile;
+    Statistics m_stats;
+    int64 m_runsPerPrint;
+    int64 m_startTime;
+    File m_outputFile;
 
     GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PerformanceCounter)
 };
@@ -130,20 +131,20 @@ private:
 class GLUE_API ScopedTimeMeasurement
 {
 public:
-    ScopedTimeMeasurement(double& resultInSeconds) noexcept : result(resultInSeconds)
+    ScopedTimeMeasurement(double& resultInSeconds) noexcept : m_result(resultInSeconds)
     {
-        result = 0.0;
+        m_result = 0.0;
     }
 
     ~ScopedTimeMeasurement()
     {
         static auto scaler = 1.0 / static_cast<double>(Time::getHighResolutionTicksPerSecond());
-        result = static_cast<double>(Time::getHighResolutionTicks() - startTimeTicks) * scaler;
+        m_result = static_cast<double>(Time::getHighResolutionTicks() - m_startTimeTicks) * scaler;
     }
 
 private:
-    int64 startTimeTicks = Time::getHighResolutionTicks();
-    double& result;
+    int64 m_startTimeTicks = Time::getHighResolutionTicks();
+    double& m_result;
 
     GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScopedTimeMeasurement)
 };

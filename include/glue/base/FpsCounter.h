@@ -31,13 +31,13 @@ private:
     void update(double now);
 
 private:
-    uint64 nFrameCount;
-    int64 then;
-    int64 lastFrameTime;
-    int64 filteredTime;
-    double fps;
-    double filterAlpha;
-    std::queue<double> timestamps;
+    uint64 m_nFrameCount;
+    int64 m_then;
+    int64 m_lastFrameTime;
+    int64 m_filteredTime;
+    double m_fps;
+    double m_filterAlpha;
+    std::queue<double> m_timestamps;
 };
 
 } // namespace glue
