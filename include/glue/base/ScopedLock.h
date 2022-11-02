@@ -51,7 +51,7 @@ public:
         otherwise there are no guarantees what will happen! Best just to use it
         as a local stack object, rather than creating one with the new() operator.
     */
-    inline explicit ScopedLock(const LockType& lock) noexcept : m_lock(lock) { m_lock.lock(); }
+    inline explicit ScopedLock(LockType& lock) noexcept : m_lock(lock) { m_lock.lock(); }
 
     /** Destructor.
         The lock will be released when the destructor is called.
@@ -62,7 +62,7 @@ public:
 
 private:
     //==============================================================================
-    const LockType& m_lock;
+    LockType& m_lock;
 
     GLUE_DECLARE_NON_COPYABLE(ScopedLock)
 };
@@ -122,7 +122,7 @@ public:
         otherwise there are no guarantees what will happen! Best just to use it
         as a local stack object, rather than creating one with the new() operator.
     */
-    inline explicit ScopedUnlock(const LockType& lock) noexcept : m_lock(lock) { lock.unlock(); }
+    inline explicit ScopedUnlock(LockType& lock) noexcept : m_lock(lock) { lock.unlock(); }
 
     /** Destructor.
 
@@ -135,7 +135,7 @@ public:
 
 private:
     //==============================================================================
-    const LockType& m_lock;
+    LockType& m_lock;
 
     GLUE_DECLARE_NON_COPYABLE(ScopedUnlock)
 };

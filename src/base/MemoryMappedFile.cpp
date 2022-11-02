@@ -5,30 +5,28 @@
 
 #include "glue/base/MemoryMappedFile.h"
 
-#include "glue/base/File.h"
-
 namespace glue
 {
 
 //==============================================================================
-MemoryMappedFile::MemoryMappedFile(const File& file, MemoryMappedFile::AccessMode mode,
+MemoryMappedFile::MemoryMappedFile(const fs::path& path, MemoryMappedFile::AccessMode mode,
                                    bool exclusive)
-    : m_range(0, file.getSize())
+    : m_range(0, fs::file_size(path))
 {
-    openInternal(file, mode, exclusive);
+    openInternal(path, mode, exclusive);
 }
 
-MemoryMappedFile::MemoryMappedFile(const File& file, const Range<int64>& fileRange, AccessMode mode,
-                                   bool exclusive)
-    : m_range(fileRange.getIntersectionWith(Range<int64>(0, file.getSize())))
+MemoryMappedFile::MemoryMappedFile(const fs::path& path, const Range<int64>& fileRange,
+                                   AccessMode mode, bool exclusive)
+    : m_range(fileRange.getIntersectionWith(Range<int64>(0, fs::file_size(path))))
 {
-    openInternal(file, mode, exclusive);
+    openInternal(path, mode, exclusive);
 }
 
 #if GLUE_WINDOWS
 
 //==============================================================================
-void MemoryMappedFile::openInternal(const File& file, AccessMode mode, bool exclusive)
+void MemoryMappedFile::openInternal(const fs::path& path, AccessMode mode, bool exclusive)
 {
     if (m_range.getStart() > 0)
     {
@@ -51,7 +49,7 @@ void MemoryMappedFile::openInternal(const File& file, AccessMode mode, bool excl
     }
 
     auto h = CreateFile(
-        file.getFullPathName().toWideCharPointer(), accessMode,
+        path.generic_u8string().c_str(), accessMode,
         exclusive
             ? 0
             : (FILE_SHARE_READ | FILE_SHARE_DELETE | (mode == readWrite ? FILE_SHARE_WRITE : 0)),
@@ -86,7 +84,7 @@ MemoryMappedFile::~MemoryMappedFile()
 
 #else
 
-void MemoryMappedFile::openInternal(const File& file, AccessMode mode, bool exclusive)
+void MemoryMappedFile::openInternal(const fs::path& path, AccessMode mode, bool exclusive)
 {
     GLUE_ASSERT(mode == readOnly || mode == readWrite);
 
@@ -96,7 +94,7 @@ void MemoryMappedFile::openInternal(const File& file, AccessMode mode, bool excl
         m_range.setStart(m_range.getStart() - (m_range.getStart() % pageSize));
     }
 
-    auto filename = file.getFullPathName().toUTF8();
+    auto filename = path.c_str();
 
     if (mode == readWrite)
         m_fileHandle = open(filename, O_CREAT | O_RDWR, 00644);
@@ -115,7 +113,10 @@ void MemoryMappedFile::openInternal(const File& file, AccessMode mode, bool excl
             m_address = m;
             madvise(m, (size_t) m_range.getLength(), MADV_SEQUENTIAL);
         }
-        else { m_range = Range<int64>(); }
+        else
+        {
+            m_range = Range<int64>();
+        }
 
         close(m_fileHandle);
         m_fileHandle = 0;

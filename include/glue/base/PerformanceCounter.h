@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "glue/base/File.h"
 #include "glue/base/LeakedObjectDetector.h"
+
 #include "glue/base/Time.h"
 
 namespace glue
@@ -44,11 +44,11 @@ public:
         @param counterName      the name used when printing out the statistics
         @param runsPerPrintout  the number of start/stop iterations before calling
                                 printStatistics()
-        @param loggingFile      a file to dump the results to - if this is File(),
+        @param loggingFile      a file to dump the results to - if this is NULL,
                                 the results are just written to the debugger output
     */
-    PerformanceCounter(const String& counterName, int runsPerPrintout = 100,
-                       const File& loggingFile = File());
+    PerformanceCounter(const char* counterName, int runsPerPrintout = 100,
+                       const char* loggingFile = nullptr);
 
     /** Destructor. */
     ~PerformanceCounter();
@@ -82,11 +82,11 @@ public:
         Statistics() noexcept;
 
         void clear() noexcept;
-        String toString() const;
+        std::string toString() const;
 
         void addResult(double elapsed) noexcept;
 
-        String name;
+        std::string name;
         double averageSeconds;
         double maximumSeconds;
         double minimumSeconds;
@@ -102,7 +102,7 @@ private:
     Statistics m_stats;
     int64 m_runsPerPrint;
     int64 m_startTime;
-    File m_outputFile;
+    FILE* m_outputFile;
 
     GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PerformanceCounter)
 };

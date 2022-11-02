@@ -5,33 +5,31 @@
 
 #include "glue/base/PerformanceCounter.h"
 
+#include "glue/base/Log.h"
 #include "glue/base/MathsFunctions.h"
 
 namespace glue
 {
 
-static void appendToFile(const File& f, const String& s)
+PerformanceCounter::PerformanceCounter(const char* name, int runsPerPrintout,
+                                       const char* loggingFile)
+    : m_runsPerPrint(runsPerPrintout), m_startTime(0)
 {
-    if (f.getFullPathName().isNotEmpty())
-    {
-        FileOutputStream out(f);
+    m_stats.name = name;
+    if (loggingFile)
+        m_outputFile = fopen(loggingFile, "w");
+    else
+        m_outputFile = stdout;
 
-        if (!out.failedToOpen()) out << s << newLine;
-    }
-}
-
-PerformanceCounter::PerformanceCounter(const String& name, int runsPerPrintout,
-                                       const File& loggingFile)
-    : runsPerPrint(runsPerPrintout), startTime(0), outputFile(loggingFile)
-{
-    stats.name = name;
-    appendToFile(outputFile, "**** Counter for \"" + name +
-                                 "\" started at: " + Time::getCurrentTime().toString(true, true));
+    time_t now;
+    ::time(&now);
+    fprintf(m_outputFile, "**** Counter for \"%s\" started at: %s\n", name, ctime(&now));
 }
 
 PerformanceCounter::~PerformanceCounter()
 {
-    if (stats.numRuns > 0) printStatistics();
+    if (m_stats.numRuns > 0) printStatistics();
+    if (m_outputFile && m_outputFile != stdout) { fclose(m_outputFile); }
 }
 
 PerformanceCounter::Statistics::Statistics() noexcept
@@ -61,13 +59,13 @@ void PerformanceCounter::Statistics::addResult(double elapsed) noexcept
     totalSeconds += elapsed;
 }
 
-static String timeToString(double secs)
+static std::string timeToString(double secs)
 {
-    return String((int64) (secs * (secs < 0.01 ? 1000000.0 : 1000.0) + 0.5)) +
+    return std::to_string((int64) (secs * (secs < 0.01 ? 1000000.0 : 1000.0) + 0.5)) +
            (secs < 0.01 ? " microsecs" : " millisecs");
 }
 
-String PerformanceCounter::Statistics::toString() const
+std::string PerformanceCounter::Statistics::toString() const
 {
     std::stringstream s;
 
@@ -78,16 +76,17 @@ String PerformanceCounter::Statistics::toString() const
       << ", maximum = " << timeToString(maximumSeconds)
       << ", total = " << timeToString(totalSeconds);
 
-    return String(s.str());
+    return s.str();
 }
 
-void PerformanceCounter::start() noexcept { startTime = Time::getHighResolutionTicks(); }
+void PerformanceCounter::start() noexcept { m_startTime = Time::getHighResolutionTicks(); }
 
 bool PerformanceCounter::stop()
 {
-    stats.addResult(Time::highResolutionTicksToSeconds(Time::getHighResolutionTicks() - startTime));
+    m_stats.addResult(
+        Time::highResolutionTicksToSeconds(Time::getHighResolutionTicks() - m_startTime));
 
-    if (stats.numRuns < runsPerPrint) return false;
+    if (m_stats.numRuns < m_runsPerPrint) return false;
 
     printStatistics();
     return true;
@@ -95,16 +94,16 @@ bool PerformanceCounter::stop()
 
 void PerformanceCounter::printStatistics()
 {
-    const String desc(getStatisticsAndReset().toString());
+    std::string desc = getStatisticsAndReset().toString();
 
-    Logger::writeToLog(desc);
-    appendToFile(outputFile, desc);
+    LogInfo() << desc;
+    fprintf(m_outputFile, "%s\n", desc.c_str());
 }
 
 PerformanceCounter::Statistics PerformanceCounter::getStatisticsAndReset()
 {
-    Statistics s(stats);
-    stats.clear();
+    Statistics s(m_stats);
+    m_stats.clear();
 
     if (s.numRuns > 0) s.averageSeconds = s.totalSeconds / (float) s.numRuns;
 

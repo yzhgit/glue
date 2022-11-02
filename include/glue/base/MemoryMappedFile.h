@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include "glue/base/Range.h"
 #include "glue/base/LeakedObjectDetector.h"
+#include "glue/base/Range.h"
+
+#include "ghc/fs_std.hpp"
 
 namespace glue
 {
-
-class File;
 
 //==============================================================================
 /**
@@ -48,7 +48,7 @@ public:
         be opened exclusively - preventing other apps to access the file which may improve the
         performance of accessing the file.
     */
-    MemoryMappedFile(const File& file, AccessMode mode, bool exclusive = false);
+    MemoryMappedFile(const fs::path& path, AccessMode mode, bool exclusive = false);
 
     /** Opens a section of a file and maps it to an area of virtual memory.
 
@@ -67,7 +67,7 @@ public:
        page-size, so do not assume that the mapped memory will begin at exactly the position you
        requested - always use getRange() to check the actual range that is being used.
     */
-    MemoryMappedFile(const File& file, const Range<int64>& fileRange, AccessMode mode,
+    MemoryMappedFile(const fs::path& path, const Range<int64>& fileRange, AccessMode mode,
                      bool exclusive = false);
 
     /** Destructor. */
@@ -97,7 +97,7 @@ private:
     int m_fileHandle = 0;
 #endif
 
-    void openInternal(const File&, AccessMode, bool);
+    void openInternal(const fs::path& path, AccessMode, bool);
 
     GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MemoryMappedFile)
 };

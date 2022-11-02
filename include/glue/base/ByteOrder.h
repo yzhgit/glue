@@ -16,7 +16,7 @@ namespace glue
 
     @tags{Core}
 */
-class GLUE_API ByteOrder
+class ByteOrder
 {
 public:
     //==============================================================================

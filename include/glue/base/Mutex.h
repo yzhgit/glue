@@ -56,8 +56,6 @@ private:
     This is currently used by some templated classes, and most compilers should
     manage to optimise it out of existence.
 
-    @see Mutex, Array, OwnedArray, ReferenceCountedArray
-
     @tags{Core}
 */
 class GLUE_API EmptyMutex

@@ -8,11 +8,11 @@
 //==============================================================================
 /** Current GLUE version number.
 
-    See also SystemStats::getVersion() for a string version.
+    See also glue::getVersion() for a string version.
 */
-#define GLUE_MAJOR_VERSION 7
-#define GLUE_MINOR_VERSION 0
-#define GLUE_PATCH_VERSION 2
+#define GLUE_MAJOR_VERSION 0
+#define GLUE_MINOR_VERSION 1
+#define GLUE_PATCH_VERSION 0
 
 /** Current GLUE version number.
 
@@ -20,39 +20,41 @@
     Bits 8 to 16 = minor version.
     Bits 0 to 8 = point release.
 
-    See also SystemStats::getVersion() for a string version.
+    See also glue::getVersion() for a string version.
 */
 #define GLUE_VERSION ((GLUE_MAJOR_VERSION << 16) + (GLUE_MINOR_VERSION << 8) + GLUE_PATCH_VERSION)
 
 //==============================================================================
-#include <algorithm>
-#include <array>
-#include <atomic>
-#include <cmath>
-#include <condition_variable>
-#include <cstddef>
-#include <cassert>
-#include <ctime>
-#include <fstream>
-#include <functional>
-#include <iomanip>
-#include <iostream>
-#include <limits>
-#include <list>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <numeric>
-#include <queue>
-#include <set>
-#include <sstream>
-#include <stdarg.h>
-#include <thread>
-#include <typeindex>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-#include <vector>
+// #include <algorithm>
+// #include <array>
+// #include <atomic>
+// #include <cassert>
+// #include <cmath>
+// #include <condition_variable>
+// #include <cstddef>
+// #include <ctime>
+// #include <fstream>
+// #include <functional>
+// #include <iomanip>
+// #include <iostream>
+// #include <limits>
+// #include <list>
+// #include <map>
+// #include <memory>
+// #include <mutex>
+// #include <numeric>
+// #include <queue>
+// #include <set>
+// #include <sstream>
+// #include <stdarg.h>
+// #include <stdexcept>
+// #include <string>
+// #include <thread>
+// #include <typeindex>
+// #include <unordered_map>
+// #include <unordered_set>
+// #include <utility>
+// #include <vector>
 
 //==============================================================================
 #include "glue/base/CompilerSupport.h"
@@ -64,6 +66,7 @@ GLUE_BEGIN_IGNORE_WARNINGS_MSVC(4514 4245 4100)
 
 #if GLUE_MSVC
     #include <intrin.h>
+    #include <sys/timeb.h>
     #include <windows.h>
 #endif
 
@@ -203,10 +206,3 @@ using ssize_t = pointer_sized_int;
 #if GLUE_DEBUG && !defined(GLUE_CHECK_MEMORY_LEAKS)
     #define GLUE_CHECK_MEMORY_LEAKS 1
 #endif
-
-namespace glue
-{
-
-GLUE_API bool GLUE_CALLTYPE glue_isRunningUnderDebugger() noexcept;
-
-}

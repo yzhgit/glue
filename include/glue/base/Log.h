@@ -729,7 +729,7 @@ public:
     void close();
 
 private:
-    std::ofstream m_file; ///< The location of the log file.
+    std::ofstream m_fileStream; ///< The location of the log file.
 };
 
 /// \endcond

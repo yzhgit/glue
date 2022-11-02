@@ -99,7 +99,7 @@ public:
     ///     unhappy with the amount of time it takes to join a thread, the user
     ///     is encouraged to seek more expedient ways of signalling their desire
     ///     for a thread to complete via other signalling methods such as
-    ///     Poco::Event, Poco::Condition, or Poco::Semaphore.
+    ///     GLUE::Event, GLUE::Condition, or GLUE::Semaphore.
     void waitForThread(bool callStopThread = true, long milliseconds = INFINITE_JOIN_TIMEOUT);
 
     /// \brief Tell the thread to sleep for a certain amount of milliseconds.
@@ -181,22 +181,22 @@ public:
     /// \returns True iff this Thread the currently active thread.
     bool isCurrentThread() const;
 
-    /// \brief Get a reference to the underlying Poco thread.
+    /// \brief Get a reference to the underlying GLUE thread.
     ///
-    /// Poco::Thread provides a clean cross-platform wrapper for
+    /// GLUE::Thread provides a clean cross-platform wrapper for
     /// threads.  On occasion, it may be useful to interact with the
-    /// underlying Poco::Thread directly.
+    /// underlying GLUE::Thread directly.
     ///
-    /// \returns A reference to the backing Poco thread.
+    /// \returns A reference to the backing GLUE thread.
     std::thread& getNativeThread();
 
-    /// \brief Get a const reference to the underlying Poco thread.
+    /// \brief Get a const reference to the underlying GLUE thread.
     ///
-    /// Poco::Thread provides a clean cross-platform wrapper for
+    /// GLUE::Thread provides a clean cross-platform wrapper for
     /// threads.  On occasion, it may be useful to interact with the
-    /// underlying Poco::Thread directly.
+    /// underlying GLUE::Thread directly.
     ///
-    /// \returns A reference to the backing Poco thread.
+    /// \returns A reference to the backing GLUE thread.
     const std::thread& getNativeThread() const;
 
     enum

@@ -6,6 +6,8 @@
 #include "glue/base/ThreadPool.h"
 
 #include "glue/base/Event.h"
+#include "glue/base/Exception.h"
+#include "glue/base/Log.h"
 #include "glue/base/Thread.h"
 
 namespace glue
@@ -208,7 +210,7 @@ ThreadPool::~ThreadPool()
         stopAll();
     } catch (...)
     {
-        poco_unexpected();
+        LogWarn() << "~ThreadPool exception";
     }
 }
 

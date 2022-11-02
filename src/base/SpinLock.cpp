@@ -29,7 +29,7 @@
 namespace glue
 {
 
-void SpinLock::lock() const noexcept
+void SpinLock::lock() noexcept
 {
     for (;;)
     {
@@ -59,7 +59,7 @@ void SpinLock::lock() const noexcept
     }
 }
 
-bool SpinLock::try_lock() const noexcept
+bool SpinLock::try_lock() noexcept
 {
     // First do a relaxed load to check if lock is free in order to prevent
     // unnecessary cache misses if someone does while(!try_lock())
@@ -67,6 +67,6 @@ bool SpinLock::try_lock() const noexcept
            !m_flag.exchange(true, std::memory_order_acquire);
 }
 
-void SpinLock::unlock() const noexcept { m_flag.store(false, std::memory_order_release); }
+void SpinLock::unlock() noexcept { m_flag.store(false, std::memory_order_release); }
 
 } // namespace glue

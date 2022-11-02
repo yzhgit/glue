@@ -32,7 +32,7 @@ namespace glue
 //   if (barrier->block()) delete barrier;  // Exactly one call to `block()`
 //                                          // returns `true`; that call
 //                                          // deletes the barrier.
-class Barrier final
+class GLUE_API Barrier final
 {
 public:
     // `num_threads` is the number of threads that will participate in the barrier

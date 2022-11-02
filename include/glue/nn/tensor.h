@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "ml/nn/types.h"
+#include "glue/nn/types.h"
 
 #include <cstdint>
 #include <iostream>

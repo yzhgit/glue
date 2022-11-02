@@ -74,8 +74,6 @@ namespace HeapBlockHelper
     then a failed allocation will just leave the heapblock with a null pointer (assuming
     that the system's malloc() function doesn't throw).
 
-    @see Array, OwnedArray, MemoryBlock
-
     @tags{Core}
 */
 template <class ElementType, bool throwOnFailure = false>

@@ -10,7 +10,7 @@
 namespace glue
 {
 
-class GLUE_API FpsCounter
+class GLUE_API FpsCounter final
 {
 public:
     FpsCounter();
