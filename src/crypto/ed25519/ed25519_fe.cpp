@@ -750,4 +750,4 @@ void FE_25519::to_bytes(uint8_t s[32]) const {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

@@ -124,4 +124,4 @@ int aes_decrypt_ccm(
                   // 192, 256.
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

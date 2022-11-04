@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 //==============================================================================
 /**
@@ -73,4 +72,4 @@ public:
     static int64 secondsToHighResolutionTicks(double seconds) noexcept;
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

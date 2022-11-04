@@ -630,4 +630,4 @@ void copy_out_vec_le(uint8_t out[], size_t out_bytes,
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

@@ -142,4 +142,4 @@ void bgr_to_tensor_hwc(const uint8_t *src, paddle::zynqmp::float16 *output,
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

@@ -7,7 +7,7 @@ NamespaceIndentation: Inner
 
 BreakBeforeBraces: Custom
 BraceWrapping:
-  AfterNamespace: true
+  AfterNamespace: false
   AfterEnum: true
   AfterStruct: true
   AfterClass: true

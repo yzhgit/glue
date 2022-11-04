@@ -278,4 +278,4 @@ void Salsa20::verify_key_set(bool cond) const {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

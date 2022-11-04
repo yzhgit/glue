@@ -213,4 +213,4 @@ class ImagePreprocess {
 };
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

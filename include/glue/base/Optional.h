@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 namespace detail
 {
@@ -461,4 +460,4 @@ bool operator>=(const T& value, const Optional<U>& opt)
     return opt.hasValue() ? value >= *opt : true;
 }
 
-} // namespace glue
+GLUE_END_NAMESPACE

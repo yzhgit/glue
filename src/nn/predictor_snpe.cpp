@@ -375,4 +375,4 @@ int32_t PredictorSnpe::GetAllTensorInfo(
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

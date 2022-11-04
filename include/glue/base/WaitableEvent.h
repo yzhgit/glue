@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 /// An Event is a synchronization object that
 /// allows one thread to signal one or more
@@ -17,10 +16,10 @@ namespace glue
 /// Usually, one thread signals an event,
 /// while one or more other threads wait
 /// for an event to become signalled.
-class GLUE_API Event final
+class GLUE_API WaitableEvent final
 {
 public:
-    explicit Event();
+    explicit WaitableEvent();
 
     // Returns the value of the event's internal "notified" state.
     bool isNotified() const { return hasBeenNotifiedInternal(&m_notified); }
@@ -53,7 +52,7 @@ private:
     mutable std::condition_variable m_cond;
     std::atomic<bool> m_notified;
 
-    GLUE_DECLARE_NON_COPYABLE(Event)
+    GLUE_DECLARE_NON_COPYABLE(WaitableEvent)
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

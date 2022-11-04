@@ -10,8 +10,7 @@
 #include "glue/base/Atomic.h"
 #include "glue/base/Log.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 //==============================================================================
 /**
@@ -126,4 +125,4 @@ private:
     #endif
 #endif
 
-} // namespace glue
+GLUE_END_NAMESPACE

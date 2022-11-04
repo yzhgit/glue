@@ -202,4 +202,4 @@ ImagePreprocess::image_crop(const uint8_t *src, uint8_t *dst,
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

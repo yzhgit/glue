@@ -7,8 +7,7 @@
 
 #include "glue/base/Atomic.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 //==============================================================================
 /**
@@ -395,4 +394,4 @@ bool operator!=(const Type* object1, const ReferenceCountedObjectPtr<Type>& obje
     return object1 != object2.get();
 }
 
-} // namespace glue
+GLUE_END_NAMESPACE

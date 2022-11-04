@@ -119,4 +119,4 @@ inline size_t var_ctz32(uint32_t n) {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

@@ -42,4 +42,4 @@ class PredictorNcnn : public Predictor {
 };
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

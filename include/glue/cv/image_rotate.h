@@ -26,4 +26,4 @@ void rotate_hwc4(const uint8_t *src, uint8_t *dst, int srcw, int srch,
                  float degree);
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

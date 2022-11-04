@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 // CountDownLatch
 //
@@ -78,4 +77,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(CountDownLatch)
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

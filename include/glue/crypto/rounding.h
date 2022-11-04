@@ -43,4 +43,4 @@ inline size_t clamp(size_t n, size_t lower_bound, size_t upper_bound) {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

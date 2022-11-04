@@ -854,4 +854,4 @@ void resize(const uint8_t *src, uint8_t *dst, ImageFormat srcFormat, int srcw,
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

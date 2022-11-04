@@ -139,4 +139,4 @@ size_t base64_decode(const BYTE in[], BYTE out[], size_t len) {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

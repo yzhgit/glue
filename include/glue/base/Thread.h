@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 /// The Runnable interface with the run() method
 /// must be implemented by classes that provide
@@ -224,4 +223,4 @@ private:
     std::shared_ptr<Runnable> m_pRunnableTarget;
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

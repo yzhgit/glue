@@ -7,11 +7,10 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 /** Returns the current version of GLUE,
    See also the GLUE_VERSION, GLUE_MAJOR_VERSION and GLUE_MINOR_VERSION macros.
 */
 GLUE_API std::string getVersion();
 
-} // namespace glue
+GLUE_END_NAMESPACE

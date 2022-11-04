@@ -310,4 +310,4 @@ strip_leading_zeros(const secure_vector<uint8_t> &in) {
 } // namespace CT
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

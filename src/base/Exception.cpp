@@ -7,8 +7,7 @@
 
 #include <typeinfo>
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 Exception::Exception(int code) : _pNested(0), _code(code) {}
 
@@ -131,4 +130,4 @@ GLUE_IMPLEMENT_EXCEPTION(URISyntaxException, SyntaxException, "Bad URI syntax")
 GLUE_IMPLEMENT_EXCEPTION(ApplicationException, Exception, "Application exception")
 GLUE_IMPLEMENT_EXCEPTION(BadCastException, RuntimeException, "Bad cast exception")
 
-} // namespace glue
+GLUE_END_NAMESPACE

@@ -7,8 +7,7 @@
 
 #include "glue/base/Mutex.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 class Runnable;
 class PooledThread;
@@ -137,4 +136,4 @@ private:
     mutable FastMutex m_mutex;
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

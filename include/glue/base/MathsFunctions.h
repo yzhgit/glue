@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 #ifndef DOXYGEN
     /** A macro for creating 64-bit literals.
@@ -312,7 +311,7 @@ constexpr int numElementsInArray(Type (&)[N]) noexcept
 template <typename Type>
 Type glue_hypot(Type a, Type b) noexcept
 {
-#if GLUE_MSVC
+#if GLUE_COMPILER_MSVC
     return static_cast<Type>(_hypot(a, b));
 #else
     return static_cast<Type>(hypot(a, b));
@@ -323,7 +322,7 @@ Type glue_hypot(Type a, Type b) noexcept
 template <>
 inline float glue_hypot(float a, float b) noexcept
 {
-    #if GLUE_MSVC
+    #if GLUE_COMPILER_MSVC
     return _hypotf(a, b);
     #else
     return hypotf(a, b);
@@ -382,7 +381,7 @@ bool glue_isfinite(NumericType) noexcept
 template <>
 inline bool glue_isfinite(float value) noexcept
 {
-#if GLUE_WINDOWS && !GLUE_MINGW
+#if GLUE_OS_WINDOWS && !GLUE_MINGW
     return _finite(value) != 0;
 #else
     return std::isfinite(value);
@@ -392,7 +391,7 @@ inline bool glue_isfinite(float value) noexcept
 template <>
 inline bool glue_isfinite(double value) noexcept
 {
-#if GLUE_WINDOWS && !GLUE_MINGW
+#if GLUE_OS_WINDOWS && !GLUE_MINGW
     return _finite(value) != 0;
 #else
     return std::isfinite(value);
@@ -400,7 +399,7 @@ inline bool glue_isfinite(double value) noexcept
 }
 
 //==============================================================================
-#if GLUE_MSVC
+#if GLUE_COMPILER_MSVC
     #pragma optimize("t", off)
     #ifndef __INTEL_COMPILER
         #pragma float_control(precise, on, push)
@@ -440,7 +439,7 @@ int roundToInt(const FloatType value) noexcept
 
 inline int roundToInt(int value) noexcept { return value; }
 
-#if GLUE_MSVC
+#if GLUE_COMPILER_MSVC
     #ifndef __INTEL_COMPILER
         #pragma float_control(pop)
     #endif
@@ -563,7 +562,7 @@ uint32 readLittleEndianBitsInBuffer(const void* sourceBuffer, uint32 startBit,
                                     uint32 numBits) noexcept;
 
 //==============================================================================
-#if GLUE_INTEL || DOXYGEN
+#if GLUE_ARCH_X86 || DOXYGEN
     /** This macro can be applied to a float variable to check whether it contains a denormalised
         value, and to normalise it if necessary.
         On CPUs that aren't vulnerable to denormalisation problems, this will have no effect.
@@ -731,4 +730,4 @@ namespace TypeHelpers
 #endif
 } // namespace TypeHelpers
 
-} // namespace glue
+GLUE_END_NAMESPACE

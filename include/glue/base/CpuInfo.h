@@ -7,8 +7,8 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
+
 struct CPUInformation
 {
     CPUInformation() noexcept { initialise(); }
@@ -27,4 +27,4 @@ struct CPUInformation
 
 GLUE_API const CPUInformation& getCPUInformation() noexcept;
 
-} // namespace glue
+GLUE_END_NAMESPACE

@@ -5,8 +5,7 @@
 
 #include "glue/base/Version.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 std::string getVersion()
 {
@@ -27,4 +26,4 @@ std::string getVersion()
         GLUE_MINOR_VERSION) "." GLUE_STRINGIFY(GLUE_PATCH_VERSION);
 }
 
-} // namespace glue
+GLUE_END_NAMESPACE

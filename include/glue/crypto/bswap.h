@@ -92,4 +92,4 @@ template <typename T> inline void bswap_4(T x[4]) {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

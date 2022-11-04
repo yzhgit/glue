@@ -1834,4 +1834,4 @@ void rotate180_hwc(const uint8_t *src, uint8_t *dst, int w, int h_in) {
 #endif
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

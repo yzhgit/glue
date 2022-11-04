@@ -5,8 +5,7 @@
 
 #include "glue/base/MemoryMappedFile.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 //==============================================================================
 MemoryMappedFile::MemoryMappedFile(const fs::path& path, MemoryMappedFile::AccessMode mode,
@@ -23,7 +22,7 @@ MemoryMappedFile::MemoryMappedFile(const fs::path& path, const Range<int64>& fil
     openInternal(path, mode, exclusive);
 }
 
-#if GLUE_WINDOWS
+#if GLUE_OS_WINDOWS
 
 //==============================================================================
 void MemoryMappedFile::openInternal(const fs::path& path, AccessMode mode, bool exclusive)
@@ -132,4 +131,4 @@ MemoryMappedFile::~MemoryMappedFile()
 
 #endif
 
-} // namespace glue
+GLUE_END_NAMESPACE

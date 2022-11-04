@@ -10,8 +10,7 @@
 
 #include "ghc/fs_std.hpp"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 //==============================================================================
 /**
@@ -91,7 +90,7 @@ private:
     void* m_address = nullptr;
     Range<int64> m_range;
 
-#if GLUE_WINDOWS
+#if GLUE_OS_WINDOWS
     void* m_fileHandle = nullptr;
 #else
     int m_fileHandle = 0;
@@ -102,4 +101,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MemoryMappedFile)
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

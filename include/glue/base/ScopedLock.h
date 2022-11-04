@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 //==============================================================================
 /**
@@ -140,4 +139,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(ScopedUnlock)
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

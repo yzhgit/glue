@@ -47,4 +47,4 @@ class ThreadPool {
 };
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

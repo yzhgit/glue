@@ -2082,4 +2082,4 @@ void hwc3_trans_hwc4(const uint8_t *src, uint8_t *dst, int srcw, int srch) {
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

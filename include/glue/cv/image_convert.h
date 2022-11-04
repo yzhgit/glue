@@ -26,4 +26,4 @@ class ImageConvert {
 };
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

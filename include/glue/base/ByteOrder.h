@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 //==============================================================================
 /** Contains static methods for converting the byte order between different
@@ -169,18 +168,18 @@ inline double ByteOrder::swap(double v) noexcept
     return n.asFloat;
 }
 
-#if GLUE_MSVC && !defined(__INTEL_COMPILER)
+#if GLUE_COMPILER_MSVC && !defined(__INTEL_COMPILER)
     #pragma intrinsic(_byteswap_ulong)
 #endif
 
 inline uint32_t ByteOrder::swap(uint32_t n) noexcept
 {
-#if (GLUE_GCC || GLUE_CLANG) && GLUE_INTEL && !GL_NO_INLINE_ASM
+#if (GLUE_COMPILER_GCC || GLUE_COMPILER_CLANG) && GLUE_ARCH_X86 && !GL_NO_INLINE_ASM
     asm("bswap %%eax" : "=a"(n) : "a"(n));
     return n;
-#elif GLUE_MSVC
+#elif GLUE_COMPILER_MSVC
     return _byteswap_ulong(n);
-#elif GLUE_ANDROID
+#elif GLUE_OS_ANDROID
     return bswap_32(n);
 #else
     return (n << 24) | (n >> 24) | ((n & 0xff00) << 8) | ((n & 0xff0000) >> 8);
@@ -189,7 +188,7 @@ inline uint32_t ByteOrder::swap(uint32_t n) noexcept
 
 inline uint64_t ByteOrder::swap(uint64_t value) noexcept
 {
-#if GLUE_MSVC
+#if GLUE_COMPILER_MSVC
     return _byteswap_uint64(value);
 #else
     return (((uint64_t) swap((uint32_t) value)) << 32) | swap((uint32_t) (value >> 32));
@@ -278,4 +277,4 @@ inline void ByteOrder::bigEndian24BitToChars(int32_t value, void* destBytes) noe
     static_cast<uint8_t*>(destBytes)[2] = (uint8_t) value;
 }
 
-} // namespace glue
+GLUE_END_NAMESPACE

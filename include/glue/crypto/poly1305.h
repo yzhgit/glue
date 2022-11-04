@@ -60,4 +60,4 @@ class Poly1305 final {
 };
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

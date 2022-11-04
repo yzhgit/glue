@@ -5,12 +5,11 @@
 
 #include "glue/base/Time.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 int64 Time::currentTimeMillis() noexcept
 {
-#if GLUE_WINDOWS && !GLUE_MINGW
+#if GLUE_OS_WINDOWS && !GLUE_MINGW
     struct _timeb t;
     _ftime_s(&t);
     return ((int64) t.time) * 1000 + t.millitm;
@@ -31,7 +30,7 @@ int64 Time::secondsToHighResolutionTicks(const double seconds) noexcept
     return (int64) (seconds * (double) getHighResolutionTicksPerSecond());
 }
 
-#if GLUE_WINDOWS
+#if GLUE_OS_WINDOWS
 
     #include <timeapi.h>
     #pragma comment(lib, "winmm.lib")
@@ -95,7 +94,7 @@ double Time::getMillisecondCounterHiRes() noexcept
     return hiResCounterHandler.getMillisecondCounterHiRes();
 }
 
-#elif GLUE_ANDROID
+#elif GLUE_OS_ANDROID
 
 int64 Time::getHighResolutionTicks() noexcept
 {
@@ -115,7 +114,7 @@ double Time::getMillisecondCounterHiRes() noexcept
     return (double) getHighResolutionTicks() * 0.001;
 }
 
-#else // GLUE_LINUX
+#else // GLUE_OS_LINUX
 
 int64 Time::getHighResolutionTicks() noexcept
 {
@@ -136,4 +135,4 @@ double Time::getMillisecondCounterHiRes() noexcept
 }
 
 #endif
-} // namespace glue
+GLUE_END_NAMESPACE

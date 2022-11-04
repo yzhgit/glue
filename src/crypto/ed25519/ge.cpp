@@ -2897,4 +2897,4 @@ void ge_scalarmult_base(uint8_t out[32], const uint8_t a[32]) {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

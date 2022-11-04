@@ -87,4 +87,4 @@ bool ed25519_verify(const uint8_t *m, size_t mlen, const uint8_t sig[64],
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

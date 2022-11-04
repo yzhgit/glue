@@ -40,4 +40,4 @@ class MD5 final {
 };
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

@@ -307,4 +307,4 @@ void SHA_512::compress_n(const uint8_t input[], size_t blocks) {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

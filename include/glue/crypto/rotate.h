@@ -71,4 +71,4 @@ template <> inline uint32_t rotr_var(uint32_t input, size_t rot) {
 #endif
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

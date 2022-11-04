@@ -5,13 +5,12 @@
 
 #include "glue/base/ThreadPool.h"
 
-#include "glue/base/Event.h"
+#include "glue/base/WaitableEvent.h"
 #include "glue/base/Exception.h"
 #include "glue/base/Log.h"
 #include "glue/base/Thread.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 class PooledThread : public Runnable
 {
@@ -35,9 +34,9 @@ private:
     Runnable* m_pTarget;
     std::string m_name;
     Thread m_thread;
-    Event m_targetReady;
-    Event m_targetCompleted;
-    Event m_started;
+    WaitableEvent m_targetReady;
+    WaitableEvent m_targetCompleted;
+    WaitableEvent m_started;
     FastMutex m_mutex;
 };
 
@@ -395,4 +394,4 @@ namespace
 
 ThreadPool& ThreadPool::defaultPool() { return *sh.pool(); }
 
-} // namespace glue
+GLUE_END_NAMESPACE

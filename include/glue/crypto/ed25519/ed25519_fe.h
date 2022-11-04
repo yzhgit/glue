@@ -165,4 +165,4 @@ inline void fe_invert(fe &x, const fe &z) { x = FE_25519::invert(z); }
 inline void fe_pow22523(fe &x, const fe &y) { x = FE_25519::pow_22523(y); }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

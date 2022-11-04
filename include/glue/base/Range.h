@@ -7,8 +7,7 @@
 
 #include "glue/base/MathsFunctions.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 //==============================================================================
 /** A general-purpose range object, that simply represents any linear range with
@@ -281,4 +280,4 @@ private:
     ValueType start{}, end{};
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

@@ -48,4 +48,4 @@ uint32_t TensorInfo::GetNumBytes() const {
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

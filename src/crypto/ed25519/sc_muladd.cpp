@@ -227,4 +227,4 @@ void sc_muladd(uint8_t *s, const uint8_t *a, const uint8_t *b,
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

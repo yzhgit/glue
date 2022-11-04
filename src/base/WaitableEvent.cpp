@@ -3,29 +3,15 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/Event.h"
+#include "glue/base/WaitableEvent.h"
 
 #include <chrono>
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
-Event::Event() : m_notified(false) {}
+WaitableEvent::WaitableEvent() : m_notified(false) {}
 
-void Event::set()
-{
-    std::unique_lock<std::mutex> lock(m_mutex);
-    m_notified = true;
-    m_cond.notify_all();
-}
-
-void Event::reset()
-{
-    std::unique_lock<std::mutex> lock(m_mutex);
-    m_notified = false;
-}
-
-void Event::wait() const
+void WaitableEvent::wait() const
 {
     if (!hasBeenNotifiedInternal(&m_notified))
     {
@@ -34,7 +20,7 @@ void Event::wait() const
     }
 }
 
-bool Event::wait(int64 milliseconds) const
+bool WaitableEvent::wait(int64 milliseconds) const
 {
     bool notified = hasBeenNotifiedInternal(&m_notified);
     if (!notified)
@@ -47,4 +33,17 @@ bool Event::wait(int64 milliseconds) const
     return notified;
 }
 
-} // namespace glue
+void WaitableEvent::set()
+{
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_notified = true;
+    m_cond.notify_all();
+}
+
+void WaitableEvent::reset()
+{
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_notified = false;
+}
+
+GLUE_END_NAMESPACE

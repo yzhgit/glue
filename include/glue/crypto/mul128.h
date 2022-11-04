@@ -22,7 +22,7 @@ typedef unsigned __int128 uint128_t;
 #endif
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE
 
 #if defined(GL_TARGET_HAS_NATIVE_UINT128)
 
@@ -126,4 +126,4 @@ inline void mul64x64_128(uint64_t a, uint64_t b, uint64_t *lo, uint64_t *hi) {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

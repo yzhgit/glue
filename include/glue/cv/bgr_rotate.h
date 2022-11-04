@@ -14,4 +14,4 @@ void bgr_rotate_hwc(const uint8_t *src, uint8_t *dst, int w_in, int h_in,
                     int angle);
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

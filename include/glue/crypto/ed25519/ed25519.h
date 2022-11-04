@@ -22,4 +22,4 @@ bool ed25519_verify(const uint8_t msg[], size_t msg_len, const uint8_t sig[64],
                     size_t domain_sep_len);
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

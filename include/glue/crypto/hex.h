@@ -103,4 +103,4 @@ std::vector<uint8_t> hex_decode(const std::string &input,
                                 bool ignore_ws = true);
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

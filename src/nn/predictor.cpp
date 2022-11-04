@@ -235,4 +235,4 @@ template void Predictor::PreProcessBlob<int8_t>(
     int32_t num_thread, const InputTensorInfo &input_tensor_info, int8_t *dst);
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

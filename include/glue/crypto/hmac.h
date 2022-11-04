@@ -80,4 +80,4 @@ std::string hmac(const std::string &data, const std::string &key) {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

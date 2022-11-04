@@ -88,4 +88,4 @@ class PredictorSnpe : public Predictor {
 };
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

@@ -56,4 +56,4 @@ class SHA_256 {
 };
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

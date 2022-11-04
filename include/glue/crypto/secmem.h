@@ -56,4 +56,4 @@ template <typename T, typename Alloc> void zap(std::vector<T, Alloc> &vec) {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

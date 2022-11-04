@@ -227,6 +227,6 @@ void SHA_256::compress_digest_x86(secure_vector<uint32_t> &digest,
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE
 
 #endif

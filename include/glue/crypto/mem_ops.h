@@ -266,4 +266,4 @@ operator^=(std::vector<uint8_t, Alloc> &out,
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

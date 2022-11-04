@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 #if !(DOXYGEN || GLUE_EXCEPTIONS_DISABLED)
 namespace HeapBlockHelper
@@ -359,4 +358,4 @@ private:
 #endif
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

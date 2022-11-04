@@ -7,8 +7,7 @@
 
 #include "glue/base/ScopedLock.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 //==============================================================================
 /**
@@ -74,4 +73,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(EmptyMutex)
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

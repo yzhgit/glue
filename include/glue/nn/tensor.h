@@ -182,4 +182,4 @@ inline std::vector<float> Dequantize(const std::vector<T> &data, float scale,
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

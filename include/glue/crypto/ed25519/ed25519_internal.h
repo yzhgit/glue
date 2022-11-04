@@ -91,4 +91,4 @@ void sc_reduce(uint8_t *);
 void sc_muladd(uint8_t *, const uint8_t *, const uint8_t *, const uint8_t *);
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 class GLUE_API FpsCounter final
 {
@@ -40,4 +39,4 @@ private:
     std::queue<double> m_timestamps;
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

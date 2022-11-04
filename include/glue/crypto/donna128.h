@@ -122,4 +122,4 @@ inline uint64_t combine_lower(const uint128_t a, size_t s1, const uint128_t b,
 #endif
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

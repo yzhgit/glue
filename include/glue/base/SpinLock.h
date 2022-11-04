@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 /**
     A simple spin-lock class that can be used as a simple, low-overhead mutex for
@@ -19,6 +18,9 @@ namespace glue
     requires almost no initialisation.
     It's most appropriate for simple situations where you're only going to hold the
     lock for a very brief time.
+
+    This uses atomics, and thus may be heavier for systems with software
+    atomics like older ARM architectures.
 */
 class GLUE_API SpinLock final
 {
@@ -48,4 +50,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(SpinLock)
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

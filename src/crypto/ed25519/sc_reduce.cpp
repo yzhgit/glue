@@ -152,4 +152,4 @@ void sc_reduce(uint8_t *s) {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

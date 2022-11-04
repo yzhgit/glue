@@ -27,4 +27,4 @@ void flip_hwc4(const uint8_t *src, uint8_t *dst, int srcw, int srch,
                FlipParam flip_param);
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

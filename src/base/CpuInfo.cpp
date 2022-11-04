@@ -7,8 +7,7 @@
 
 #include "glue/base/HeapBlock.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 static const CPUInformation& getCPUInformation() noexcept
 {
@@ -16,9 +15,9 @@ static const CPUInformation& getCPUInformation() noexcept
     return info;
 }
 
-#if GLUE_WINDOWS
+#if GLUE_OS_WINDOWS
 
-    #if GLUE_MINGW || GLUE_CLANG
+    #if GLUE_MINGW || GLUE_COMPILER_CLANG
 static void callCPUID(int result[4], uint32 type)
 {
     uint32 la = (uint32) result[0], lb = (uint32) result[1], lc = (uint32) result[2],
@@ -151,7 +150,7 @@ void CPUInformation::initialise() noexcept
     if (numPhysicalCPUs <= 0) numPhysicalCPUs = numLogicalCPUs;
 }
 
-#elif GLUE_ANDROID
+#elif GLUE_OS_ANDROID
 
 static std::string getCpuVendor() { return AndroidStatsHelpers::getSystemProperty("os.arch"); }
 
@@ -233,4 +232,4 @@ void CPUInformation::initialise() noexcept
 }
 #endif
 
-} // namespace glue
+GLUE_END_NAMESPACE

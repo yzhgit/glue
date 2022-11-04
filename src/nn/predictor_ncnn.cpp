@@ -220,4 +220,4 @@ int32_t PredictorNcnn::Process(
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

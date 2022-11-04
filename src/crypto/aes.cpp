@@ -1212,4 +1212,4 @@ void aes_decrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize) {
 }
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

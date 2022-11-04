@@ -2028,4 +2028,4 @@ void flip_hwc4_xy(const uint8_t *src, uint8_t *dst, int w_in, int h_in) {
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

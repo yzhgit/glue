@@ -38,4 +38,4 @@ enum class RoundingPolicy { TO_ZERO, RTNE };
 enum class ResizeType { NEAREST_NEIGHBOR, BILINEAR, AREA };
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

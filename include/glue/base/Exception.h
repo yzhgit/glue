@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 class GLUE_API Exception : public std::exception
 /// This is the base class for all exceptions defined
@@ -197,4 +196,4 @@ GLUE_DECLARE_EXCEPTION(GLUE_API, URISyntaxException, SyntaxException)
 GLUE_DECLARE_EXCEPTION(GLUE_API, ApplicationException, Exception)
 GLUE_DECLARE_EXCEPTION(GLUE_API, BadCastException, RuntimeException)
 
-} // namespace glue
+GLUE_END_NAMESPACE

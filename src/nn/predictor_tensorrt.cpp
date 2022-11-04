@@ -522,4 +522,4 @@ int32_t PredictorTensorRt::AllocateBuffers(
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

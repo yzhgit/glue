@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 #ifndef DOXYGEN
 namespace AtomicHelpers
@@ -130,4 +129,4 @@ struct Atomic final
     std::atomic<Type> value;
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

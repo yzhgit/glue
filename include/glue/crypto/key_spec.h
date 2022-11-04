@@ -68,4 +68,4 @@ class KeySpec final {
 };
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

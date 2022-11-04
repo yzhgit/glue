@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 /// \file
 /// Log provides an interface for writing text output from your app.
@@ -230,7 +229,7 @@ GLUE_API void LogToFile(const std::string& path, bool append = false);
 /// after LogToFile or SetLoggerChannel has been called.
 GLUE_API void LogToConsole();
 
-#if GLUE_WINDOWS
+#if GLUE_OS_WINDOWS
 /// Set the logging to ouptut to windows debug view or visual studio console
 ///
 /// This is the default state and can be called to reset console logging
@@ -682,7 +681,7 @@ public:
     void log(LogLevel level, const std::string& module, const std::string& message);
 };
 
-#if GLUE_ANDROID
+#if GLUE_OS_ANDROID
 class GLUE_API AndroidLogChannel : public BaseLoggerChannel
 {
 public:
@@ -692,7 +691,7 @@ public:
 };
 #endif
 
-#if GLUE_WINDOWS
+#if GLUE_OS_WINDOWS
 /// A logger channel that logs its messages to windows debug view and visual studio output.
 class GLUE_API DebugViewLoggerChannel : public BaseLoggerChannel
 {
@@ -734,4 +733,4 @@ private:
 
 /// \endcond
 
-} // namespace glue
+GLUE_END_NAMESPACE

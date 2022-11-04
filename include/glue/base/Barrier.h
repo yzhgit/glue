@@ -7,8 +7,7 @@
 
 #include "glue/base/StandardHeader.h"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 // Barrier
 //
@@ -59,4 +58,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(Barrier)
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

@@ -633,4 +633,4 @@ void bgra_to_tensor_hwc(const uint8_t *src, float *output, int width,
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

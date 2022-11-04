@@ -5,8 +5,7 @@
 
 #pragma once
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 //==============================================================================
 /**
@@ -105,4 +104,4 @@ private:
         maximum{-std::numeric_limits<FloatType>::infinity()};
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE

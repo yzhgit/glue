@@ -39,4 +39,4 @@ class SHA_512 {
 };
 
 } // namespace crypto
-} // namespace glue
+GLUE_END_NAMESPACE

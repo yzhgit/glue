@@ -171,4 +171,4 @@ void ThreadPool::Enqueue(TASK_COMMON &&task) {
 }
 
 } // namespace ml
-} // namespace glue
+GLUE_END_NAMESPACE

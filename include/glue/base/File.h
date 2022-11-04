@@ -9,8 +9,7 @@
 
 #include "ghc/fs_std.hpp"
 
-namespace glue
-{
+GLUE_START_NAMESPACE
 
 //==============================================================================
 /**
@@ -32,4 +31,4 @@ public:
     static std::list<std::string> readLines(const fs::path& path);
 };
 
-} // namespace glue
+GLUE_END_NAMESPACE
