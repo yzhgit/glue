@@ -211,7 +211,7 @@ template <typename Type>
 Type jlimit(Type lowerLimit, Type upperLimit, Type valueToConstrain) noexcept
 {
     GLUE_ASSERT(lowerLimit <=
-            upperLimit); // if these are in the wrong order, results are unpredictable..
+                upperLimit); // if these are in the wrong order, results are unpredictable..
 
     return valueToConstrain < lowerLimit
                ? lowerLimit
@@ -237,7 +237,7 @@ template <typename Type>
 bool isPositiveAndBelow(int valueToTest, Type upperLimit) noexcept
 {
     GLUE_ASSERT(upperLimit >=
-            0); // makes no sense to call this if the upper limit is itself below zero..
+                0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast<unsigned int>(valueToTest) < static_cast<unsigned int>(upperLimit);
 }
 
@@ -260,7 +260,7 @@ template <typename Type>
 bool isPositiveAndNotGreaterThan(int valueToTest, Type upperLimit) noexcept
 {
     GLUE_ASSERT(upperLimit >=
-            0); // makes no sense to call this if the upper limit is itself below zero..
+                0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast<unsigned int>(valueToTest) <= static_cast<unsigned int>(upperLimit);
 }
 
@@ -311,7 +311,7 @@ constexpr int numElementsInArray(Type (&)[N]) noexcept
 template <typename Type>
 Type glue_hypot(Type a, Type b) noexcept
 {
-#if GLUE_COMPILER_MSVC
+#if defined(GLUE_COMPILER_MSVC)
     return static_cast<Type>(_hypot(a, b));
 #else
     return static_cast<Type>(hypot(a, b));
@@ -322,7 +322,7 @@ Type glue_hypot(Type a, Type b) noexcept
 template <>
 inline float glue_hypot(float a, float b) noexcept
 {
-    #if GLUE_COMPILER_MSVC
+    #if defined(GLUE_COMPILER_MSVC)
     return _hypotf(a, b);
     #else
     return hypotf(a, b);
@@ -381,7 +381,7 @@ bool glue_isfinite(NumericType) noexcept
 template <>
 inline bool glue_isfinite(float value) noexcept
 {
-#if GLUE_OS_WINDOWS && !GLUE_MINGW
+#if defined(GLUE_OS_WINDOWS) && !defined(GLUE_COMPILER_MINGW)
     return _finite(value) != 0;
 #else
     return std::isfinite(value);
@@ -391,7 +391,7 @@ inline bool glue_isfinite(float value) noexcept
 template <>
 inline bool glue_isfinite(double value) noexcept
 {
-#if GLUE_OS_WINDOWS && !GLUE_MINGW
+#if defined(GLUE_OS_WINDOWS) && !defined(GLUE_COMPILER_MINGW)
     return _finite(value) != 0;
 #else
     return std::isfinite(value);
@@ -399,7 +399,7 @@ inline bool glue_isfinite(double value) noexcept
 }
 
 //==============================================================================
-#if GLUE_COMPILER_MSVC
+#if defined(GLUE_COMPILER_MSVC)
     #pragma optimize("t", off)
     #ifndef __INTEL_COMPILER
         #pragma float_control(precise, on, push)
@@ -430,16 +430,19 @@ int roundToInt(const FloatType value) noexcept
     } n;
     n.asDouble = ((double) value) + 6755399441055744.0;
 
-#if GLUE_BIG_ENDIAN
+#if defined(GLUE_BIG_ENDIAN)
     return n.asInt[1];
 #else
     return n.asInt[0];
 #endif
 }
 
-inline int roundToInt(int value) noexcept { return value; }
+inline int roundToInt(int value) noexcept
+{
+    return value;
+}
 
-#if GLUE_COMPILER_MSVC
+#if defined(GLUE_COMPILER_MSVC)
     #ifndef __INTEL_COMPILER
         #pragma float_control(pop)
     #endif
@@ -472,7 +475,7 @@ unsigned int truncatePositiveToUnsignedInt(FloatType value) noexcept
 {
     GLUE_ASSERT(value >= static_cast<FloatType>(0));
     GLUE_ASSERT(static_cast<FloatType>(value) <=
-            static_cast<FloatType>(std::numeric_limits<unsigned int>::max()));
+                static_cast<FloatType>(std::numeric_limits<unsigned int>::max()));
 
     return static_cast<unsigned int>(value);
 }
@@ -562,7 +565,7 @@ uint32 readLittleEndianBitsInBuffer(const void* sourceBuffer, uint32 startBit,
                                     uint32 numBits) noexcept;
 
 //==============================================================================
-#if GLUE_ARCH_X86 || DOXYGEN
+#if defined(GLUE_ARCH_X86) || DOXYGEN
     /** This macro can be applied to a float variable to check whether it contains a denormalised
         value, and to normalise it if necessary.
         On CPUs that aren't vulnerable to denormalisation problems, this will have no effect.
@@ -579,154 +582,153 @@ uint32 readLittleEndianBitsInBuffer(const void* sourceBuffer, uint32 startBit,
 //==============================================================================
 /** This namespace contains a few template classes for helping work out class type variations.
  */
-namespace TypeHelpers
+namespace TypeHelpers {
+/** The ParameterType struct is used to find the best type to use when passing some kind
+    of object as a parameter.
+
+    Of course, this is only likely to be useful in certain esoteric template situations.
+
+    E.g. "myFunction (typename TypeHelpers::ParameterType<int>::type, typename
+   TypeHelpers::ParameterType<MyObject>::type)" would evaluate to "myfunction (int, const
+   MyObject&)", keeping any primitive types as pass-by-value, but passing objects as a const
+   reference, to avoid copying.
+
+    @tags{Core}
+*/
+template <typename Type>
+struct ParameterType
 {
-    /** The ParameterType struct is used to find the best type to use when passing some kind
-        of object as a parameter.
-
-        Of course, this is only likely to be useful in certain esoteric template situations.
-
-        E.g. "myFunction (typename TypeHelpers::ParameterType<int>::type, typename
-       TypeHelpers::ParameterType<MyObject>::type)" would evaluate to "myfunction (int, const
-       MyObject&)", keeping any primitive types as pass-by-value, but passing objects as a const
-       reference, to avoid copying.
-
-        @tags{Core}
-    */
-    template <typename Type>
-    struct ParameterType
-    {
-        using type = const Type&;
-    };
+    using type = const Type&;
+};
 
 #ifndef DOXYGEN
-    template <typename Type>
-    struct ParameterType<Type&>
-    {
-        using type = Type&;
-    };
-    template <typename Type>
-    struct ParameterType<Type*>
-    {
-        using type = Type*;
-    };
-    template <>
-    struct ParameterType<char>
-    {
-        using type = char;
-    };
-    template <>
-    struct ParameterType<unsigned char>
-    {
-        using type = unsigned char;
-    };
-    template <>
-    struct ParameterType<short>
-    {
-        using type = short;
-    };
-    template <>
-    struct ParameterType<unsigned short>
-    {
-        using type = unsigned short;
-    };
-    template <>
-    struct ParameterType<int>
-    {
-        using type = int;
-    };
-    template <>
-    struct ParameterType<unsigned int>
-    {
-        using type = unsigned int;
-    };
-    template <>
-    struct ParameterType<long>
-    {
-        using type = long;
-    };
-    template <>
-    struct ParameterType<unsigned long>
-    {
-        using type = unsigned long;
-    };
-    template <>
-    struct ParameterType<int64>
-    {
-        using type = int64;
-    };
-    template <>
-    struct ParameterType<uint64>
-    {
-        using type = uint64;
-    };
-    template <>
-    struct ParameterType<bool>
-    {
-        using type = bool;
-    };
-    template <>
-    struct ParameterType<float>
-    {
-        using type = float;
-    };
-    template <>
-    struct ParameterType<double>
-    {
-        using type = double;
-    };
+template <typename Type>
+struct ParameterType<Type&>
+{
+    using type = Type&;
+};
+template <typename Type>
+struct ParameterType<Type*>
+{
+    using type = Type*;
+};
+template <>
+struct ParameterType<char>
+{
+    using type = char;
+};
+template <>
+struct ParameterType<unsigned char>
+{
+    using type = unsigned char;
+};
+template <>
+struct ParameterType<short>
+{
+    using type = short;
+};
+template <>
+struct ParameterType<unsigned short>
+{
+    using type = unsigned short;
+};
+template <>
+struct ParameterType<int>
+{
+    using type = int;
+};
+template <>
+struct ParameterType<unsigned int>
+{
+    using type = unsigned int;
+};
+template <>
+struct ParameterType<long>
+{
+    using type = long;
+};
+template <>
+struct ParameterType<unsigned long>
+{
+    using type = unsigned long;
+};
+template <>
+struct ParameterType<int64>
+{
+    using type = int64;
+};
+template <>
+struct ParameterType<uint64>
+{
+    using type = uint64;
+};
+template <>
+struct ParameterType<bool>
+{
+    using type = bool;
+};
+template <>
+struct ParameterType<float>
+{
+    using type = float;
+};
+template <>
+struct ParameterType<double>
+{
+    using type = double;
+};
 #endif
 
-    /** These templates are designed to take a type, and if it's a double, they return a double
-        type; for anything else, they return a float type.
+/** These templates are designed to take a type, and if it's a double, they return a double
+    type; for anything else, they return a float type.
 
-        @tags{Core}
-    */
-    template <typename Type>
-    struct SmallestFloatType
-    {
-        using type = float;
-    };
+    @tags{Core}
+*/
+template <typename Type>
+struct SmallestFloatType
+{
+    using type = float;
+};
 
 #ifndef DOXYGEN
-    template <>
-    struct SmallestFloatType<double>
-    {
-        using type = double;
-    };
+template <>
+struct SmallestFloatType<double>
+{
+    using type = double;
+};
 #endif
 
-    /** These templates are designed to take an integer type, and return an unsigned int
-        version with the same size.
+/** These templates are designed to take an integer type, and return an unsigned int
+    version with the same size.
 
-        @tags{Core}
-    */
-    template <int bytes>
-    struct UnsignedTypeWithSize
-    {
-    };
+    @tags{Core}
+*/
+template <int bytes>
+struct UnsignedTypeWithSize
+{
+};
 
 #ifndef DOXYGEN
-    template <>
-    struct UnsignedTypeWithSize<1>
-    {
-        using type = uint8;
-    };
-    template <>
-    struct UnsignedTypeWithSize<2>
-    {
-        using type = uint16;
-    };
-    template <>
-    struct UnsignedTypeWithSize<4>
-    {
-        using type = uint32;
-    };
-    template <>
-    struct UnsignedTypeWithSize<8>
-    {
-        using type = uint64;
-    };
+template <>
+struct UnsignedTypeWithSize<1>
+{
+    using type = uint8;
+};
+template <>
+struct UnsignedTypeWithSize<2>
+{
+    using type = uint16;
+};
+template <>
+struct UnsignedTypeWithSize<4>
+{
+    using type = uint32;
+};
+template <>
+struct UnsignedTypeWithSize<8>
+{
+    using type = uint64;
+};
 #endif
 } // namespace TypeHelpers
 

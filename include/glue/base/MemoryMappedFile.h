@@ -90,7 +90,7 @@ private:
     void* m_address = nullptr;
     Range<int64> m_range;
 
-#if GLUE_OS_WINDOWS
+#if defined(GLUE_OS_WINDOWS)
     void* m_fileHandle = nullptr;
 #else
     int m_fileHandle = 0;

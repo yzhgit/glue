@@ -9,57 +9,72 @@
 
 GLUE_START_NAMESPACE
 
-Exception::Exception(int code) : _pNested(0), _code(code) {}
+Exception::Exception(int code) : m_pNested(0), m_code(code)
+{}
 
-Exception::Exception(const std::string& msg, int code) : _msg(msg), _pNested(0), _code(code) {}
+Exception::Exception(const std::string& msg, int code) : m_msg(msg), m_pNested(0), m_code(code)
+{}
 
 Exception::Exception(const std::string& msg, const std::string& arg, int code)
-    : _msg(msg), _pNested(0), _code(code)
+    : m_msg(msg), m_pNested(0), m_code(code)
 {
     if (!arg.empty())
     {
-        _msg.append(": ");
-        _msg.append(arg);
+        m_msg.append(": ");
+        m_msg.append(arg);
     }
 }
 
 Exception::Exception(const std::string& msg, const Exception& nested, int code)
-    : _msg(msg), _pNested(nested.clone()), _code(code)
+    : m_msg(msg), m_pNested(nested.clone()), m_code(code)
 {}
 
-Exception::Exception(const Exception& exc) : std::exception(exc), _msg(exc._msg), _code(exc._code)
+Exception::Exception(const Exception& exc)
+    : std::exception(exc), m_msg(exc.m_msg), m_code(exc.m_code)
 {
-    _pNested = exc._pNested ? exc._pNested->clone() : 0;
+    m_pNested = exc.m_pNested ? exc.m_pNested->clone() : 0;
 }
 
-Exception::~Exception() noexcept { delete _pNested; }
+Exception::~Exception() noexcept
+{
+    delete m_pNested;
+}
 
 Exception& Exception::operator=(const Exception& exc)
 {
     if (&exc != this)
     {
-        Exception* newPNested = exc._pNested ? exc._pNested->clone() : 0;
-        delete _pNested;
-        _msg = exc._msg;
-        _pNested = newPNested;
-        _code = exc._code;
+        Exception* newPNested = exc.m_pNested ? exc.m_pNested->clone() : 0;
+        delete m_pNested;
+        m_msg = exc.m_msg;
+        m_pNested = newPNested;
+        m_code = exc.m_code;
     }
     return *this;
 }
 
-const char* Exception::name() const noexcept { return "Exception"; }
+const char* Exception::name() const noexcept
+{
+    return "Exception";
+}
 
-const char* Exception::className() const noexcept { return typeid(*this).name(); }
+const char* Exception::className() const noexcept
+{
+    return typeid(*this).name();
+}
 
-const char* Exception::what() const noexcept { return name(); }
+const char* Exception::what() const noexcept
+{
+    return name();
+}
 
 std::string Exception::displayText() const
 {
     std::string txt = name();
-    if (!_msg.empty())
+    if (!m_msg.empty())
     {
         txt.append(": ");
-        txt.append(_msg);
+        txt.append(m_msg);
     }
     return txt;
 }
@@ -68,14 +83,20 @@ void Exception::extendedMessage(const std::string& arg)
 {
     if (!arg.empty())
     {
-        if (!_msg.empty()) _msg.append(": ");
-        _msg.append(arg);
+        if (!m_msg.empty()) m_msg.append(": ");
+        m_msg.append(arg);
     }
 }
 
-Exception* Exception::clone() const { return new Exception(*this); }
+Exception* Exception::clone() const
+{
+    return new Exception(*this);
+}
 
-void Exception::rethrow() const { throw *this; }
+void Exception::rethrow() const
+{
+    throw *this;
+}
 
 GLUE_IMPLEMENT_EXCEPTION(LogicException, Exception, "Logic exception")
 GLUE_IMPLEMENT_EXCEPTION(AssertionViolationException, LogicException, "Assertion violation")

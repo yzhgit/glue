@@ -31,10 +31,10 @@ static void noopDeleter(BaseLoggerChannel*) {}
 
 shared_ptr<BaseLoggerChannel>& Log::channel()
 {
-#if GLUE_OS_ANDROID
+#if defined(GLUE_OS_ANDROID)
     static shared_ptr<BaseLoggerChannel> channel = shared_ptr<AndroidLogChannel>(
         new AndroidLogChannel, std::function<void(BaseLoggerChannel*)>(noopDeleter));
-#elif GLUE_OS_WINDOWS
+#elif defined(GLUE_OS_WINDOWS)
     static shared_ptr<BaseLoggerChannel> channel =
         IsDebuggerPresent()
             ? shared_ptr<BaseLoggerChannel>(new DebugViewLoggerChannel,
@@ -75,7 +75,7 @@ void LogToConsole()
         new ConsoleLoggerChannel, std::function<void(BaseLoggerChannel*)>(noopDeleter)));
 }
 
-#if GLUE_OS_WINDOWS
+#if defined(GLUE_OS_WINDOWS)
 void LogToDebugView()
 {
     Log::setChannel(shared_ptr<DebugViewLoggerChannel>(
@@ -242,7 +242,7 @@ void ConsoleLoggerChannel::log(LogLevel level, const string& module, const strin
     out << message << std::endl;
 }
 
-#if GLUE_OS_ANDROID
+#if defined(GLUE_OS_ANDROID)
 void AndroidLogChannel::log(LogLevel level, const string& module, const string& msg)
 {
     android_LogPriority androidPrio;
@@ -271,7 +271,7 @@ void AndroidLogChannel::log(LogLevel level, const string& module, const string& 
 }
 #endif
 
-#if GLUE_OS_WINDOWS
+#if defined(GLUE_OS_WINDOWS)
 void DebugViewLoggerChannel::log(LogLevel level, const string& module, const string& message)
 {
     std::stringstream out;

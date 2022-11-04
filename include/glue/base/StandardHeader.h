@@ -63,31 +63,31 @@
 // Now we'll include some common OS headers..
 GLUE_BEGIN_IGNORE_WARNINGS_MSVC(4514 4245 4100)
 
-#if GLUE_COMPILER_MSVC
+#if defined(GLUE_COMPILER_MSVC)
     #include <intrin.h>
     #include <sys/timeb.h>
     #include <windows.h>
 #endif
 
-#if GLUE_COMPILER_MSVC && GLUE_DEBUG
+#if defined(GLUE_COMPILER_MSVC) && defined(GLUE_DEBUG)
     #include <crtdbg.h>
     #include <debugapi.h>
 #endif
 
 GLUE_END_IGNORE_WARNINGS_MSVC
 
-#if GLUE_MINGW
+#if defined(GLUE_COMPILER_MINGW)
     #include <cstring>
     #include <sys/types.h>
 #endif
 
-#if GLUE_OS_LINUX
+#if defined(GLUE_OS_LINUX)
     #include <cstring>
     #include <signal.h>
     #include <sys/stat.h>
 #endif
 
-#if GLUE_OS_ANDROID
+#if defined(GLUE_OS_ANDROID)
     #include <byteswap.h>
     #include <cstring>
 #endif
@@ -117,7 +117,7 @@ using int32 = signed int;
 /** A platform-independent 32-bit unsigned integer type. */
 using uint32 = unsigned int;
 
-#if GLUE_COMPILER_MSVC
+#if defined(GLUE_COMPILER_MSVC)
 /** A platform-independent 64-bit integer type. */
 using int64 = __int64;
 /** A platform-independent 64-bit unsigned integer type. */
@@ -129,14 +129,14 @@ using int64 = long long;
 using uint64 = unsigned long long;
 #endif
 
-#if GLUE_64BIT
+#if defined(GLUE_64BIT)
 /** A signed integer type that's guaranteed to be large enough to hold a pointer without truncating
  * it. */
 using pointer_sized_int = int64;
 /** An unsigned integer type that's guaranteed to be large enough to hold a pointer without
  * truncating it. */
 using pointer_sized_uint = uint64;
-#elif GLUE_COMPILER_MSVC
+#elif defined(GLUE_COMPILER_MSVC)
 /** A signed integer type that's guaranteed to be large enough to hold a pointer without truncating
  * it. */
 using pointer_sized_int = _W64 int;
@@ -152,7 +152,7 @@ using pointer_sized_int = int;
 using pointer_sized_uint = unsigned int;
 #endif
 
-#if GLUE_OS_WINDOWS && !GLUE_MINGW
+#if defined(GLUE_OS_WINDOWS) && !defined(GLUE_COMPILER_MINGW)
 using ssize_t = pointer_sized_int;
 #endif
 
@@ -202,7 +202,7 @@ using ssize_t = pointer_sized_int;
    LeakedObjectDetector class and the GLUE_LEAK_DETECTOR macro for more details about enabling leak
    checking for specific classes.
 */
-#if GLUE_DEBUG && !defined(GLUE_CHECK_MEMORY_LEAKS)
+#if defined(GLUE_DEBUG) && !defined(GLUE_CHECK_MEMORY_LEAKS)
     #define GLUE_CHECK_MEMORY_LEAKS 1
 #endif
 

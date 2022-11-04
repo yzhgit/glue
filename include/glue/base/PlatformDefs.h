@@ -10,27 +10,27 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #if (defined(_M_IX86) || defined(__i386__))
-    #define GLUE_ARCH_X86_32 1
+    #define GLUE_ARCH_X86_32
 #endif
 
 #if (defined(_M_X64) || defined(__x86_64__))
-    #define GLUE_ARCH_X86_64 1
+    #define GLUE_ARCH_X86_64
 #endif
 
-#if GLUE_ARCH_X86_32 || GLUE_ARCH_X86_64
-    #define GLUE_ARCH_X86 1
+#if defined(GLUE_ARCH_X86_32) || defined(GLUE_ARCH_X86_64)
+    #define GLUE_ARCH_X86
 #endif
 
 #if (defined(__arm__) || defined(_M_ARM))
-    #define GLUE_ARCH_ARM 1
+    #define GLUE_ARCH_ARM
 #endif
 
 #if defined(__aarch64__)
-    #define GLUE_ARCH_AARCH64 1
+    #define GLUE_ARCH_AARCH64
 #endif
 
-#if GLUE_ARCH_AARCH64 || GLUE_ARCH_ARM
-    #define GLUE_ARCH_ANY_ARM 1
+#if defined(GLUE_ARCH_AARCH64) || defined(GLUE_ARCH_ARM)
+    #define GLUE_ARCH_ANY_ARM
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,13 +39,13 @@
 
 // https://jmgorius.com/blog/2021/using-predefined-compiler-macros-c-cpp/
 #if defined(_WIN32) || defined(_WIN64)
-    #define GLUE_OS_WINDOWS 1
+    #define GLUE_OS_WINDOWS
 #elif defined(__ANDROID__)
-    #define GLUE_OS_ANDROID 1
+    #define GLUE_OS_ANDROID
 #elif defined(__freebsd__) || defined(__FreeBSD__) || (__OpenBSD__)
-    #define GLUE_OS_BSD 1
+    #define GLUE_OS_BSD
 #elif defined(linux) || defined(__linux) || defined(__linux__)
-    #define GLUE_OS_LINUX 1
+    #define GLUE_OS_LINUX
 #else
     #error "Unknown platform!"
 #endif
@@ -55,56 +55,56 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #if defined(__clang__)
-    #define GLUE_COMPILER_CLANG 1
+    #define GLUE_COMPILER_CLANG
 #elif defined(__GNUC__) || defined(__GNUG__) && !defined(__clang__)
-    #define GLUE_COMPILER_GCC 1
+    #define GLUE_COMPILER_GCC
 #elif defined(_MSC_VER)
-    #define GLUE_COMPILER_MSVC 1
+    #define GLUE_COMPILER_MSVC
 #else
     #error "Unknown compiler"
 #endif
 
 //==============================================================================
-#if GLUE_OS_WINDOWS
+#if defined(GLUE_OS_WINDOWS)
     #ifdef _DEBUG
-        #define GLUE_DEBUG 1
+        #define GLUE_DEBUG
     #endif
 
     #ifdef _MSC_VER
         #ifdef _WIN64
-            #define GLUE_64BIT 1
+            #define GLUE_64BIT
         #else
-            #define GLUE_32BIT 1
+            #define GLUE_32BIT
         #endif
     #endif
 
     #ifdef __MINGW32__
-        #define GLUE_MINGW 1
+        #define GLUE_COMPILER_MINGW
         #ifdef __MINGW64__
-            #define GLUE_64BIT 1
+            #define GLUE_64BIT
         #else
-            #define GLUE_32BIT 1
+            #define GLUE_32BIT
         #endif
     #endif
 
     /** If defined, this indicates that the processor is little-endian. */
-    #define GLUE_LITTLE_ENDIAN 1
-#elif GLUE_OS_LINUX || GLUE_OS_ANDROID
+    #define GLUE_LITTLE_ENDIAN
+#elif defined(GLUE_OS_LINUX) || defined(GLUE_OS_ANDROID)
     #ifdef _DEBUG
-        #define GLUE_DEBUG 1
+        #define GLUE_DEBUG
     #endif
 
     // Allow override for big-endian Linux platforms
     #if defined(__LITTLE_ENDIAN__) || !defined(GLUE_BIG_ENDIAN)
-        #define GLUE_LITTLE_ENDIAN 1
+        #define GLUE_LITTLE_ENDIAN
     #else
-        #define GLUE_BIG_ENDIAN 1
+        #define GLUE_BIG_ENDIAN
     #endif
 
     #if defined(__LP64__) || defined(_LP64) || defined(__arm64__)
-        #define GLUE_64BIT 1
+        #define GLUE_64BIT
     #else
-        #define GLUE_32BIT 1
+        #define GLUE_32BIT
     #endif
 #endif
 
@@ -114,7 +114,7 @@
 
 //==============================================================================
 // GCC
-#if GLUE_COMPILER_GCC
+#if defined(GLUE_COMPILER_GCC)
     #if (__GNUC__ * 100 + __GNUC_MINOR__) < 500
         #error "GLUE requires GCC 5.0 or later"
     #endif
@@ -132,7 +132,7 @@
 
 //==============================================================================
 // Clang
-#if GLUE_COMPILER_CLANG
+#if defined(GLUE_COMPILER_CLANG)
     #if (__clang_major__ < 3) || (__clang_major__ == 3 && __clang_minor__ < 4)
         #error "GLUE requires Clang 3.4 or later"
     #endif
@@ -150,7 +150,7 @@
 
 //==============================================================================
 // MSVC
-#if GLUE_COMPILER_MSVC
+#if defined(GLUE_COMPILER_MSVC)
     #if _MSC_FULL_VER < 191025017 // VS2017
         #error "GLUE requires Visual Studio 2017 or later"
     #endif
@@ -186,7 +186,7 @@
 /** Push/pop warnings on MSVC. These macros expand to nothing on other
     compilers (like clang and gcc).
 */
-#if GLUE_COMPILER_MSVC
+#if defined(GLUE_COMPILER_MSVC)
     #define GLUE_IGNORE_MSVC(warnings) __pragma(warning(disable : warnings))
     #define GLUE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC(level, warnings)                                 \
         __pragma(warning(push, level)) GLUE_IGNORE_MSVC(warnings)
@@ -201,7 +201,7 @@
 #endif
 
 /** This macro defines the C calling convention used as the standard for GLUE_ calls. */
-#if GLUE_OS_WINDOWS
+#if defined(GLUE_OS_WINDOWS)
     #define GLUE_CALLTYPE __stdcall
     #define GLUE_CDECL __cdecl
 #else
@@ -210,7 +210,7 @@
 #endif
 
 //==============================================================================
-#if GLUE_OS_LINUX || GLUE_OS_BSD
+#if defined(GLUE_OS_LINUX) || defined(GLUE_OS_BSD)
     /** This will try to break into the debugger if the app is currently being debugged.
         If called by an app that's not being debugged, the behaviour isn't defined - it may
         crash or not, depending on the platform.
@@ -220,7 +220,7 @@
         {                                                                                          \
             ::kill(0, SIGTRAP);                                                                    \
         }
-#elif GLUE_COMPILER_MSVC
+#elif defined(GLUE_COMPILER_MSVC)
     #ifndef __INTEL_COMPILER
         #pragma intrinsic(__debugbreak)
     #endif
@@ -228,7 +228,7 @@
         {                                                                                          \
             __debugbreak();                                                                        \
         }
-#elif GLUE_ARCH_X86 && (GLUE_COMPILER_GCC || GLUE_COMPILER_CLANG)
+#elif GLUE_ARCH_X86 && (defined(GLUE_COMPILER_GCC) || defined(GLUE_COMPILER_CLANG))
     #if GLUE_NO_INLINE_ASM
         #define GLUE_BREAK_IN_DEBUGGER                                                             \
             {                                                                                      \
@@ -239,7 +239,7 @@
                 asm("int $3");                                                                     \
             }
     #endif
-#elif GLUE_OS_ANDROID
+#elif defined(GLUE_OS_ANDROID)
     #define GLUE_BREAK_IN_DEBUGGER                                                                 \
         {                                                                                          \
             __builtin_trap();                                                                      \
@@ -251,9 +251,10 @@
         }
 #endif
 
-#if GLUE_COMPILER_CLANG && defined(__has_feature) && !defined(GLUE_ANALYZER_NORETURN)
+#if defined(GLUE_COMPILER_CLANG) && defined(__has_feature) && !defined(GLUE_ANALYZER_NORETURN)
     #if __has_feature(attribute_analyzer_noreturn)
-inline void __attribute__((analyzer_noreturn)) glue_assert_noreturn() {}
+inline void __attribute__((analyzer_noreturn)) glue_assert_noreturn()
+{}
         #define GLUE_ANALYZER_NORETURN glue::glue_assert_noreturn();
     #endif
 #endif
@@ -266,13 +267,13 @@ inline void __attribute__((analyzer_noreturn)) glue_assert_noreturn() {}
     as there are a few places in the codebase where we need to do this
     deliberately and want to ignore the warning.
 */
-#if GLUE_COMPILER_CLANG
+#if defined(GLUE_COMPILER_CLANG)
     #if __has_cpp_attribute(clang::fallthrough)
         #define GLUE_FALLTHROUGH [[clang::fallthrough]];
     #else
         #define GLUE_FALLTHROUGH
     #endif
-#elif GLUE_COMPILER_GCC
+#elif defined(GLUE_COMPILER_GCC)
     #if __GNUC__ >= 7
         #define GLUE_FALLTHROUGH [[gnu::fallthrough]];
     #else

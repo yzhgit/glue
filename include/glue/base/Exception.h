@@ -82,21 +82,21 @@ protected:
     /// Sets the extended message for the exception.
 
 private:
-    std::string _msg;
-    Exception* _pNested;
-    int _code;
+    std::string m_msg;
+    Exception* m_pNested;
+    int m_code;
 };
 
 //
 // inlines
 //
-inline const Exception* Exception::nested() const { return _pNested; }
+inline const Exception* Exception::nested() const { return m_pNested; }
 
-inline const std::string& Exception::message() const { return _msg; }
+inline const std::string& Exception::message() const { return m_msg; }
 
-inline void Exception::message(const std::string& msg) { _msg = msg; }
+inline void Exception::message(const std::string& msg) { m_msg = msg; }
 
-inline int Exception::code() const { return _code; }
+inline int Exception::code() const { return m_code; }
 
 //
 // Macros for quickly declaring and implementing exception classes.

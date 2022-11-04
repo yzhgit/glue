@@ -7,7 +7,6 @@ set(source
   Barrier.cpp
   CountDownLatch.cpp
   CpuInfo.cpp
-  Event.cpp
   Exception.cpp
   File.cpp
   FpsCounter.cpp
@@ -19,6 +18,8 @@ set(source
   ThreadPool.cpp
   Time.cpp
   Version.cpp
+  WaitableEvent.cpp
+  SystemStats.cpp
 )
 
 set(target base)

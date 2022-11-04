@@ -9,7 +9,7 @@ GLUE_START_NAMESPACE
 
 int64 Time::currentTimeMillis() noexcept
 {
-#if GLUE_OS_WINDOWS && !GLUE_MINGW
+#if defined(GLUE_OS_WINDOWS) && !defined(GLUE_COMPILER_MINGW)
     struct _timeb t;
     _ftime_s(&t);
     return ((int64) t.time) * 1000 + t.millitm;
@@ -30,7 +30,7 @@ int64 Time::secondsToHighResolutionTicks(const double seconds) noexcept
     return (int64) (seconds * (double) getHighResolutionTicksPerSecond());
 }
 
-#if GLUE_OS_WINDOWS
+#if defined(GLUE_OS_WINDOWS)
 
     #include <timeapi.h>
     #pragma comment(lib, "winmm.lib")
@@ -94,7 +94,7 @@ double Time::getMillisecondCounterHiRes() noexcept
     return hiResCounterHandler.getMillisecondCounterHiRes();
 }
 
-#elif GLUE_OS_ANDROID
+#elif defined(GLUE_OS_ANDROID)
 
 int64 Time::getHighResolutionTicks() noexcept
 {
@@ -114,7 +114,7 @@ double Time::getMillisecondCounterHiRes() noexcept
     return (double) getHighResolutionTicks() * 0.001;
 }
 
-#else // GLUE_OS_LINUX
+#else // defined(GLUE_OS_LINUX)
 
 int64 Time::getHighResolutionTicks() noexcept
 {

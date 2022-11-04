@@ -6,20 +6,12 @@
 
 #include "glue/base/SpinLock.h"
 
-#if defined(_MSC_VER)
+#if defined(GLUE_COMPILER_MSVC)
     #include <windows.h>
-#elif defined(__i386__) || defined(__x86_64__)
-    #if defined(__clang__)
+#elif defined(GLUE_ARCH_X86)
+    #if defined(GLUE_COMPILER_CLANG)
         #include <emmintrin.h>
     #endif
-#endif
-
-/* if GCC on i386/x86_64 or if the built-in is present */
-#if ((defined(__GNUC__) && !defined(__clang__)) && (defined(__i386__) || defined(__x86_64__))) ||  \
-    GLUE_HAVE_BUILTIN(__builtin_ia32_pause)
-    #define HAVE_BUILTIN_IA32_PAUSE 1
-#else
-    #define HAVE_BUILTIN_IA32_PAUSE 0
 #endif
 
 #if defined(HAVE_SCHED_YIELD)
@@ -39,15 +31,15 @@ void SpinLock::lock() noexcept
         while (m_flag.load(std::memory_order_relaxed))
         {
 // Issue a Pause/Yield instruction while spinning.
-#if defined(_MSC_VER)
+#if defined(GLUE_COMPILER_MSVC)
             YieldProcessor();
-#elif defined(__i386__) || defined(__x86_64__)
-    #if defined(__clang__)
+#elif defined(GLUE_ARCH_X86)
+    #if defined(GLUE_COMPILER_CLANG)
             _mm_pause();
     #else
             __builtin_ia32_pause();
     #endif
-#elif defined(__arm__)
+#elif defined(GLUE_ARCH_ANY_ARM)
             // This intrinsic should fail to be found if YIELD is not supported on the current
             // processor.
             __yield();
@@ -66,6 +58,9 @@ bool SpinLock::try_lock() noexcept
            !m_flag.exchange(true, std::memory_order_acquire);
 }
 
-void SpinLock::unlock() noexcept { m_flag.store(false, std::memory_order_release); }
+void SpinLock::unlock() noexcept
+{
+    m_flag.store(false, std::memory_order_release);
+}
 
 GLUE_END_NAMESPACE

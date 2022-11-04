@@ -22,7 +22,7 @@ MemoryMappedFile::MemoryMappedFile(const fs::path& path, const Range<int64>& fil
     openInternal(path, mode, exclusive);
 }
 
-#if GLUE_OS_WINDOWS
+#if defined(GLUE_OS_WINDOWS)
 
 //==============================================================================
 void MemoryMappedFile::openInternal(const fs::path& path, AccessMode mode, bool exclusive)

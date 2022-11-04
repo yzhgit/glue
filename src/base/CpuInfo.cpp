@@ -15,9 +15,9 @@ static const CPUInformation& getCPUInformation() noexcept
     return info;
 }
 
-#if GLUE_OS_WINDOWS
+#if defined(GLUE_OS_WINDOWS)
 
-    #if GLUE_MINGW || GLUE_COMPILER_CLANG
+    #if defined(GLUE_COMPILER_MINGW) || defined(GLUE_COMPILER_CLANG)
 static void callCPUID(int result[4], uint32 type)
 {
     uint32 la = (uint32) result[0], lb = (uint32) result[1], lc = (uint32) result[2],
@@ -28,7 +28,7 @@ static void callCPUID(int result[4], uint32 type)
         "xchg %%esi, %%ebx"
         : "=a"(la), "=S"(lb), "=c"(lc), "=d"(ld)
         : "a"(type)
-        #if GLUE_64BIT
+        #if defined(GLUE_64BIT)
               ,
           "b"(lb), "c"(lc), "d"(ld)
         #endif
@@ -40,7 +40,10 @@ static void callCPUID(int result[4], uint32 type)
     result[3] = (int) ld;
 }
     #else
-static void callCPUID(int result[4], int infoType) { __cpuid(result, infoType); }
+static void callCPUID(int result[4], int infoType)
+{
+    __cpuid(result, infoType);
+}
     #endif
 
 static std::string getCpuVendor()
@@ -82,11 +85,13 @@ static std::string getCpuModel()
 
 static int findNumberOfPhysicalCores() noexcept
 {
-    #if GLUE_MINGW
+    #if defined(GLUE_COMPILER_MINGW)
+
     // Not implemented in MinGW
     jassertfalse;
 
     return 1;
+
     #else
 
     int numPhysicalCores = 0;
@@ -103,7 +108,8 @@ static int findNumberOfPhysicalCores() noexcept
     }
 
     return numPhysicalCores;
-    #endif // GLUE_MINGW
+
+    #endif // defined(GLUE_COMPILER_MINGW)
 }
 
 //==============================================================================
@@ -150,11 +156,17 @@ void CPUInformation::initialise() noexcept
     if (numPhysicalCPUs <= 0) numPhysicalCPUs = numLogicalCPUs;
 }
 
-#elif GLUE_OS_ANDROID
+#elif defined(GLUE_OS_ANDROID)
 
-static std::string getCpuVendor() { return AndroidStatsHelpers::getSystemProperty("os.arch"); }
+static std::string getCpuVendor()
+{
+    return AndroidStatsHelpers::getSystemProperty("os.arch");
+}
 
-static std::string getCpuModel() { return readPosixConfigFileValue("/proc/cpuinfo", "Hardware"); }
+static std::string getCpuModel()
+{
+    return readPosixConfigFileValue("/proc/cpuinfo", "Hardware");
+}
 
 void CPUInformation::initialise() noexcept
 {
