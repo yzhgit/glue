@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <vector>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 // color enum
 enum ImageFormat {

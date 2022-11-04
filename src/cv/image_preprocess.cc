@@ -18,7 +18,7 @@
 #include <math.h>
 #include <string.h>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 #define PI 3.14159265f

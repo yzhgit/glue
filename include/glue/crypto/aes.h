@@ -7,8 +7,8 @@
 
 #define AES_BLOCK_SIZE 16 // AES operates on 16 bytes at a time
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
+
 
 typedef unsigned char BYTE; // 8-bit byte
 typedef unsigned int WORD;  // 32-bit word, change to "long" for 16-bit machines
@@ -123,5 +123,5 @@ int aes_decrypt_ccm(
     int keysize); // IN  - The length of the key in BITS. Valid values are 128,
                   // 192, 256.
 
-} // namespace crypto
+
 GLUE_END_NAMESPACE

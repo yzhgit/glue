@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 typedef void (*convert_func)(const uint8_t *src, uint8_t *dst, int srcw,

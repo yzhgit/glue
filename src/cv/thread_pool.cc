@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 ThreadPool *ThreadPool::gInstance = nullptr;

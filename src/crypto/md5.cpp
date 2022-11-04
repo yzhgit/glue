@@ -10,8 +10,7 @@
 #include "glue/crypto/rotate.h"
 #include "glue/crypto/secmem.h"
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
 namespace {
 
@@ -19,7 +18,8 @@ namespace {
  * MD5 FF Function
  */
 template <size_t S>
-inline void FF(uint32_t &A, uint32_t B, uint32_t C, uint32_t D, uint32_t M) {
+inline void FF(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
+{
     A += (D ^ (B & (C ^ D))) + M;
     A = rotl<S>(A) + B;
 }
@@ -28,7 +28,8 @@ inline void FF(uint32_t &A, uint32_t B, uint32_t C, uint32_t D, uint32_t M) {
  * MD5 GG Function
  */
 template <size_t S>
-inline void GG(uint32_t &A, uint32_t B, uint32_t C, uint32_t D, uint32_t M) {
+inline void GG(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
+{
     A += (C ^ (D & (B ^ C))) + M;
     A = rotl<S>(A) + B;
 }
@@ -37,7 +38,8 @@ inline void GG(uint32_t &A, uint32_t B, uint32_t C, uint32_t D, uint32_t M) {
  * MD5 HH Function
  */
 template <size_t S>
-inline void HH(uint32_t &A, uint32_t B, uint32_t C, uint32_t D, uint32_t M) {
+inline void HH(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
+{
     A += (B ^ C ^ D) + M;
     A = rotl<S>(A) + B;
 }
@@ -46,19 +48,21 @@ inline void HH(uint32_t &A, uint32_t B, uint32_t C, uint32_t D, uint32_t M) {
  * MD5 II Function
  */
 template <size_t S>
-inline void II(uint32_t &A, uint32_t B, uint32_t C, uint32_t D, uint32_t M) {
+inline void II(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
+{
     A += (C ^ (B | ~D)) + M;
     A = rotl<S>(A) + B;
 }
 
 } // namespace
 
-MD5::MD5()
-    : m_buffer(BlockSize), m_M(16), m_digest(DigestSize / sizeof(uint32_t)) {
+MD5::MD5() : m_buffer(BlockSize), m_M(16), m_digest(DigestSize / sizeof(uint32_t))
+{
     clear();
 }
 
-void MD5::clear() {
+void MD5::clear()
+{
     zeroise(m_buffer);
     m_count = 0;
     m_position = 0;
@@ -70,13 +74,16 @@ void MD5::clear() {
     m_digest[3] = 0x10325476;
 }
 
-void MD5::update(const uint8_t input[], size_t length) {
+void MD5::update(const uint8_t input[], size_t length)
+{
     m_count += length;
 
-    if (m_position) {
+    if (m_position)
+    {
         buffer_insert(m_buffer, m_position, input, length);
 
-        if (m_position + length >= BlockSize) {
+        if (m_position + length >= BlockSize)
+        {
             compress_n(m_buffer.data(), 1);
             input += (BlockSize - m_position);
             length -= (BlockSize - m_position);
@@ -88,20 +95,19 @@ void MD5::update(const uint8_t input[], size_t length) {
     const size_t full_blocks = length >> 6;
     const size_t remaining = length & (BlockSize - 1);
 
-    if (full_blocks > 0) {
-        compress_n(input, full_blocks);
-    }
+    if (full_blocks > 0) { compress_n(input, full_blocks); }
 
-    buffer_insert(m_buffer, m_position, input + full_blocks * BlockSize,
-                  remaining);
+    buffer_insert(m_buffer, m_position, input + full_blocks * BlockSize, remaining);
     m_position += remaining;
 }
 
-void MD5::final(uint8_t output[]) {
+void MD5::final(uint8_t output[])
+{
     clear_mem(&m_buffer[m_position], BlockSize - m_position);
     m_buffer[m_position] = 0x80;
 
-    if (m_position >= BlockSize - 8) {
+    if (m_position >= BlockSize - 8)
+    {
         compress_n(m_buffer.data(), 1);
         zeroise(m_buffer);
     }
@@ -116,10 +122,12 @@ void MD5::final(uint8_t output[]) {
 /*
  * MD5 Compression Function
  */
-void MD5::compress_n(const uint8_t input[], size_t blocks) {
+void MD5::compress_n(const uint8_t input[], size_t blocks)
+{
     uint32_t A = m_digest[0], B = m_digest[1], C = m_digest[2], D = m_digest[3];
 
-    for (size_t i = 0; i != blocks; ++i) {
+    for (size_t i = 0; i != blocks; ++i)
+    {
         load_le(m_M.data(), input, m_M.size());
 
         FF<7>(A, B, C, D, m_M[0] + 0xD76AA478);
@@ -199,5 +207,4 @@ void MD5::compress_n(const uint8_t input[], size_t blocks) {
     }
 }
 
-} // namespace crypto
 GLUE_END_NAMESPACE

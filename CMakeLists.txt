@@ -19,16 +19,16 @@ project(glue VERSION 0.1.0)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if(NOT CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
-  option(GL_ENABLE_INSTALL "Enable install rule" OFF)
+  option(GLUE_ENABLE_INSTALL "Enable install rule" OFF)
 else()
-  option(GL_ENABLE_INSTALL "Enable install rule" ON)
+  option(GLUE_ENABLE_INSTALL "Enable install rule" ON)
 endif()
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
 
 add_subdirectory(src)
 
-if(GL_ENABLE_INSTALL)
+if(GLUE_ENABLE_INSTALL)
   include(GNUInstallDirs)
   include(CMakePackageConfigHelpers)
 

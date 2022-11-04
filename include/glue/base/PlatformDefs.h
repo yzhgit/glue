@@ -125,6 +125,8 @@
         #endif
     #endif
 
+    #define GLUE_USE_GCC_INLINE_ASM
+
     #define GLUE_CXX11_IS_AVAILABLE (__cplusplus >= 201103L)
     #define GLUE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
     #define GLUE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
@@ -142,6 +144,8 @@
             #define GLUE_EXCEPTIONS_DISABLED 1
         #endif
     #endif
+
+    #define GLUE_USE_GCC_INLINE_ASM
 
     #define GLUE_CXX11_IS_AVAILABLE (__cplusplus >= 201103L)
     #define GLUE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
@@ -228,17 +232,12 @@
         {                                                                                          \
             __debugbreak();                                                                        \
         }
-#elif GLUE_ARCH_X86 && (defined(GLUE_COMPILER_GCC) || defined(GLUE_COMPILER_CLANG))
-    #if GLUE_NO_INLINE_ASM
-        #define GLUE_BREAK_IN_DEBUGGER                                                             \
-            {                                                                                      \
-            }
-    #else
-        #define GLUE_BREAK_IN_DEBUGGER                                                             \
-            {                                                                                      \
-                asm("int $3");                                                                     \
-            }
-    #endif
+#elif GLUE_ARCH_X86 && defined(GLUE_USE_GCC_INLINE_ASM)
+    #define GLUE_BREAK_IN_DEBUGGER                                                                 \
+        {                                                                                          \
+            asm("int $3");                                                                         \
+        }
+#endif
 #elif defined(GLUE_OS_ANDROID)
     #define GLUE_BREAK_IN_DEBUGGER                                                                 \
         {                                                                                          \
@@ -401,7 +400,7 @@ private:                                                                        
 // Note: As the GCC manual states, "[s]ince non-static C++ methods
 // have an implicit 'this' argument, the arguments of such methods
 // should be counted from two, not one."
-#if GLUE_HAVE_ATTRIBUTE(format) || (defined(__GNUC__) && !defined(__clang__))
+#if GLUE_HAVE_ATTRIBUTE(format) || defined(GLUE_COMPILER_GCC)
     #define GLUE_CHECK_FMT(string_index, first_to_check)                                           \
         __attribute__((__format__(__printf__, string_index, first_to_check)))
 #else
@@ -411,9 +410,9 @@ private:                                                                        
 // GLUE_ALWAYS_INLINE
 //
 // Forces functions to either inline or not inline. Introduced in gcc 3.1.
-#if GLUE_HAVE_ATTRIBUTE(always_inline) || (defined(__GNUC__) && !defined(__clang__))
+#if GLUE_HAVE_ATTRIBUTE(always_inline) || defined(GLUE_COMPILER_GCC)
     #define GLUE_ALWAYS_INLINE __attribute__((always_inline))
-    #define GL_HAVE_ATTRIBUTE_ALWAYS_INLINE 1
+    #define GLUE_HAVE_ATTRIBUTE_ALWAYS_INLINE 1
 #else
     #define GLUE_ALWAYS_INLINE
 #endif
@@ -426,7 +425,7 @@ private:                                                                        
 // for further information.
 // The MinGW compiler doesn't complain about the weak attribute until the link
 // step, presumably because Windows doesn't use ELF binaries.
-#if (GLUE_HAVE_ATTRIBUTE(weak) || (defined(__GNUC__) && !defined(__clang__))) &&                   \
+#if (GLUE_HAVE_ATTRIBUTE(weak) || defined(GLUE_COMPILER_GCC)) &&                                   \
     (!defined(_WIN32) || (defined(__clang__) && __clang_major__ >= 9)) && !defined(__MINGW32__)
     #undef GLUE_WEAK
     #define GLUE_WEAK __attribute__((weak))
@@ -474,7 +473,7 @@ private:                                                                        
 //
 // NOTE: The GCC nonnull attribute actually accepts a list of arguments, but
 // GLUE_NONNULL does not.
-#if GLUE_HAVE_ATTRIBUTE(nonnull) || (defined(__GNUC__) && !defined(__clang__))
+#if GLUE_HAVE_ATTRIBUTE(nonnull) || defined(GLUE_COMPILER_GCC)
     #define GLUE_NONNULL(arg_index) __attribute__((nonnull(arg_index)))
 #else
     #define GLUE_NONNULL(...)
@@ -579,7 +578,7 @@ private:                                                                        
 // Due to differences in positioning requirements between the old, compiler
 // specific __attribute__ syntax and the now standard [[maybe_unused]], this
 // macro does not attempt to take advantage of '[[maybe_unused]]'.
-#if GLUE_HAVE_ATTRIBUTE(unused) || (defined(__GNUC__) && !defined(__clang__))
+#if GLUE_HAVE_ATTRIBUTE(unused) || defined(GLUE_COMPILER_GCC)
     #undef GLUE_UNUSED
     #define GLUE_UNUSED __attribute__((__unused__))
 #else
@@ -607,7 +606,7 @@ private:                                                                        
 // natural alignment of structure members not annotated is preserved. Aligned
 // member accesses are faster than non-aligned member accesses even if the
 // targeted microprocessor supports non-aligned accesses.
-#if GLUE_HAVE_ATTRIBUTE(packed) || (defined(__GNUC__) && !defined(__clang__))
+#if GLUE_HAVE_ATTRIBUTE(packed) || defined(GLUE_COMPILER_GCC)
     #define GLUE_PACKED __attribute__((__packed__))
 #else
     #define GLUE_PACKED
@@ -676,7 +675,7 @@ private:                                                                        
 // branch in a codebase is likely counterproductive; however, annotating
 // specific branches that are both hot and consistently mispredicted is likely
 // to yield performance improvements.
-#if GLUE_HAVE_BUILTIN(__builtin_expect) || (defined(__GNUC__) && !defined(__clang__))
+#if GLUE_HAVE_BUILTIN(__builtin_expect) || (defined(GLUE_COMPILER_GCC)
     #define GLUE_PREDICT_FALSE(x) (__builtin_expect(false || (x), false))
     #define GLUE_PREDICT_TRUE(x) (__builtin_expect(false || (x), true))
 #else
@@ -706,8 +705,9 @@ private:                                                                        
 
 /*
  * Define GLUE_FUNC_ISA
+ * __GNUG__  = (__GNUC__ && __cplusplus)
  */
-#if (defined(__GNUG__) && !defined(__clang__)) || (OCL_CLANG_VERSION > 38)
+#if (defined(__GNUG__) && !defined(__clang__)) || (GLUE_CLANG_VERSION > 38)
     #define GLUE_FUNC_ISA(isa) __attribute__((target(isa)))
 #else
     #define GLUE_FUNC_ISA(isa)
@@ -716,7 +716,7 @@ private:                                                                        
 ////////////////////////////////////////////////////////////////////////////////
 // Cpp
 ////////////////////////////////////////////////////////////////////////////////
-#define GLUE_START_NAMESPACE namespace glue {
+#define GLUE_START_NAMESPACE GLUE_START_NAMESPACE
 #define GLUE_END_NAMESPACE }
 
 #define GLUE_START_EXTERN_C extern "C" {

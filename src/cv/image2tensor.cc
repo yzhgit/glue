@@ -8,7 +8,7 @@
 
 #include <arm_neon.h>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 void gray_to_tensor(const uint8_t *src, float *output, int width, int height,

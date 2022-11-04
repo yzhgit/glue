@@ -9,17 +9,17 @@
 #include "glue/crypto/loadstor.h"
 #include "glue/crypto/secmem.h"
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
 namespace {
 
-void poly1305_init(std::vector<uint64_t> &X, const uint8_t key[32]) {
+void poly1305_init(std::vector<uint64_t>& X, const uint8_t key[32])
+{
     /* r &= 0xffffffc0ffffffc0ffffffc0fffffff */
     const uint64_t t0 = load_le<uint64_t>(key, 0);
     const uint64_t t1 = load_le<uint64_t>(key, 1);
 
-    X[0] = (t0)&0xffc0fffffff;
+    X[0] = (t0) &0xffc0fffffff;
     X[1] = ((t0 >> 44) | (t1 << 20)) & 0xfffffc0ffff;
     X[2] = ((t1 >> 24)) & 0x00ffffffc0f;
 
@@ -33,14 +33,14 @@ void poly1305_init(std::vector<uint64_t> &X, const uint8_t key[32]) {
     X[7] = load_le<uint64_t>(key, 3);
 }
 
-void poly1305_blocks(std::vector<uint64_t> &X, const uint8_t *m, size_t blocks,
-                     bool is_final = false) {
-#if !defined(GL_TARGET_HAS_NATIVE_UINT128)
+void poly1305_blocks(std::vector<uint64_t>& X, const uint8_t* m, size_t blocks,
+                     bool is_final = false)
+{
+#if !defined(GLUE_TARGET_HAS_NATIVE_UINT128)
     typedef donna128 uint128_t;
 #endif
 
-    const uint64_t hibit =
-        is_final ? 0 : (static_cast<uint64_t>(1) << 40); /* 1 << 128 */
+    const uint64_t hibit = is_final ? 0 : (static_cast<uint64_t>(1) << 40); /* 1 << 128 */
 
     const uint64_t r0 = X[0];
     const uint64_t r1 = X[1];
@@ -56,24 +56,22 @@ void poly1305_blocks(std::vector<uint64_t> &X, const uint8_t *m, size_t blocks,
     const uint64_t s1 = r1 * 20;
     const uint64_t s2 = r2 * 20;
 
-    for (size_t i = 0; i != blocks; ++i) {
+    for (size_t i = 0; i != blocks; ++i)
+    {
         const uint64_t t0 = load_le<uint64_t>(m, 0);
         const uint64_t t1 = load_le<uint64_t>(m, 1);
 
-        h0 += ((t0)&M44);
+        h0 += ((t0) &M44);
         h1 += (((t0 >> 44) | (t1 << 20)) & M44);
         h2 += (((t1 >> 24)) & M42) | hibit;
 
-        const uint128_t d0 =
-            uint128_t(h0) * r0 + uint128_t(h1) * s2 + uint128_t(h2) * s1;
+        const uint128_t d0 = uint128_t(h0) * r0 + uint128_t(h1) * s2 + uint128_t(h2) * s1;
         const uint64_t c0 = carry_shift(d0, 44);
 
-        const uint128_t d1 =
-            uint128_t(h0) * r1 + uint128_t(h1) * r0 + uint128_t(h2) * s2 + c0;
+        const uint128_t d1 = uint128_t(h0) * r1 + uint128_t(h1) * r0 + uint128_t(h2) * s2 + c0;
         const uint64_t c1 = carry_shift(d1, 44);
 
-        const uint128_t d2 =
-            uint128_t(h0) * r2 + uint128_t(h1) * r1 + uint128_t(h2) * r0 + c1;
+        const uint128_t d2 = uint128_t(h0) * r2 + uint128_t(h1) * r1 + uint128_t(h2) * r0 + c1;
         const uint64_t c2 = carry_shift(d2, 42);
 
         h0 = d0 & M44;
@@ -92,7 +90,8 @@ void poly1305_blocks(std::vector<uint64_t> &X, const uint8_t *m, size_t blocks,
     X[3 + 2] = h2;
 }
 
-void poly1305_finish(std::vector<uint64_t> &X, uint8_t mac[16]) {
+void poly1305_finish(std::vector<uint64_t>& X, uint8_t mac[16])
+{
     const uint64_t M44 = 0xFFFFFFFFFFF;
     const uint64_t M42 = 0x3FFFFFFFFFF;
 
@@ -140,7 +139,7 @@ void poly1305_finish(std::vector<uint64_t> &X, uint8_t mac[16]) {
     const uint64_t t0 = X[6];
     const uint64_t t1 = X[7];
 
-    h0 += ((t0)&M44);
+    h0 += ((t0) &M44);
     c = (h0 >> 44);
     h0 &= M44;
     h1 += (((t0 >> 44) | (t1 << 20)) & M44) + c;
@@ -161,19 +160,21 @@ void poly1305_finish(std::vector<uint64_t> &X, uint8_t mac[16]) {
 
 } // namespace
 
-void Poly1305::clear() {
+void Poly1305::clear()
+{
     zap(m_poly);
     zap(m_buf);
     m_buf_pos = 0;
 }
 
-void Poly1305::set_key(const uint8_t key[], size_t length) {
-    if (!valid_keylength(length))
-        throw std::invalid_argument("[Salsa20] Invalid key length");
+void Poly1305::set_key(const uint8_t key[], size_t length)
+{
+    if (!valid_keylength(length)) throw std::invalid_argument("[Salsa20] Invalid key length");
     key_schedule(key, length);
 }
 
-void Poly1305::key_schedule(const uint8_t key[], size_t) {
+void Poly1305::key_schedule(const uint8_t key[], size_t)
+{
     m_buf_pos = 0;
     m_buf.resize(16);
     m_poly.resize(8);
@@ -181,13 +182,16 @@ void Poly1305::key_schedule(const uint8_t key[], size_t) {
     poly1305_init(m_poly, key);
 }
 
-void Poly1305::update(const uint8_t input[], size_t length) {
+void Poly1305::update(const uint8_t input[], size_t length)
+{
     verify_key_set(m_poly.size() == 8);
 
-    if (m_buf_pos) {
+    if (m_buf_pos)
+    {
         buffer_insert(m_buf, m_buf_pos, input, length);
 
-        if (m_buf_pos + length >= m_buf.size()) {
+        if (m_buf_pos + length >= m_buf.size())
+        {
             poly1305_blocks(m_poly, m_buf.data(), 1);
             input += (m_buf.size() - m_buf_pos);
             length -= (m_buf.size() - m_buf_pos);
@@ -198,23 +202,21 @@ void Poly1305::update(const uint8_t input[], size_t length) {
     const size_t full_blocks = length / m_buf.size();
     const size_t remaining = length % m_buf.size();
 
-    if (full_blocks)
-        poly1305_blocks(m_poly, input, full_blocks);
+    if (full_blocks) poly1305_blocks(m_poly, input, full_blocks);
 
-    buffer_insert(m_buf, m_buf_pos, input + full_blocks * m_buf.size(),
-                  remaining);
+    buffer_insert(m_buf, m_buf_pos, input + full_blocks * m_buf.size(), remaining);
     m_buf_pos += remaining;
 }
 
-void Poly1305::final(uint8_t out[]) {
+void Poly1305::final(uint8_t out[])
+{
     verify_key_set(m_poly.size() == 8);
 
-    if (m_buf_pos != 0) {
+    if (m_buf_pos != 0)
+    {
         m_buf[m_buf_pos] = 1;
         const size_t len = m_buf.size() - m_buf_pos - 1;
-        if (len > 0) {
-            clear_mem(&m_buf[m_buf_pos + 1], len);
-        }
+        if (len > 0) { clear_mem(&m_buf[m_buf_pos + 1], len); }
         poly1305_blocks(m_poly, m_buf.data(), 1, true);
     }
 
@@ -224,10 +226,9 @@ void Poly1305::final(uint8_t out[]) {
     m_buf_pos = 0;
 }
 
-void Poly1305::verify_key_set(bool cond) const {
-    if (cond == false)
-        throw std::runtime_error("[Poly1305] Key not set");
+void Poly1305::verify_key_set(bool cond) const
+{
+    if (cond == false) throw std::runtime_error("[Poly1305] Key not set");
 }
 
-} // namespace crypto
 GLUE_END_NAMESPACE

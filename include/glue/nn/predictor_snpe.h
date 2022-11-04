@@ -33,7 +33,7 @@ class UserBufferMap;
 }
 } // namespace zdl
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 class PredictorSnpe : public Predictor {

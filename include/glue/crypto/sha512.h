@@ -8,14 +8,20 @@
 #include <stdint.h>
 #include <vector>
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
-class SHA_512 {
-  public:
+class SHA_512
+{
+public:
     /// split into 128 byte blocks (=> 1024 bits), hash is 64 bytes long
-    enum { BlockSize = 128 };
-    enum { DigestSize = 64 };
+    enum
+    {
+        BlockSize = 128
+    };
+    enum
+    {
+        DigestSize = 64
+    };
 
     SHA_512();
 
@@ -24,10 +30,10 @@ class SHA_512 {
     // output is DigestSize long
     void final(uint8_t output[]);
 
-  private:
+private:
     void compress_n(const uint8_t input[], size_t blocks);
 
-  private:
+private:
     /// size of processed data in bytes
     uint64_t m_count;
     /// valid bytes in m_buffer
@@ -38,5 +44,4 @@ class SHA_512 {
     std::vector<uint64_t> m_digest;
 };
 
-} // namespace crypto
 GLUE_END_NAMESPACE

@@ -5,15 +5,16 @@
 
 #pragma once
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
 /**
  * Bit rotation left by a compile-time constant amount
  * @param input the input word
  * @return input rotated left by ROT bits
  */
-template <size_t ROT, typename T> inline constexpr T rotl(T input) {
+template <size_t ROT, typename T>
+inline constexpr T rotl(T input)
+{
     static_assert(ROT > 0 && ROT < 8 * sizeof(T), "Invalid rotation constant");
     return static_cast<T>((input << ROT) | (input >> (8 * sizeof(T) - ROT)));
 }
@@ -23,7 +24,9 @@ template <size_t ROT, typename T> inline constexpr T rotl(T input) {
  * @param input the input word
  * @return input rotated right by ROT bits
  */
-template <size_t ROT, typename T> inline constexpr T rotr(T input) {
+template <size_t ROT, typename T>
+inline constexpr T rotr(T input)
+{
     static_assert(ROT > 0 && ROT < 8 * sizeof(T), "Invalid rotation constant");
     return static_cast<T>((input >> ROT) | (input << (8 * sizeof(T) - ROT)));
 }
@@ -34,10 +37,10 @@ template <size_t ROT, typename T> inline constexpr T rotr(T input) {
  * @param rot the number of bits to rotate, must be between 0 and sizeof(T)*8-1
  * @return input rotated left by rot bits
  */
-template <typename T> inline T rotl_var(T input, size_t rot) {
-    return rot ? static_cast<T>((input << rot) |
-                                (input >> (sizeof(T) * 8 - rot)))
-               : input;
+template <typename T>
+inline T rotl_var(T input, size_t rot)
+{
+    return rot ? static_cast<T>((input << rot) | (input >> (sizeof(T) * 8 - rot))) : input;
 }
 
 /**
@@ -46,22 +49,26 @@ template <typename T> inline T rotl_var(T input, size_t rot) {
  * @param rot the number of bits to rotate, must be between 0 and sizeof(T)*8-1
  * @return input rotated right by rot bits
  */
-template <typename T> inline T rotr_var(T input, size_t rot) {
-    return rot ? static_cast<T>((input >> rot) |
-                                (input << (sizeof(T) * 8 - rot)))
-               : input;
+template <typename T>
+inline T rotr_var(T input, size_t rot)
+{
+    return rot ? static_cast<T>((input >> rot) | (input << (sizeof(T) * 8 - rot))) : input;
 }
 
-#if defined(GL_USE_GCC_INLINE_ASM)
+#if defined(GLUE_USE_GCC_INLINE_ASM)
 
-    #if defined(GL_TARGET_ARCH_IS_X86_64) || defined(GL_TARGET_ARCH_IS_X86_32)
+    #if defined(GLUE_ARCH_X86_64) || defined(GLUE_ARCH_X86_32)
 
-template <> inline uint32_t rotl_var(uint32_t input, size_t rot) {
+template <>
+inline uint32_t rotl_var(uint32_t input, size_t rot)
+{
     asm("roll %1,%0" : "+r"(input) : "c"(static_cast<uint8_t>(rot)));
     return input;
 }
 
-template <> inline uint32_t rotr_var(uint32_t input, size_t rot) {
+template <>
+inline uint32_t rotr_var(uint32_t input, size_t rot)
+{
     asm("rorl %1,%0" : "+r"(input) : "c"(static_cast<uint8_t>(rot)));
     return input;
 }
@@ -70,5 +77,4 @@ template <> inline uint32_t rotr_var(uint32_t input, size_t rot) {
 
 #endif
 
-} // namespace crypto
 GLUE_END_NAMESPACE

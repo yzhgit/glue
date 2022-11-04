@@ -8,8 +8,8 @@
 #include "glue/crypto/ed25519/ed25519_fe.h"
 #include "glue/crypto/loadstor.h"
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
+
 
 inline uint64_t load_3(const uint8_t in[3]) {
     return static_cast<uint64_t>(in[0]) | (static_cast<uint64_t>(in[1]) << 8) |
@@ -90,5 +90,5 @@ where l = 2^252 + 27742317777372353535851937790883648493.
 void sc_reduce(uint8_t *);
 void sc_muladd(uint8_t *, const uint8_t *, const uint8_t *, const uint8_t *);
 
-} // namespace crypto
+
 GLUE_END_NAMESPACE

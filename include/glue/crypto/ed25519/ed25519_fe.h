@@ -9,8 +9,8 @@
 
 #include <exception>
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
+
 /**
  * An element of the field \\Z/(2^255-19)
  */
@@ -164,5 +164,5 @@ inline void fe_invert(fe &x, const fe &z) { x = FE_25519::invert(z); }
 
 inline void fe_pow22523(fe &x, const fe &y) { x = FE_25519::pow_22523(y); }
 
-} // namespace crypto
+
 GLUE_END_NAMESPACE

@@ -10,7 +10,7 @@
 #include <math.h>
 #include <string.h>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 void rotate90_hwc(const uint8_t *src, uint8_t *dst, int w_in, int h_in);

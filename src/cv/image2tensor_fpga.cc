@@ -13,7 +13,7 @@
 
 #include "lite/utils/log/logging.h"
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 void bgr_to_tensor_hwc(const uint8_t *src, paddle::zynqmp::float16 *output,

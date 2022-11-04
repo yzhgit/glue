@@ -174,7 +174,7 @@ inline double ByteOrder::swap(double v) noexcept
 
 inline uint32_t ByteOrder::swap(uint32_t n) noexcept
 {
-#if (defined(GLUE_COMPILER_GCC) || defined(GLUE_COMPILER_CLANG)) && GLUE_ARCH_X86 && !GL_NO_INLINE_ASM
+#if defined(GLUE_ARCH_X86) && defined(GLUE_USE_GCC_INLINE_ASM)
     asm("bswap %%eax" : "=a"(n) : "a"(n));
     return n;
 #elif defined(GLUE_COMPILER_MSVC)

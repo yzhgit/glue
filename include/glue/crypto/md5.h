@@ -8,13 +8,19 @@
 #include <stdint.h>
 #include <vector>
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
-class MD5 final {
-  public:
-    enum { BlockSize = 64 };
-    enum { DigestSize = 16 };
+class MD5 final
+{
+public:
+    enum
+    {
+        BlockSize = 64
+    };
+    enum
+    {
+        DigestSize = 16
+    };
 
     MD5();
 
@@ -23,10 +29,10 @@ class MD5 final {
     // output is DigestSize long
     void final(uint8_t output[]);
 
-  private:
+private:
     void compress_n(const uint8_t[], size_t blocks);
 
-  private:
+private:
     /// size of processed data in bytes
     uint64_t m_count;
     /// valid bytes in m_buffer
@@ -39,5 +45,4 @@ class MD5 final {
     std::vector<uint32_t> m_digest;
 };
 
-} // namespace crypto
 GLUE_END_NAMESPACE

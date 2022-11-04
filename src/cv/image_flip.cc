@@ -9,7 +9,7 @@
 #include <math.h>
 #include <string.h>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 void ImageFlip::choose(const uint8_t *src, uint8_t *dst, ImageFormat srcFormat,

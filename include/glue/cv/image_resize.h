@@ -10,7 +10,7 @@
 #include <math.h>
 #include <stdint.h>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 class ImageResize {

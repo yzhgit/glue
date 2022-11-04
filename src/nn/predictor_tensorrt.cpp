@@ -61,7 +61,7 @@
     #include "tensorrt/EntropyCalibrator.h"
 #endif
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 PredictorTensorRt::~PredictorTensorRt() = default;

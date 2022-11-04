@@ -16,7 +16,7 @@
 
 #include "glue/nn/predictor.h"
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 class PredictorNcnn : public Predictor {

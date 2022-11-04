@@ -9,14 +9,14 @@
 
 #include <vector>
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
 /**
  * DJB's Salsa20 (and XSalsa20)
  */
-class Salsa20 final {
-  public:
+class Salsa20 final
+{
+public:
     Salsa20() = default;
 
     void clear();
@@ -32,19 +32,26 @@ class Salsa20 final {
     /**
      * @return minimum allowed key length
      */
-    size_t maximum_keylength() const { return m_key_spec.maximum_keylength(); }
+    size_t maximum_keylength() const
+    {
+        return m_key_spec.maximum_keylength();
+    }
 
     /**
      * @return maximum allowed key length
      */
-    size_t minimum_keylength() const { return m_key_spec.minimum_keylength(); }
+    size_t minimum_keylength() const
+    {
+        return m_key_spec.minimum_keylength();
+    }
 
     /**
      * Check whether a given key length is valid for this algorithm.
      * @param length the key length to be checked.
      * @return true if the key length is valid.
      */
-    bool valid_keylength(size_t length) const {
+    bool valid_keylength(size_t length) const
+    {
         return m_key_spec.valid_keylength(length);
     }
 
@@ -52,10 +59,9 @@ class Salsa20 final {
 
     size_t default_iv_length() const;
 
-    static void salsa_core(uint8_t output[64], const uint32_t input[16],
-                           size_t rounds);
+    static void salsa_core(uint8_t output[64], const uint32_t input[16], size_t rounds);
 
-  private:
+private:
     void key_schedule(const uint8_t key[], size_t key_len);
 
     void initialize_state();
@@ -70,5 +76,4 @@ class Salsa20 final {
     size_t m_position = 0;
 };
 
-} // namespace crypto
 GLUE_END_NAMESPACE

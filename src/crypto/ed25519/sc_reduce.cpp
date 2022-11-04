@@ -5,8 +5,7 @@
 
 #include "glue/crypto/ed25519/ed25519_internal.h"
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
 /*
 Input:
@@ -18,7 +17,8 @@ where l = 2^252 + 27742317777372353535851937790883648493.
 Overwrites s in place.
 */
 
-void sc_reduce(uint8_t *s) {
+void sc_reduce(uint8_t* s)
+{
     const uint32_t MASK = 0x1fffff;
 
     int64_t s0 = MASK & load_3(s);
@@ -151,5 +151,4 @@ void sc_reduce(uint8_t *s) {
     s[31] = static_cast<uint8_t>(s11 >> 17);
 }
 
-} // namespace crypto
 GLUE_END_NAMESPACE

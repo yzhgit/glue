@@ -5,7 +5,7 @@
 
 #include "glue/nn/tensor.h"
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 constexpr uint32_t GetDataTypeSize(DataType dataType) {

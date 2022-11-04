@@ -21,91 +21,86 @@
 #define AES_192_ROUNDS 12
 #define AES_256_ROUNDS 14
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
 /*********************** FUNCTION DECLARATIONS **********************/
-void ccm_prepare_first_ctr_blk(BYTE counter[], const BYTE nonce[],
-                               int nonce_len, int payload_len_store_size);
+void ccm_prepare_first_ctr_blk(BYTE counter[], const BYTE nonce[], int nonce_len,
+                               int payload_len_store_size);
 void ccm_prepare_first_format_blk(BYTE buf[], int assoc_len, int payload_len,
-                                  int payload_len_store_size, int mac_len,
-                                  const BYTE nonce[], int nonce_len);
-void ccm_format_assoc_data(BYTE buf[], int *end_of_buf, const BYTE assoc[],
-                           int assoc_len);
-void ccm_format_payload_data(BYTE buf[], int *end_of_buf, const BYTE payload[],
-                             int payload_len);
+                                  int payload_len_store_size, int mac_len, const BYTE nonce[],
+                                  int nonce_len);
+void ccm_format_assoc_data(BYTE buf[], int* end_of_buf, const BYTE assoc[], int assoc_len);
+void ccm_format_payload_data(BYTE buf[], int* end_of_buf, const BYTE payload[], int payload_len);
 
 /**************************** VARIABLES *****************************/
 // This is the specified AES SBox. To look up a substitution value, put the
 // first nibble in the first index (row) and the second nibble in the second
 // index (column).
-static const BYTE aes_sbox[16][16] = {
-    {0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B,
-     0xFE, 0xD7, 0xAB, 0x76},
-    {0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF,
-     0x9C, 0xA4, 0x72, 0xC0},
-    {0xB7, 0xFD, 0x93, 0x26, 0x36, 0x3F, 0xF7, 0xCC, 0x34, 0xA5, 0xE5, 0xF1,
-     0x71, 0xD8, 0x31, 0x15},
-    {0x04, 0xC7, 0x23, 0xC3, 0x18, 0x96, 0x05, 0x9A, 0x07, 0x12, 0x80, 0xE2,
-     0xEB, 0x27, 0xB2, 0x75},
-    {0x09, 0x83, 0x2C, 0x1A, 0x1B, 0x6E, 0x5A, 0xA0, 0x52, 0x3B, 0xD6, 0xB3,
-     0x29, 0xE3, 0x2F, 0x84},
-    {0x53, 0xD1, 0x00, 0xED, 0x20, 0xFC, 0xB1, 0x5B, 0x6A, 0xCB, 0xBE, 0x39,
-     0x4A, 0x4C, 0x58, 0xCF},
-    {0xD0, 0xEF, 0xAA, 0xFB, 0x43, 0x4D, 0x33, 0x85, 0x45, 0xF9, 0x02, 0x7F,
-     0x50, 0x3C, 0x9F, 0xA8},
-    {0x51, 0xA3, 0x40, 0x8F, 0x92, 0x9D, 0x38, 0xF5, 0xBC, 0xB6, 0xDA, 0x21,
-     0x10, 0xFF, 0xF3, 0xD2},
-    {0xCD, 0x0C, 0x13, 0xEC, 0x5F, 0x97, 0x44, 0x17, 0xC4, 0xA7, 0x7E, 0x3D,
-     0x64, 0x5D, 0x19, 0x73},
-    {0x60, 0x81, 0x4F, 0xDC, 0x22, 0x2A, 0x90, 0x88, 0x46, 0xEE, 0xB8, 0x14,
-     0xDE, 0x5E, 0x0B, 0xDB},
-    {0xE0, 0x32, 0x3A, 0x0A, 0x49, 0x06, 0x24, 0x5C, 0xC2, 0xD3, 0xAC, 0x62,
-     0x91, 0x95, 0xE4, 0x79},
-    {0xE7, 0xC8, 0x37, 0x6D, 0x8D, 0xD5, 0x4E, 0xA9, 0x6C, 0x56, 0xF4, 0xEA,
-     0x65, 0x7A, 0xAE, 0x08},
-    {0xBA, 0x78, 0x25, 0x2E, 0x1C, 0xA6, 0xB4, 0xC6, 0xE8, 0xDD, 0x74, 0x1F,
-     0x4B, 0xBD, 0x8B, 0x8A},
-    {0x70, 0x3E, 0xB5, 0x66, 0x48, 0x03, 0xF6, 0x0E, 0x61, 0x35, 0x57, 0xB9,
-     0x86, 0xC1, 0x1D, 0x9E},
-    {0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9,
-     0xCE, 0x55, 0x28, 0xDF},
-    {0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F,
-     0xB0, 0x54, 0xBB, 0x16}};
+static const BYTE aes_sbox[16][16] = {{0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01,
+                                       0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76},
+                                      {0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4,
+                                       0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0},
+                                      {0xB7, 0xFD, 0x93, 0x26, 0x36, 0x3F, 0xF7, 0xCC, 0x34, 0xA5,
+                                       0xE5, 0xF1, 0x71, 0xD8, 0x31, 0x15},
+                                      {0x04, 0xC7, 0x23, 0xC3, 0x18, 0x96, 0x05, 0x9A, 0x07, 0x12,
+                                       0x80, 0xE2, 0xEB, 0x27, 0xB2, 0x75},
+                                      {0x09, 0x83, 0x2C, 0x1A, 0x1B, 0x6E, 0x5A, 0xA0, 0x52, 0x3B,
+                                       0xD6, 0xB3, 0x29, 0xE3, 0x2F, 0x84},
+                                      {0x53, 0xD1, 0x00, 0xED, 0x20, 0xFC, 0xB1, 0x5B, 0x6A, 0xCB,
+                                       0xBE, 0x39, 0x4A, 0x4C, 0x58, 0xCF},
+                                      {0xD0, 0xEF, 0xAA, 0xFB, 0x43, 0x4D, 0x33, 0x85, 0x45, 0xF9,
+                                       0x02, 0x7F, 0x50, 0x3C, 0x9F, 0xA8},
+                                      {0x51, 0xA3, 0x40, 0x8F, 0x92, 0x9D, 0x38, 0xF5, 0xBC, 0xB6,
+                                       0xDA, 0x21, 0x10, 0xFF, 0xF3, 0xD2},
+                                      {0xCD, 0x0C, 0x13, 0xEC, 0x5F, 0x97, 0x44, 0x17, 0xC4, 0xA7,
+                                       0x7E, 0x3D, 0x64, 0x5D, 0x19, 0x73},
+                                      {0x60, 0x81, 0x4F, 0xDC, 0x22, 0x2A, 0x90, 0x88, 0x46, 0xEE,
+                                       0xB8, 0x14, 0xDE, 0x5E, 0x0B, 0xDB},
+                                      {0xE0, 0x32, 0x3A, 0x0A, 0x49, 0x06, 0x24, 0x5C, 0xC2, 0xD3,
+                                       0xAC, 0x62, 0x91, 0x95, 0xE4, 0x79},
+                                      {0xE7, 0xC8, 0x37, 0x6D, 0x8D, 0xD5, 0x4E, 0xA9, 0x6C, 0x56,
+                                       0xF4, 0xEA, 0x65, 0x7A, 0xAE, 0x08},
+                                      {0xBA, 0x78, 0x25, 0x2E, 0x1C, 0xA6, 0xB4, 0xC6, 0xE8, 0xDD,
+                                       0x74, 0x1F, 0x4B, 0xBD, 0x8B, 0x8A},
+                                      {0x70, 0x3E, 0xB5, 0x66, 0x48, 0x03, 0xF6, 0x0E, 0x61, 0x35,
+                                       0x57, 0xB9, 0x86, 0xC1, 0x1D, 0x9E},
+                                      {0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E,
+                                       0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF},
+                                      {0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99,
+                                       0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16}};
 
-static const BYTE aes_invsbox[16][16] = {
-    {0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E,
-     0x81, 0xF3, 0xD7, 0xFB},
-    {0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34, 0x8E, 0x43, 0x44,
-     0xC4, 0xDE, 0xE9, 0xCB},
-    {0x54, 0x7B, 0x94, 0x32, 0xA6, 0xC2, 0x23, 0x3D, 0xEE, 0x4C, 0x95, 0x0B,
-     0x42, 0xFA, 0xC3, 0x4E},
-    {0x08, 0x2E, 0xA1, 0x66, 0x28, 0xD9, 0x24, 0xB2, 0x76, 0x5B, 0xA2, 0x49,
-     0x6D, 0x8B, 0xD1, 0x25},
-    {0x72, 0xF8, 0xF6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xD4, 0xA4, 0x5C, 0xCC,
-     0x5D, 0x65, 0xB6, 0x92},
-    {0x6C, 0x70, 0x48, 0x50, 0xFD, 0xED, 0xB9, 0xDA, 0x5E, 0x15, 0x46, 0x57,
-     0xA7, 0x8D, 0x9D, 0x84},
-    {0x90, 0xD8, 0xAB, 0x00, 0x8C, 0xBC, 0xD3, 0x0A, 0xF7, 0xE4, 0x58, 0x05,
-     0xB8, 0xB3, 0x45, 0x06},
-    {0xD0, 0x2C, 0x1E, 0x8F, 0xCA, 0x3F, 0x0F, 0x02, 0xC1, 0xAF, 0xBD, 0x03,
-     0x01, 0x13, 0x8A, 0x6B},
-    {0x3A, 0x91, 0x11, 0x41, 0x4F, 0x67, 0xDC, 0xEA, 0x97, 0xF2, 0xCF, 0xCE,
-     0xF0, 0xB4, 0xE6, 0x73},
-    {0x96, 0xAC, 0x74, 0x22, 0xE7, 0xAD, 0x35, 0x85, 0xE2, 0xF9, 0x37, 0xE8,
-     0x1C, 0x75, 0xDF, 0x6E},
-    {0x47, 0xF1, 0x1A, 0x71, 0x1D, 0x29, 0xC5, 0x89, 0x6F, 0xB7, 0x62, 0x0E,
-     0xAA, 0x18, 0xBE, 0x1B},
-    {0xFC, 0x56, 0x3E, 0x4B, 0xC6, 0xD2, 0x79, 0x20, 0x9A, 0xDB, 0xC0, 0xFE,
-     0x78, 0xCD, 0x5A, 0xF4},
-    {0x1F, 0xDD, 0xA8, 0x33, 0x88, 0x07, 0xC7, 0x31, 0xB1, 0x12, 0x10, 0x59,
-     0x27, 0x80, 0xEC, 0x5F},
-    {0x60, 0x51, 0x7F, 0xA9, 0x19, 0xB5, 0x4A, 0x0D, 0x2D, 0xE5, 0x7A, 0x9F,
-     0x93, 0xC9, 0x9C, 0xEF},
-    {0xA0, 0xE0, 0x3B, 0x4D, 0xAE, 0x2A, 0xF5, 0xB0, 0xC8, 0xEB, 0xBB, 0x3C,
-     0x83, 0x53, 0x99, 0x61},
-    {0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63,
-     0x55, 0x21, 0x0C, 0x7D}};
+static const BYTE aes_invsbox[16][16] = {{0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF,
+                                          0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB},
+                                         {0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34,
+                                          0x8E, 0x43, 0x44, 0xC4, 0xDE, 0xE9, 0xCB},
+                                         {0x54, 0x7B, 0x94, 0x32, 0xA6, 0xC2, 0x23, 0x3D, 0xEE,
+                                          0x4C, 0x95, 0x0B, 0x42, 0xFA, 0xC3, 0x4E},
+                                         {0x08, 0x2E, 0xA1, 0x66, 0x28, 0xD9, 0x24, 0xB2, 0x76,
+                                          0x5B, 0xA2, 0x49, 0x6D, 0x8B, 0xD1, 0x25},
+                                         {0x72, 0xF8, 0xF6, 0x64, 0x86, 0x68, 0x98, 0x16, 0xD4,
+                                          0xA4, 0x5C, 0xCC, 0x5D, 0x65, 0xB6, 0x92},
+                                         {0x6C, 0x70, 0x48, 0x50, 0xFD, 0xED, 0xB9, 0xDA, 0x5E,
+                                          0x15, 0x46, 0x57, 0xA7, 0x8D, 0x9D, 0x84},
+                                         {0x90, 0xD8, 0xAB, 0x00, 0x8C, 0xBC, 0xD3, 0x0A, 0xF7,
+                                          0xE4, 0x58, 0x05, 0xB8, 0xB3, 0x45, 0x06},
+                                         {0xD0, 0x2C, 0x1E, 0x8F, 0xCA, 0x3F, 0x0F, 0x02, 0xC1,
+                                          0xAF, 0xBD, 0x03, 0x01, 0x13, 0x8A, 0x6B},
+                                         {0x3A, 0x91, 0x11, 0x41, 0x4F, 0x67, 0xDC, 0xEA, 0x97,
+                                          0xF2, 0xCF, 0xCE, 0xF0, 0xB4, 0xE6, 0x73},
+                                         {0x96, 0xAC, 0x74, 0x22, 0xE7, 0xAD, 0x35, 0x85, 0xE2,
+                                          0xF9, 0x37, 0xE8, 0x1C, 0x75, 0xDF, 0x6E},
+                                         {0x47, 0xF1, 0x1A, 0x71, 0x1D, 0x29, 0xC5, 0x89, 0x6F,
+                                          0xB7, 0x62, 0x0E, 0xAA, 0x18, 0xBE, 0x1B},
+                                         {0xFC, 0x56, 0x3E, 0x4B, 0xC6, 0xD2, 0x79, 0x20, 0x9A,
+                                          0xDB, 0xC0, 0xFE, 0x78, 0xCD, 0x5A, 0xF4},
+                                         {0x1F, 0xDD, 0xA8, 0x33, 0x88, 0x07, 0xC7, 0x31, 0xB1,
+                                          0x12, 0x10, 0x59, 0x27, 0x80, 0xEC, 0x5F},
+                                         {0x60, 0x51, 0x7F, 0xA9, 0x19, 0xB5, 0x4A, 0x0D, 0x2D,
+                                          0xE5, 0x7A, 0x9F, 0x93, 0xC9, 0x9C, 0xEF},
+                                         {0xA0, 0xE0, 0x3B, 0x4D, 0xAE, 0x2A, 0xF5, 0xB0, 0xC8,
+                                          0xEB, 0xBB, 0x3C, 0x83, 0x53, 0x99, 0x61},
+                                         {0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1,
+                                          0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D}};
 
 // This table stores pre-calculated values for all possible GF(2^8)
 // calculations.This table is only used by the (Inv)MixColumns steps. USAGE: The
@@ -246,30 +241,30 @@ static const BYTE gf_mul[256][6] = {
 
 /*********************** FUNCTION DEFINITIONS ***********************/
 // XORs the in and out buffers, storing the result in out. Length is in bytes.
-void xor_buf(const BYTE in[], BYTE out[], size_t len) {
+void xor_buf(const BYTE in[], BYTE out[], size_t len)
+{
     size_t idx;
 
-    for (idx = 0; idx < len; idx++)
-        out[idx] ^= in[idx];
+    for (idx = 0; idx < len; idx++) out[idx] ^= in[idx];
 }
 
 /*******************
  * AES - CBC
  *******************/
-int aes_encrypt_cbc(const BYTE in[], size_t in_len, BYTE out[],
-                    const WORD key[], int keysize, const BYTE iv[]) {
-    BYTE buf_in[AES_BLOCK_SIZE], buf_out[AES_BLOCK_SIZE],
-        iv_buf[AES_BLOCK_SIZE];
+int aes_encrypt_cbc(const BYTE in[], size_t in_len, BYTE out[], const WORD key[], int keysize,
+                    const BYTE iv[])
+{
+    BYTE buf_in[AES_BLOCK_SIZE], buf_out[AES_BLOCK_SIZE], iv_buf[AES_BLOCK_SIZE];
     int blocks, idx;
 
-    if (in_len % AES_BLOCK_SIZE != 0)
-        return (FALSE);
+    if (in_len % AES_BLOCK_SIZE != 0) return (FALSE);
 
     blocks = in_len / AES_BLOCK_SIZE;
 
     memcpy(iv_buf, iv, AES_BLOCK_SIZE);
 
-    for (idx = 0; idx < blocks; idx++) {
+    for (idx = 0; idx < blocks; idx++)
+    {
         memcpy(buf_in, &in[idx * AES_BLOCK_SIZE], AES_BLOCK_SIZE);
         xor_buf(iv_buf, buf_in, AES_BLOCK_SIZE);
         aes_encrypt(buf_in, buf_out, key, keysize);
@@ -280,20 +275,20 @@ int aes_encrypt_cbc(const BYTE in[], size_t in_len, BYTE out[],
     return (TRUE);
 }
 
-int aes_encrypt_cbc_mac(const BYTE in[], size_t in_len, BYTE out[],
-                        const WORD key[], int keysize, const BYTE iv[]) {
-    BYTE buf_in[AES_BLOCK_SIZE], buf_out[AES_BLOCK_SIZE],
-        iv_buf[AES_BLOCK_SIZE];
+int aes_encrypt_cbc_mac(const BYTE in[], size_t in_len, BYTE out[], const WORD key[], int keysize,
+                        const BYTE iv[])
+{
+    BYTE buf_in[AES_BLOCK_SIZE], buf_out[AES_BLOCK_SIZE], iv_buf[AES_BLOCK_SIZE];
     int blocks, idx;
 
-    if (in_len % AES_BLOCK_SIZE != 0)
-        return (FALSE);
+    if (in_len % AES_BLOCK_SIZE != 0) return (FALSE);
 
     blocks = in_len / AES_BLOCK_SIZE;
 
     memcpy(iv_buf, iv, AES_BLOCK_SIZE);
 
-    for (idx = 0; idx < blocks; idx++) {
+    for (idx = 0; idx < blocks; idx++)
+    {
         memcpy(buf_in, &in[idx * AES_BLOCK_SIZE], AES_BLOCK_SIZE);
         xor_buf(iv_buf, buf_in, AES_BLOCK_SIZE);
         aes_encrypt(buf_in, buf_out, key, keysize);
@@ -306,20 +301,20 @@ int aes_encrypt_cbc_mac(const BYTE in[], size_t in_len, BYTE out[],
     return (TRUE);
 }
 
-int aes_decrypt_cbc(const BYTE in[], size_t in_len, BYTE out[],
-                    const WORD key[], int keysize, const BYTE iv[]) {
-    BYTE buf_in[AES_BLOCK_SIZE], buf_out[AES_BLOCK_SIZE],
-        iv_buf[AES_BLOCK_SIZE];
+int aes_decrypt_cbc(const BYTE in[], size_t in_len, BYTE out[], const WORD key[], int keysize,
+                    const BYTE iv[])
+{
+    BYTE buf_in[AES_BLOCK_SIZE], buf_out[AES_BLOCK_SIZE], iv_buf[AES_BLOCK_SIZE];
     int blocks, idx;
 
-    if (in_len % AES_BLOCK_SIZE != 0)
-        return (FALSE);
+    if (in_len % AES_BLOCK_SIZE != 0) return (FALSE);
 
     blocks = in_len / AES_BLOCK_SIZE;
 
     memcpy(iv_buf, iv, AES_BLOCK_SIZE);
 
-    for (idx = 0; idx < blocks; idx++) {
+    for (idx = 0; idx < blocks; idx++)
+    {
         memcpy(buf_in, &in[idx * AES_BLOCK_SIZE], AES_BLOCK_SIZE);
         aes_decrypt(buf_in, buf_out, key, keysize);
         xor_buf(iv_buf, buf_out, AES_BLOCK_SIZE);
@@ -333,34 +328,36 @@ int aes_decrypt_cbc(const BYTE in[], size_t in_len, BYTE out[],
 /*******************
  * AES - CTR
  *******************/
-void increment_iv(BYTE iv[], int counter_size) {
+void increment_iv(BYTE iv[], int counter_size)
+{
     int idx;
 
     // Use counter_size bytes at the end of the IV as the big-endian integer to
     // increment.
-    for (idx = AES_BLOCK_SIZE - 1; idx >= AES_BLOCK_SIZE - counter_size;
-         idx--) {
+    for (idx = AES_BLOCK_SIZE - 1; idx >= AES_BLOCK_SIZE - counter_size; idx--)
+    {
         iv[idx]++;
-        if (iv[idx] != 0 || idx == AES_BLOCK_SIZE - counter_size)
-            break;
+        if (iv[idx] != 0 || idx == AES_BLOCK_SIZE - counter_size) break;
     }
 }
 
 // Performs the encryption in-place, the input and output buffers may be the
 // same. Input may be an arbitrary length (in bytes).
-void aes_encrypt_ctr(const BYTE in[], size_t in_len, BYTE out[],
-                     const WORD key[], int keysize, const BYTE iv[]) {
+void aes_encrypt_ctr(const BYTE in[], size_t in_len, BYTE out[], const WORD key[], int keysize,
+                     const BYTE iv[])
+{
     size_t idx = 0, last_block_length;
     BYTE iv_buf[AES_BLOCK_SIZE], out_buf[AES_BLOCK_SIZE];
 
-    if (in != out)
-        memcpy(out, in, in_len);
+    if (in != out) memcpy(out, in, in_len);
 
     memcpy(iv_buf, iv, AES_BLOCK_SIZE);
     last_block_length = in_len - AES_BLOCK_SIZE;
 
-    if (in_len > AES_BLOCK_SIZE) {
-        for (idx = 0; idx < last_block_length; idx += AES_BLOCK_SIZE) {
+    if (in_len > AES_BLOCK_SIZE)
+    {
+        for (idx = 0; idx < last_block_length; idx += AES_BLOCK_SIZE)
+        {
             aes_encrypt(iv_buf, out_buf, key, keysize);
             xor_buf(out_buf, &out[idx], AES_BLOCK_SIZE);
             increment_iv(iv_buf, AES_BLOCK_SIZE);
@@ -372,8 +369,9 @@ void aes_encrypt_ctr(const BYTE in[], size_t in_len, BYTE out[],
             in_len - idx); // Use the Most Significant bytes.
 }
 
-void aes_decrypt_ctr(const BYTE in[], size_t in_len, BYTE out[],
-                     const WORD key[], int keysize, const BYTE iv[]) {
+void aes_decrypt_ctr(const BYTE in[], size_t in_len, BYTE out[], const WORD key[], int keysize,
+                     const BYTE iv[])
+{
     // CTR encryption is its own inverse function.
     aes_encrypt_ctr(in, in_len, out, key, keysize, iv);
 }
@@ -383,35 +381,33 @@ void aes_decrypt_ctr(const BYTE in[], size_t in_len, BYTE out[],
  *******************/
 // out_len = payload_len + assoc_len
 int aes_encrypt_ccm(const BYTE payload[], WORD payload_len, const BYTE assoc[],
-                    unsigned short assoc_len, const BYTE nonce[],
-                    unsigned short nonce_len, BYTE out[], WORD *out_len,
-                    WORD mac_len, const BYTE key_str[], int keysize) {
+                    unsigned short assoc_len, const BYTE nonce[], unsigned short nonce_len,
+                    BYTE out[], WORD* out_len, WORD mac_len, const BYTE key_str[], int keysize)
+{
     BYTE temp_iv[AES_BLOCK_SIZE], counter[AES_BLOCK_SIZE], mac[16], *buf;
     int end_of_buf, payload_len_store_size;
     WORD key[60];
 
-    if (mac_len != 4 && mac_len != 6 && mac_len != 8 && mac_len != 10 &&
-        mac_len != 12 && mac_len != 14 && mac_len != 16)
+    if (mac_len != 4 && mac_len != 6 && mac_len != 8 && mac_len != 10 && mac_len != 12 &&
+        mac_len != 14 && mac_len != 16)
         return (FALSE);
 
-    if (nonce_len < 7 || nonce_len > 13)
-        return (FALSE);
+    if (nonce_len < 7 || nonce_len > 13) return (FALSE);
 
-    if (assoc_len > 32768 /* = 2^15 */)
-        return (FALSE);
+    if (assoc_len > 32768 /* = 2^15 */) return (FALSE);
 
-    buf = (BYTE*)malloc(payload_len + assoc_len + 48 /*Round both payload and associated data up a block size and add an extra block.*/);
-    if (!buf)
-        return (FALSE);
+    buf = (BYTE*) malloc(
+        payload_len + assoc_len +
+        48 /*Round both payload and associated data up a block size and add an extra block.*/);
+    if (!buf) return (FALSE);
 
     // Prepare the key for usage.
     aes_key_setup(key_str, key, keysize);
 
     // Format the first block of the formatted data.
     payload_len_store_size = AES_BLOCK_SIZE - 1 - nonce_len;
-    ccm_prepare_first_format_blk(buf, assoc_len, payload_len,
-                                 payload_len_store_size, mac_len, nonce,
-                                 nonce_len);
+    ccm_prepare_first_format_blk(buf, assoc_len, payload_len, payload_len_store_size, mac_len,
+                                 nonce, nonce_len);
     end_of_buf = AES_BLOCK_SIZE;
 
     // Format the Associated Data, aka, assoc[].
@@ -421,8 +417,7 @@ int aes_encrypt_ccm(const BYTE payload[], WORD payload_len, const BYTE assoc[],
     ccm_format_payload_data(buf, &end_of_buf, payload, payload_len);
 
     // Create the first counter block.
-    ccm_prepare_first_ctr_blk(counter, nonce, nonce_len,
-                              payload_len_store_size);
+    ccm_prepare_first_ctr_blk(counter, nonce, nonce_len, payload_len_store_size);
 
     // Perform the CBC operation with an IV of zeros on the formatted buffer to
     // calculate the MAC.
@@ -436,14 +431,12 @@ int aes_encrypt_ccm(const BYTE payload[], WORD payload_len, const BYTE assoc[],
     // Encrypt the Payload with CTR mode with a counter starting at 1.
     memcpy(temp_iv, counter, AES_BLOCK_SIZE);
     increment_iv(temp_iv,
-                 AES_BLOCK_SIZE - 1 -
-                     mac_len); // Last argument is the byte size of the counting
-                               // portion of the counter block. /*BUG?*/
+                 AES_BLOCK_SIZE - 1 - mac_len); // Last argument is the byte size of the counting
+                                                // portion of the counter block. /*BUG?*/
     aes_encrypt_ctr(out, payload_len, out, key, keysize, temp_iv);
 
     // Encrypt the MAC with CTR mode with a counter starting at 0.
-    aes_encrypt_ctr(&out[payload_len], mac_len, &out[payload_len], key, keysize,
-                    counter);
+    aes_encrypt_ctr(&out[payload_len], mac_len, &out[payload_len], key, keysize, counter);
 
     free(buf);
     *out_len = payload_len + mac_len;
@@ -453,24 +446,20 @@ int aes_encrypt_ccm(const BYTE payload[], WORD payload_len, const BYTE assoc[],
 
 // plaintext_len = ciphertext_len - mac_len
 // Needs a flag for whether the MAC matches.
-int aes_decrypt_ccm(const BYTE ciphertext[], WORD ciphertext_len,
-                    const BYTE assoc[], unsigned short assoc_len,
-                    const BYTE nonce[], unsigned short nonce_len,
-                    BYTE plaintext[], WORD *plaintext_len, WORD mac_len,
-                    int *mac_auth, const BYTE key_str[], int keysize) {
-    BYTE temp_iv[AES_BLOCK_SIZE], counter[AES_BLOCK_SIZE], mac[16], mac_buf[16],
-        *buf;
+int aes_decrypt_ccm(const BYTE ciphertext[], WORD ciphertext_len, const BYTE assoc[],
+                    unsigned short assoc_len, const BYTE nonce[], unsigned short nonce_len,
+                    BYTE plaintext[], WORD* plaintext_len, WORD mac_len, int* mac_auth,
+                    const BYTE key_str[], int keysize)
+{
+    BYTE temp_iv[AES_BLOCK_SIZE], counter[AES_BLOCK_SIZE], mac[16], mac_buf[16], *buf;
     int end_of_buf, plaintext_len_store_size;
     WORD key[60];
 
-    if (ciphertext_len <= mac_len)
-        return (FALSE);
+    if (ciphertext_len <= mac_len) return (FALSE);
 
-    buf = (BYTE *)malloc(
-        assoc_len +
-        ciphertext_len /*ciphertext_len = plaintext_len + mac_len*/ + 48);
-    if (!buf)
-        return (FALSE);
+    buf = (BYTE*) malloc(assoc_len + ciphertext_len /*ciphertext_len = plaintext_len + mac_len*/ +
+                         48);
+    if (!buf) return (FALSE);
 
     // Prepare the key for usage.
     aes_key_setup(key_str, key, keysize);
@@ -482,29 +471,25 @@ int aes_decrypt_ccm(const BYTE ciphertext[], WORD ciphertext_len,
     memcpy(mac, &ciphertext[*plaintext_len], mac_len);
 
     // Prepare the first counter block for use in decryption.
-    ccm_prepare_first_ctr_blk(counter, nonce, nonce_len,
-                              plaintext_len_store_size);
+    ccm_prepare_first_ctr_blk(counter, nonce, nonce_len, plaintext_len_store_size);
 
     // Decrypt the Payload with CTR mode with a counter starting at 1.
     memcpy(temp_iv, counter, AES_BLOCK_SIZE);
-    increment_iv(
-        temp_iv,
-        AES_BLOCK_SIZE - 1 -
-            mac_len); // (AES_BLOCK_SIZE - 1 - mac_len) is the byte size of the
-                      // counting portion of the counter block.
-    aes_decrypt_ctr(plaintext, *plaintext_len, plaintext, key, keysize,
-                    temp_iv);
+    increment_iv(temp_iv,
+                 AES_BLOCK_SIZE - 1 - mac_len); // (AES_BLOCK_SIZE - 1 - mac_len) is the byte size
+                                                // of the counting portion of the counter block.
+    aes_decrypt_ctr(plaintext, *plaintext_len, plaintext, key, keysize, temp_iv);
 
     // Setting mac_auth to NULL disables the authentication check.
-    if (mac_auth != NULL) {
+    if (mac_auth != NULL)
+    {
         // Decrypt the MAC with CTR mode with a counter starting at 0.
         aes_decrypt_ctr(mac, mac_len, mac, key, keysize, counter);
 
         // Format the first block of the formatted data.
         plaintext_len_store_size = AES_BLOCK_SIZE - 1 - nonce_len;
-        ccm_prepare_first_format_blk(buf, assoc_len, *plaintext_len,
-                                     plaintext_len_store_size, mac_len, nonce,
-                                     nonce_len);
+        ccm_prepare_first_format_blk(buf, assoc_len, *plaintext_len, plaintext_len_store_size,
+                                     mac_len, nonce, nonce_len);
         end_of_buf = AES_BLOCK_SIZE;
 
         // Format the Associated Data into the authentication buffer.
@@ -520,9 +505,9 @@ int aes_decrypt_ccm(const BYTE ciphertext[], WORD ciphertext_len,
 
         // Compare the calculated MAC against the MAC embedded in the ciphertext
         // to see if they are the same.
-        if (!memcmp(mac, mac_buf, mac_len)) {
-            *mac_auth = TRUE;
-        } else {
+        if (!memcmp(mac, mac_buf, mac_len)) { *mac_auth = TRUE; }
+        else
+        {
             *mac_auth = FALSE;
             memset(plaintext, 0, *plaintext_len);
         }
@@ -535,21 +520,21 @@ int aes_decrypt_ccm(const BYTE ciphertext[], WORD ciphertext_len,
 
 // Creates the first counter block. First byte is flags, then the nonce, then
 // the incremented part.
-void ccm_prepare_first_ctr_blk(BYTE counter[], const BYTE nonce[],
-                               int nonce_len, int payload_len_store_size) {
+void ccm_prepare_first_ctr_blk(BYTE counter[], const BYTE nonce[], int nonce_len,
+                               int payload_len_store_size)
+{
     memset(counter, 0, AES_BLOCK_SIZE);
     counter[0] = (payload_len_store_size - 1) & 0x07;
     memcpy(&counter[1], nonce, nonce_len);
 }
 
 void ccm_prepare_first_format_blk(BYTE buf[], int assoc_len, int payload_len,
-                                  int payload_len_store_size, int mac_len,
-                                  const BYTE nonce[], int nonce_len) {
+                                  int payload_len_store_size, int mac_len, const BYTE nonce[],
+                                  int nonce_len)
+{
     // Set the flags for the first byte of the first block.
-    buf[0] = ((((mac_len - 2) / 2) & 0x07) << 3) |
-             ((payload_len_store_size - 1) & 0x07);
-    if (assoc_len > 0)
-        buf[0] += 0x40;
+    buf[0] = ((((mac_len - 2) / 2) & 0x07) << 3) | ((payload_len_store_size - 1) & 0x07);
+    if (assoc_len > 0) buf[0] += 0x40;
     // Format the rest of the first block, storing the nonce and the size of the
     // payload.
     memcpy(&buf[1], nonce, nonce_len);
@@ -558,8 +543,8 @@ void ccm_prepare_first_format_blk(BYTE buf[], int assoc_len, int payload_len,
     buf[14] = (payload_len >> 8) & 0x000000FF;
 }
 
-void ccm_format_assoc_data(BYTE buf[], int *end_of_buf, const BYTE assoc[],
-                           int assoc_len) {
+void ccm_format_assoc_data(BYTE buf[], int* end_of_buf, const BYTE assoc[], int assoc_len)
+{
     int pad;
 
     buf[*end_of_buf + 1] = assoc_len & 0x00FF;
@@ -572,15 +557,14 @@ void ccm_format_assoc_data(BYTE buf[], int *end_of_buf, const BYTE assoc[],
     *end_of_buf += pad;
 }
 
-void ccm_format_payload_data(BYTE buf[], int *end_of_buf, const BYTE payload[],
-                             int payload_len) {
+void ccm_format_payload_data(BYTE buf[], int* end_of_buf, const BYTE payload[], int payload_len)
+{
     int pad;
 
     memcpy(&buf[*end_of_buf], payload, payload_len);
     *end_of_buf += payload_len;
     pad = *end_of_buf % AES_BLOCK_SIZE;
-    if (pad != 0)
-        pad = AES_BLOCK_SIZE - pad;
+    if (pad != 0) pad = AES_BLOCK_SIZE - pad;
     memset(&buf[*end_of_buf], 0, pad);
     *end_of_buf += pad;
 }
@@ -593,32 +577,29 @@ void ccm_format_payload_data(BYTE buf[], int *end_of_buf, const BYTE payload[],
 /////////////////
 
 // Substitutes a word using the AES S-Box.
-WORD SubWord(WORD word) {
+WORD SubWord(WORD word)
+{
     unsigned int result;
 
-    result = (int)aes_sbox[(word >> 4) & 0x0000000F][word & 0x0000000F];
-    result += (int)aes_sbox[(word >> 12) & 0x0000000F][(word >> 8) & 0x0000000F]
-              << 8;
-    result +=
-        (int)aes_sbox[(word >> 20) & 0x0000000F][(word >> 16) & 0x0000000F]
-        << 16;
-    result +=
-        (int)aes_sbox[(word >> 28) & 0x0000000F][(word >> 24) & 0x0000000F]
-        << 24;
+    result = (int) aes_sbox[(word >> 4) & 0x0000000F][word & 0x0000000F];
+    result += (int) aes_sbox[(word >> 12) & 0x0000000F][(word >> 8) & 0x0000000F] << 8;
+    result += (int) aes_sbox[(word >> 20) & 0x0000000F][(word >> 16) & 0x0000000F] << 16;
+    result += (int) aes_sbox[(word >> 28) & 0x0000000F][(word >> 24) & 0x0000000F] << 24;
     return (result);
 }
 
 // Performs the action of generating the keys that will be used in every round
 // of encryption. "key" is the user-supplied input key, "w" is the output key
 // schedule, "keysize" is the length in bits of "key", must be 128, 192, or 256.
-void aes_key_setup(const BYTE key[], WORD w[], int keysize) {
+void aes_key_setup(const BYTE key[], WORD w[], int keysize)
+{
     int Nb = 4, Nr, Nk, idx;
-    WORD temp,
-        Rcon[] = {0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
-                  0x20000000, 0x40000000, 0x80000000, 0x1b000000, 0x36000000,
-                  0x6c000000, 0xd8000000, 0xab000000, 0x4d000000, 0x9a000000};
+    WORD temp, Rcon[] = {0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
+                         0x20000000, 0x40000000, 0x80000000, 0x1b000000, 0x36000000,
+                         0x6c000000, 0xd8000000, 0xab000000, 0x4d000000, 0x9a000000};
 
-    switch (keysize) {
+    switch (keysize)
+    {
     case 128:
         Nr = 10;
         Nk = 4;
@@ -635,12 +616,14 @@ void aes_key_setup(const BYTE key[], WORD w[], int keysize) {
         return;
     }
 
-    for (idx = 0; idx < Nk; ++idx) {
-        w[idx] = ((key[4 * idx]) << 24) | ((key[4 * idx + 1]) << 16) |
-                 ((key[4 * idx + 2]) << 8) | ((key[4 * idx + 3]));
+    for (idx = 0; idx < Nk; ++idx)
+    {
+        w[idx] = ((key[4 * idx]) << 24) | ((key[4 * idx + 1]) << 16) | ((key[4 * idx + 2]) << 8) |
+                 ((key[4 * idx + 3]));
     }
 
-    for (idx = Nk; idx < Nb * (Nr + 1); ++idx) {
+    for (idx = Nk; idx < Nb * (Nr + 1); ++idx)
+    {
         temp = w[idx - 1];
         if ((idx % Nk) == 0)
             temp = SubWord(KE_ROTWORD(temp)) ^ Rcon[(idx - 1) / Nk];
@@ -658,7 +641,8 @@ void aes_key_setup(const BYTE key[], WORD w[], int keysize) {
 // key in the form of 4 integers (the "w" array). Each integer is XOR'd by one
 // column of the state. Also performs the job of InvAddRoundKey(); since the
 // function is a simple XOR process, it is its own inverse.
-void AddRoundKey(BYTE state[][4], const WORD w[]) {
+void AddRoundKey(BYTE state[][4], const WORD w[])
+{
     BYTE subkey[4];
 
     // memcpy(subkey,&w[idx],4); // Not accurate for big endian machines
@@ -706,7 +690,8 @@ void AddRoundKey(BYTE state[][4], const WORD w[]) {
 
 // Performs the SubBytes step. All bytes in the state are substituted with a
 // pre-calculated value from a lookup table.
-void SubBytes(BYTE state[][4]) {
+void SubBytes(BYTE state[][4])
+{
     state[0][0] = aes_sbox[state[0][0] >> 4][state[0][0] & 0x0F];
     state[0][1] = aes_sbox[state[0][1] >> 4][state[0][1] & 0x0F];
     state[0][2] = aes_sbox[state[0][2] >> 4][state[0][2] & 0x0F];
@@ -725,7 +710,8 @@ void SubBytes(BYTE state[][4]) {
     state[3][3] = aes_sbox[state[3][3] >> 4][state[3][3] & 0x0F];
 }
 
-void InvSubBytes(BYTE state[][4]) {
+void InvSubBytes(BYTE state[][4])
+{
     state[0][0] = aes_invsbox[state[0][0] >> 4][state[0][0] & 0x0F];
     state[0][1] = aes_invsbox[state[0][1] >> 4][state[0][1] & 0x0F];
     state[0][2] = aes_invsbox[state[0][2] >> 4][state[0][2] & 0x0F];
@@ -749,7 +735,8 @@ void InvSubBytes(BYTE state[][4]) {
 /////////////////
 
 // Performs the ShiftRows step. All rows are shifted cylindrically to the left.
-void ShiftRows(BYTE state[][4]) {
+void ShiftRows(BYTE state[][4])
+{
     int t;
 
     // Shift left by 1
@@ -774,7 +761,8 @@ void ShiftRows(BYTE state[][4]) {
 }
 
 // All rows are shifted cylindrically to the right.
-void InvShiftRows(BYTE state[][4]) {
+void InvShiftRows(BYTE state[][4])
+{
     int t;
 
     // Shift right by 1
@@ -806,7 +794,8 @@ void InvShiftRows(BYTE state[][4]) {
 // multiplication in a Galios Field 2^8. All multiplication is pre-computed in a
 // table. Addition is equivilent to XOR. (Must always make a copy of the column
 // as the original values will be destoyed.)
-void MixColumns(BYTE state[][4]) {
+void MixColumns(BYTE state[][4])
+{
     BYTE col[4];
 
     // Column 1
@@ -895,7 +884,8 @@ void MixColumns(BYTE state[][4]) {
     state[3][3] ^= gf_mul[col[3]][0];
 }
 
-void InvMixColumns(BYTE state[][4]) {
+void InvMixColumns(BYTE state[][4])
+{
     BYTE col[4];
 
     // Column 1
@@ -988,7 +978,8 @@ void InvMixColumns(BYTE state[][4]) {
 // (En/De)Crypt
 /////////////////
 
-void aes_encrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize) {
+void aes_encrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize)
+{
     BYTE state[4][4];
 
     // Copy input array (should be 16 bytes long) to a matrix (sequential bytes
@@ -1053,7 +1044,8 @@ void aes_encrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize) {
     ShiftRows(state);
     MixColumns(state);
     AddRoundKey(state, &key[36]);
-    if (keysize != 128) {
+    if (keysize != 128)
+    {
         SubBytes(state);
         ShiftRows(state);
         MixColumns(state);
@@ -1062,7 +1054,8 @@ void aes_encrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize) {
         ShiftRows(state);
         MixColumns(state);
         AddRoundKey(state, &key[44]);
-        if (keysize != 192) {
+        if (keysize != 192)
+        {
             SubBytes(state);
             ShiftRows(state);
             MixColumns(state);
@@ -1074,12 +1067,16 @@ void aes_encrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize) {
             SubBytes(state);
             ShiftRows(state);
             AddRoundKey(state, &key[56]);
-        } else {
+        }
+        else
+        {
             SubBytes(state);
             ShiftRows(state);
             AddRoundKey(state, &key[48]);
         }
-    } else {
+    }
+    else
+    {
         SubBytes(state);
         ShiftRows(state);
         AddRoundKey(state, &key[40]);
@@ -1104,7 +1101,8 @@ void aes_encrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize) {
     out[15] = state[3][3];
 }
 
-void aes_decrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize) {
+void aes_decrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize)
+{
     BYTE state[4][4];
 
     // Copy the input to the state.
@@ -1127,8 +1125,10 @@ void aes_decrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize) {
 
     // Perform the necessary number of rounds. The round key is added first.
     // The last round does not perform the MixColumns step.
-    if (keysize > 128) {
-        if (keysize > 192) {
+    if (keysize > 128)
+    {
+        if (keysize > 192)
+        {
             AddRoundKey(state, &key[56]);
             InvShiftRows(state);
             InvSubBytes(state);
@@ -1138,7 +1138,9 @@ void aes_decrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize) {
             InvSubBytes(state);
             AddRoundKey(state, &key[48]);
             InvMixColumns(state);
-        } else {
+        }
+        else
+        {
             AddRoundKey(state, &key[48]);
         }
         InvShiftRows(state);
@@ -1149,7 +1151,9 @@ void aes_decrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize) {
         InvSubBytes(state);
         AddRoundKey(state, &key[40]);
         InvMixColumns(state);
-    } else {
+    }
+    else
+    {
         AddRoundKey(state, &key[40]);
     }
     InvShiftRows(state);
@@ -1211,5 +1215,4 @@ void aes_decrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize) {
     out[15] = state[3][3];
 }
 
-} // namespace crypto
 GLUE_END_NAMESPACE

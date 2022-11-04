@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <vector>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 class ImageRotate {

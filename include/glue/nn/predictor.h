@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 class TensorInfo {

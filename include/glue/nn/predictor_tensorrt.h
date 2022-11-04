@@ -21,7 +21,7 @@ class ICudaEngine;
 class IExecutionContext;
 } // namespace nvinfer1
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 class PredictorTensorRt : public Predictor {

@@ -9,15 +9,15 @@
 
 #include <vector>
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
 /**
  * DJB's Poly1305
  * Important note: each key can only be used once
  */
-class Poly1305 final {
-  public:
+class Poly1305 final
+{
+public:
     void clear();
 
     void set_key(const uint8_t key[], size_t key_len);
@@ -26,28 +26,38 @@ class Poly1305 final {
 
     void final(uint8_t[]);
 
-    size_t output_length() const { return 16; }
+    size_t output_length() const
+    {
+        return 16;
+    }
 
     /**
      * @return minimum allowed key length
      */
-    size_t maximum_keylength() const { return m_key_spec.maximum_keylength(); }
+    size_t maximum_keylength() const
+    {
+        return m_key_spec.maximum_keylength();
+    }
 
     /**
      * @return maximum allowed key length
      */
-    size_t minimum_keylength() const { return m_key_spec.minimum_keylength(); }
+    size_t minimum_keylength() const
+    {
+        return m_key_spec.minimum_keylength();
+    }
 
     /**
      * Check whether a given key length is valid for this algorithm.
      * @param length the key length to be checked.
      * @return true if the key length is valid.
      */
-    bool valid_keylength(size_t length) const {
+    bool valid_keylength(size_t length) const
+    {
         return m_key_spec.valid_keylength(length);
     }
 
-  private:
+private:
     void key_schedule(const uint8_t[], size_t);
 
     void verify_key_set(bool cond) const;
@@ -59,5 +69,4 @@ class Poly1305 final {
     size_t m_buf_pos = 0;
 };
 
-} // namespace crypto
 GLUE_END_NAMESPACE

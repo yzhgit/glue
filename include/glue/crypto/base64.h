@@ -5,8 +5,7 @@
 
 #pragma once
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
 typedef unsigned char BYTE; // 8-bit byte
 
@@ -18,5 +17,4 @@ size_t base64_encode(const BYTE in[], BYTE out[], size_t len, int newline_flag);
 // the size of what the output would have been (without a terminating NULL).
 size_t base64_decode(const BYTE in[], BYTE out[], size_t len);
 
-} // namespace crypto
 GLUE_END_NAMESPACE

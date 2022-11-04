@@ -8,8 +8,8 @@
 #include <string>
 #include <vector>
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
+
 /**
  * Perform hex encoding
  * @param output an array of at least input_length*2 bytes
@@ -102,5 +102,5 @@ std::vector<uint8_t> hex_decode(const char input[], size_t input_length,
 std::vector<uint8_t> hex_decode(const std::string &input,
                                 bool ignore_ws = true);
 
-} // namespace crypto
+
 GLUE_END_NAMESPACE

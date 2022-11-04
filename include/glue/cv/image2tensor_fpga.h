@@ -10,7 +10,7 @@
 #include "lite/backends/fpga/KD/llapi/zynqmp_api.h"
 #include <stdint.h>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 using paddle::zynqmp::float16;

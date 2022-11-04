@@ -8,7 +8,7 @@
 #include "glue/cv/image_preprocess.h"
 #include <stdint.h>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 typedef void (*tensor_func)(const uint8_t *src, float *dst, int srcw, int srch,

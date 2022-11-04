@@ -7,11 +7,10 @@
 
 #include <stdint.h>
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
-#if defined(__SIZEOF_INT128__) && defined(GL_TARGET_CPU_HAS_NATIVE_64BIT)
-    #define GL_TARGET_HAS_NATIVE_UINT128
+#if defined(__SIZEOF_INT128__) && defined(GLUE_64BIT)
+    #define GLUE_TARGET_HAS_NATIVE_UINT128
 
     // Prefer TI mode over __int128 as GCC rejects the latter in pendantic mode
     #if defined(__GNUG__)
@@ -21,76 +20,73 @@ typedef unsigned __int128 uint128_t;
     #endif
 #endif
 
-} // namespace crypto
 GLUE_END_NAMESPACE
 
-#if defined(GL_TARGET_HAS_NATIVE_UINT128)
+#if defined(GLUE_TARGET_HAS_NATIVE_UINT128)
 
-    #define GL_FAST_64X64_MUL(a, b, lo, hi)                                    \
-        do {                                                                   \
-            const uint128_t r = static_cast<uint128_t>(a) * b;                 \
-            *hi = (r >> 64) & 0xFFFFFFFFFFFFFFFF;                              \
-            *lo = (r)&0xFFFFFFFFFFFFFFFF;                                      \
+    #define GLUE_FAST_64X64_MUL(a, b, lo, hi)                                                      \
+        do {                                                                                       \
+            const uint128_t r = static_cast<uint128_t>(a) * b;                                     \
+            *hi = (r >> 64) & 0xFFFFFFFFFFFFFFFF;                                                  \
+            *lo = (r) &0xFFFFFFFFFFFFFFFF;                                                         \
         } while (0)
 
-#elif defined(GL_COMPILER_MSVC) && defined(GL_TARGET_CPU_HAS_NATIVE_64BIT)
+#elif defined(GLUE_COMPILER_MSVC) && defined(GLUE_64BIT)
 
     #include <intrin.h>
     #pragma intrinsic(_umul128)
 
-    #define GL_FAST_64X64_MUL(a, b, lo, hi)                                    \
-        do {                                                                   \
-            *lo = _umul128(a, b, hi);                                          \
+    #define GLUE_FAST_64X64_MUL(a, b, lo, hi)                                                      \
+        do {                                                                                       \
+            *lo = _umul128(a, b, hi);                                                              \
         } while (0)
 
-#elif defined(GL_USE_GCC_INLINE_ASM)
+#elif defined(GLUE_USE_GCC_INLINE_ASM)
 
-    #if defined(GL_TARGET_ARCH_IS_X86_64)
+    #if defined(GLUE_ARCH_X86_64)
 
-        #define GL_FAST_64X64_MUL(a, b, lo, hi)                                \
-            do {                                                               \
-                asm("mulq %3"                                                  \
-                    : "=d"(*hi), "=a"(*lo)                                     \
-                    : "a"(a), "rm"(b)                                          \
-                    : "cc");                                                   \
+        #define GLUE_FAST_64X64_MUL(a, b, lo, hi)                                                  \
+            do {                                                                                   \
+                asm("mulq %3" : "=d"(*hi), "=a"(*lo) : "a"(a), "rm"(b) : "cc");                    \
             } while (0)
 
-    #elif defined(GL_TARGET_ARCH_IS_ALPHA)
+    #elif defined(GLUE_ARCH_ALPHA)
 
-        #define GL_FAST_64X64_MUL(a, b, lo, hi)                                \
-            do {                                                               \
-                asm("umulh %1,%2,%0" : "=r"(*hi) : "r"(a), "r"(b));            \
-                *lo = a * b;                                                   \
+        #define GLUE_FAST_64X64_MUL(a, b, lo, hi)                                                  \
+            do {                                                                                   \
+                asm("umulh %1,%2,%0" : "=r"(*hi) : "r"(a), "r"(b));                                \
+                *lo = a * b;                                                                       \
             } while (0)
 
-    #elif defined(GL_TARGET_ARCH_IS_IA64)
+    #elif defined(GLUE_ARCH_IA64)
 
-        #define GL_FAST_64X64_MUL(a, b, lo, hi)                                \
-            do {                                                               \
-                asm("xmpy.hu %0=%1,%2" : "=f"(*hi) : "f"(a), "f"(b));          \
-                *lo = a * b;                                                   \
+        #define GLUE_FAST_64X64_MUL(a, b, lo, hi)                                                  \
+            do {                                                                                   \
+                asm("xmpy.hu %0=%1,%2" : "=f"(*hi) : "f"(a), "f"(b));                              \
+                *lo = a * b;                                                                       \
             } while (0)
 
-    #elif defined(GL_TARGET_ARCH_IS_PPC64)
+    #elif defined(GLUE_ARCH_PPC64)
 
-        #define GL_FAST_64X64_MUL(a, b, lo, hi)                                \
-            do {                                                               \
-                asm("mulhdu %0,%1,%2" : "=r"(*hi) : "r"(a), "r"(b) : "cc");    \
-                *lo = a * b;                                                   \
+        #define GLUE_FAST_64X64_MUL(a, b, lo, hi)                                                  \
+            do {                                                                                   \
+                asm("mulhdu %0,%1,%2" : "=r"(*hi) : "r"(a), "r"(b) : "cc");                        \
+                *lo = a * b;                                                                       \
             } while (0)
 
     #endif
 
 #endif
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
+
 /**
  * Perform a 64x64->128 bit multiplication
  */
-inline void mul64x64_128(uint64_t a, uint64_t b, uint64_t *lo, uint64_t *hi) {
-#if defined(GL_FAST_64X64_MUL)
-    GL_FAST_64X64_MUL(a, b, lo, hi);
+inline void mul64x64_128(uint64_t a, uint64_t b, uint64_t* lo, uint64_t* hi)
+{
+#if defined(GLUE_FAST_64X64_MUL)
+    GLUE_FAST_64X64_MUL(a, b, lo, hi);
 #else
 
     /*
@@ -125,5 +121,4 @@ inline void mul64x64_128(uint64_t a, uint64_t b, uint64_t *lo, uint64_t *hi) {
 #endif
 }
 
-} // namespace crypto
 GLUE_END_NAMESPACE

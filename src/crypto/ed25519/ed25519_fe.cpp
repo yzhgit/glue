@@ -6,11 +6,11 @@
 #include "glue/crypto/ed25519/ed25519_fe.h"
 #include "glue/crypto/ed25519/ed25519_internal.h"
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
 // static
-FE_25519 FE_25519::invert(const FE_25519 &z) {
+FE_25519 FE_25519::invert(const FE_25519& z)
+{
     fe t0;
     fe t1;
     fe t2;
@@ -42,7 +42,8 @@ FE_25519 FE_25519::invert(const FE_25519 &z) {
     return t0;
 }
 
-FE_25519 FE_25519::pow_22523(const fe &z) {
+FE_25519 FE_25519::pow_22523(const fe& z)
+{
     fe t0;
     fe t1;
     fe t2;
@@ -106,7 +107,8 @@ With tighter constraints on inputs can squeeze carries into int32.
 */
 
 // static
-FE_25519 FE_25519::mul(const FE_25519 &f, const FE_25519 &g) {
+FE_25519 FE_25519::mul(const FE_25519& f, const FE_25519& g)
+{
     const int32_t f0 = f[0];
     const int32_t f1 = f[1];
     const int32_t f2 = f[2];
@@ -245,26 +247,21 @@ FE_25519 FE_25519::mul(const FE_25519 &f, const FE_25519 &g) {
     const int64_t f9g8_19 = f9 * static_cast<int64_t>(g8_19);
     const int64_t f9g9_38 = f9_2 * static_cast<int64_t>(g9_19);
 
-    int64_t h0 = f0g0 + f1g9_38 + f2g8_19 + f3g7_38 + f4g6_19 + f5g5_38 +
-                 f6g4_19 + f7g3_38 + f8g2_19 + f9g1_38;
-    int64_t h1 = f0g1 + f1g0 + f2g9_19 + f3g8_19 + f4g7_19 + f5g6_19 + f6g5_19 +
-                 f7g4_19 + f8g3_19 + f9g2_19;
-    int64_t h2 = f0g2 + f1g1_2 + f2g0 + f3g9_38 + f4g8_19 + f5g7_38 + f6g6_19 +
-                 f7g5_38 + f8g4_19 + f9g3_38;
-    int64_t h3 = f0g3 + f1g2 + f2g1 + f3g0 + f4g9_19 + f5g8_19 + f6g7_19 +
-                 f7g6_19 + f8g5_19 + f9g4_19;
-    int64_t h4 = f0g4 + f1g3_2 + f2g2 + f3g1_2 + f4g0 + f5g9_38 + f6g8_19 +
-                 f7g7_38 + f8g6_19 + f9g5_38;
-    int64_t h5 = f0g5 + f1g4 + f2g3 + f3g2 + f4g1 + f5g0 + f6g9_19 + f7g8_19 +
-                 f8g7_19 + f9g6_19;
-    int64_t h6 = f0g6 + f1g5_2 + f2g4 + f3g3_2 + f4g2 + f5g1_2 + f6g0 +
-                 f7g9_38 + f8g8_19 + f9g7_38;
-    int64_t h7 = f0g7 + f1g6 + f2g5 + f3g4 + f4g3 + f5g2 + f6g1 + f7g0 +
-                 f8g9_19 + f9g8_19;
-    int64_t h8 = f0g8 + f1g7_2 + f2g6 + f3g5_2 + f4g4 + f5g3_2 + f6g2 + f7g1_2 +
-                 f8g0 + f9g9_38;
-    int64_t h9 =
-        f0g9 + f1g8 + f2g7 + f3g6 + f4g5 + f5g4 + f6g3 + f7g2 + f8g1 + f9g0;
+    int64_t h0 = f0g0 + f1g9_38 + f2g8_19 + f3g7_38 + f4g6_19 + f5g5_38 + f6g4_19 + f7g3_38 +
+                 f8g2_19 + f9g1_38;
+    int64_t h1 =
+        f0g1 + f1g0 + f2g9_19 + f3g8_19 + f4g7_19 + f5g6_19 + f6g5_19 + f7g4_19 + f8g3_19 + f9g2_19;
+    int64_t h2 =
+        f0g2 + f1g1_2 + f2g0 + f3g9_38 + f4g8_19 + f5g7_38 + f6g6_19 + f7g5_38 + f8g4_19 + f9g3_38;
+    int64_t h3 =
+        f0g3 + f1g2 + f2g1 + f3g0 + f4g9_19 + f5g8_19 + f6g7_19 + f7g6_19 + f8g5_19 + f9g4_19;
+    int64_t h4 =
+        f0g4 + f1g3_2 + f2g2 + f3g1_2 + f4g0 + f5g9_38 + f6g8_19 + f7g7_38 + f8g6_19 + f9g5_38;
+    int64_t h5 = f0g5 + f1g4 + f2g3 + f3g2 + f4g1 + f5g0 + f6g9_19 + f7g8_19 + f8g7_19 + f9g6_19;
+    int64_t h6 = f0g6 + f1g5_2 + f2g4 + f3g3_2 + f4g2 + f5g1_2 + f6g0 + f7g9_38 + f8g8_19 + f9g7_38;
+    int64_t h7 = f0g7 + f1g6 + f2g5 + f3g4 + f4g3 + f5g2 + f6g1 + f7g0 + f8g9_19 + f9g8_19;
+    int64_t h8 = f0g8 + f1g7_2 + f2g6 + f3g5_2 + f4g4 + f5g3_2 + f6g2 + f7g1_2 + f8g0 + f9g9_38;
+    int64_t h9 = f0g9 + f1g8 + f2g7 + f3g6 + f4g5 + f5g4 + f6g3 + f7g2 + f8g1 + f9g0;
 
     /*
  |h0| <= (1.65*1.65*2^52*(1+19+19+19+19)+1.65*1.65*2^50*(38+38+38+38+38))
@@ -337,7 +334,8 @@ See fe_mul.c for discussion of implementation strategy.
 */
 
 // static
-FE_25519 FE_25519::sqr_iter(const FE_25519 &f, size_t iter) {
+FE_25519 FE_25519::sqr_iter(const FE_25519& f, size_t iter)
+{
     int32_t f0 = f[0];
     int32_t f1 = f[1];
     int32_t f2 = f[2];
@@ -349,7 +347,8 @@ FE_25519 FE_25519::sqr_iter(const FE_25519 &f, size_t iter) {
     int32_t f8 = f[8];
     int32_t f9 = f[9];
 
-    for (size_t i = 0; i != iter; ++i) {
+    for (size_t i = 0; i != iter; ++i)
+    {
         const int32_t f0_2 = 2 * f0;
         const int32_t f1_2 = 2 * f1;
         const int32_t f2_2 = 2 * f2;
@@ -477,7 +476,8 @@ See fe_mul.c for discussion of implementation strategy.
 */
 
 // static
-FE_25519 FE_25519::sqr2(const FE_25519 &f) {
+FE_25519 FE_25519::sqr2(const FE_25519& f)
+{
     const int32_t f0 = f[0];
     const int32_t f1 = f[1];
     const int32_t f2 = f[2];
@@ -602,7 +602,8 @@ FE_25519 FE_25519::sqr2(const FE_25519 &f) {
 Ignores top bit of h.
 */
 
-void FE_25519::from_bytes(const uint8_t s[32]) {
+void FE_25519::from_bytes(const uint8_t s[32])
+{
     int64_t h0 = load_4(s);
     int64_t h1 = load_3(s + 4) << 6;
     int64_t h2 = load_3(s + 7) << 5;
@@ -663,7 +664,8 @@ Have q+2^(-255)x = 2^(-255)(h + 19 2^(-25) h9 + 2^(-1))
 so floor(2^(-255)(h + 19 2^(-25) h9 + 2^(-1))) = q.
 */
 
-void FE_25519::to_bytes(uint8_t s[32]) const {
+void FE_25519::to_bytes(uint8_t s[32]) const
+{
     const int64_t X25 = (1 << 25);
 
     int32_t h0 = m_fe[0];
@@ -749,5 +751,4 @@ void FE_25519::to_bytes(uint8_t s[32]) const {
     s[31] = static_cast<uint8_t>(h9 >> 18);
 }
 
-} // namespace crypto
 GLUE_END_NAMESPACE

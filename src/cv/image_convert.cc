@@ -10,7 +10,7 @@
 #include <math.h>
 #include <string.h>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 void nv_to_bgr(const uint8_t *src, uint8_t *dst, int srcw, int srch, int x_num,

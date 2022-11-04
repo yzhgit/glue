@@ -10,8 +10,7 @@
 #include <cstring>
 #include <vector>
 
-namespace glue {
-namespace crypto {
+GLUE_START_NAMESPACE
 
 /**
  * Allocate a memory buffer by some method. This should only be used for
@@ -22,7 +21,7 @@ namespace crypto {
  * @return pointer to allocated and zeroed memory, or throw std::bad_alloc on
  * failure
  */
-GLUE_API void *allocate_memory(size_t elems, size_t elem_size);
+GLUE_API void* allocate_memory(size_t elems, size_t elem_size);
 
 /**
  * Free a pointer returned by allocate_memory
@@ -30,16 +29,20 @@ GLUE_API void *allocate_memory(size_t elems, size_t elem_size);
  * @param elems the number of elements, as passed to allocate_memory
  * @param elem_size the size of each element, as passed to allocate_memory
  */
-GLUE_API void deallocate_memory(void *p, size_t elems, size_t elem_size);
+GLUE_API void deallocate_memory(void* p, size_t elems, size_t elem_size);
 
 /**
  * Ensure the allocator is initialized
  */
 void initialize_allocator();
 
-class Allocator_Initializer {
-  public:
-    Allocator_Initializer() { initialize_allocator(); }
+class Allocator_Initializer
+{
+public:
+    Allocator_Initializer()
+    {
+        initialize_allocator();
+    }
 };
 
 /**
@@ -57,7 +60,7 @@ class Allocator_Initializer {
  * @param ptr a pointer to memory to scrub
  * @param n the number of bytes pointed to by ptr
  */
-GLUE_API void secure_scrub_memory(void *ptr, size_t n);
+GLUE_API void secure_scrub_memory(void* ptr, size_t n);
 
 /**
  * Memory comparison, input insensitive
@@ -66,8 +69,7 @@ GLUE_API void secure_scrub_memory(void *ptr, size_t n);
  * @param len the number of Ts in x and y
  * @return 0xFF iff x[i] == y[i] forall i in [0...n) or 0x00 otherwise
  */
-GLUE_API uint8_t ct_compare_u8(const uint8_t x[], const uint8_t y[],
-                               size_t len);
+GLUE_API uint8_t ct_compare_u8(const uint8_t x[], const uint8_t y[], size_t len);
 
 /**
  * Memory comparison, input insensitive
@@ -76,8 +78,8 @@ GLUE_API uint8_t ct_compare_u8(const uint8_t x[], const uint8_t y[],
  * @param len the number of Ts in x and y
  * @return true iff x[i] == y[i] forall i in [0...n)
  */
-inline bool constant_time_compare(const uint8_t x[], const uint8_t y[],
-                                  size_t len) {
+inline bool constant_time_compare(const uint8_t x[], const uint8_t y[], size_t len)
+{
     return ct_compare_u8(x, y, len) == 0xFF;
 }
 
@@ -86,10 +88,9 @@ inline bool constant_time_compare(const uint8_t x[], const uint8_t y[],
  * @param ptr a pointer to memory to zero
  * @param bytes the number of bytes to zero in ptr
  */
-inline void clear_bytes(void *ptr, size_t bytes) {
-    if (bytes > 0) {
-        std::memset(ptr, 0, bytes);
-    }
+inline void clear_bytes(void* ptr, size_t bytes)
+{
+    if (bytes > 0) { std::memset(ptr, 0, bytes); }
 }
 
 /**
@@ -102,7 +103,9 @@ inline void clear_bytes(void *ptr, size_t bytes) {
  * @param ptr a pointer to an array of Ts to zero
  * @param n the number of Ts pointed to by ptr
  */
-template <typename T> inline void clear_mem(T *ptr, size_t n) {
+template <typename T>
+inline void clear_mem(T* ptr, size_t n)
+{
     clear_bytes(ptr, sizeof(T) * n);
 }
 
@@ -112,22 +115,27 @@ template <typename T> inline void clear_mem(T *ptr, size_t n) {
  * @param in the source array
  * @param n the number of elements of in/out
  */
-template <typename T> inline void copy_mem(T *out, const T *in, size_t n) {
-    if (n > 0) {
-        std::memmove(out, in, sizeof(T) * n);
-    }
+template <typename T>
+inline void copy_mem(T* out, const T* in, size_t n)
+{
+    if (n > 0) { std::memmove(out, in, sizeof(T) * n); }
 }
 
-template <typename T> inline void typecast_copy(uint8_t out[], T in) {
+template <typename T>
+inline void typecast_copy(uint8_t out[], T in)
+{
     std::memcpy(out, &in, sizeof(T));
 }
 
-template <typename T> inline void typecast_copy(T &out, const uint8_t in[]) {
+template <typename T>
+inline void typecast_copy(T& out, const uint8_t in[])
+{
     std::memcpy(&out, in, sizeof(T));
 }
 
 template <typename T>
-inline void typecast_copy(T out[], const uint8_t in[], size_t N) {
+inline void typecast_copy(T out[], const uint8_t in[], size_t N)
+{
     std::memcpy(out, in, sizeof(T) * N);
 }
 
@@ -137,26 +145,30 @@ inline void typecast_copy(T out[], const uint8_t in[], size_t N) {
  * @param n the number of Ts pointed to by ptr
  * @param val the value to set each byte to
  */
-template <typename T> inline void set_mem(T *ptr, size_t n, uint8_t val) {
-    if (n > 0) {
-        std::memset(ptr, val, sizeof(T) * n);
-    }
+template <typename T>
+inline void set_mem(T* ptr, size_t n, uint8_t val)
+{
+    if (n > 0) { std::memset(ptr, val, sizeof(T) * n); }
 }
 
-inline const uint8_t *cast_char_ptr_to_uint8(const char *s) {
-    return reinterpret_cast<const uint8_t *>(s);
+inline const uint8_t* cast_char_ptr_to_uint8(const char* s)
+{
+    return reinterpret_cast<const uint8_t*>(s);
 }
 
-inline const char *cast_uint8_ptr_to_char(const uint8_t *b) {
-    return reinterpret_cast<const char *>(b);
+inline const char* cast_uint8_ptr_to_char(const uint8_t* b)
+{
+    return reinterpret_cast<const char*>(b);
 }
 
-inline uint8_t *cast_char_ptr_to_uint8(char *s) {
-    return reinterpret_cast<uint8_t *>(s);
+inline uint8_t* cast_char_ptr_to_uint8(char* s)
+{
+    return reinterpret_cast<uint8_t*>(s);
 }
 
-inline char *cast_uint8_ptr_to_char(uint8_t *b) {
-    return reinterpret_cast<char *>(b);
+inline char* cast_uint8_ptr_to_char(uint8_t* b)
+{
+    return reinterpret_cast<char*>(b);
 }
 
 /**
@@ -166,11 +178,12 @@ inline char *cast_uint8_ptr_to_char(uint8_t *b) {
  * @param n the number of Ts in p1 and p2
  * @return true iff p1[i] == p2[i] forall i in [0...n)
  */
-template <typename T> inline bool same_mem(const T *p1, const T *p2, size_t n) {
+template <typename T>
+inline bool same_mem(const T* p1, const T* p2, size_t n)
+{
     volatile T difference = 0;
 
-    for (size_t i = 0; i != n; ++i)
-        difference |= (p1[i] ^ p2[i]);
+    for (size_t i = 0; i != n; ++i) difference |= (p1[i] ^ p2[i]);
 
     return difference == 0;
 }
@@ -181,8 +194,10 @@ template <typename T> inline bool same_mem(const T *p1, const T *p2, size_t n) {
  * @param in the read-only input buffer
  * @param length the length of the buffers
  */
-inline void xor_buf(uint8_t out[], const uint8_t in[], size_t length) {
-    while (length >= 16) {
+inline void xor_buf(uint8_t out[], const uint8_t in[], size_t length)
+{
+    while (length >= 16)
+    {
         uint64_t x0, x1, y0, y1;
 
         typecast_copy(x0, in);
@@ -199,7 +214,8 @@ inline void xor_buf(uint8_t out[], const uint8_t in[], size_t length) {
         length -= 16;
     }
 
-    while (length > 0) {
+    while (length > 0)
+    {
         out[0] ^= in[0];
         out += 1;
         in += 1;
@@ -214,9 +230,10 @@ inline void xor_buf(uint8_t out[], const uint8_t in[], size_t length) {
  * @param in2 the second output buffer
  * @param length the length of the three buffers
  */
-inline void xor_buf(uint8_t out[], const uint8_t in[], const uint8_t in2[],
-                    size_t length) {
-    while (length >= 16) {
+inline void xor_buf(uint8_t out[], const uint8_t in[], const uint8_t in2[], size_t length)
+{
+    while (length >= 16)
+    {
         uint64_t x0, x1, y0, y1;
         typecast_copy(x0, in);
         typecast_copy(x1, in + 8);
@@ -233,37 +250,36 @@ inline void xor_buf(uint8_t out[], const uint8_t in[], const uint8_t in2[],
         length -= 16;
     }
 
-    for (size_t i = 0; i != length; ++i)
-        out[i] = in[i] ^ in2[i];
+    for (size_t i = 0; i != length; ++i) out[i] = in[i] ^ in2[i];
 }
 
 template <typename Alloc, typename Alloc2>
-void xor_buf(std::vector<uint8_t, Alloc> &out,
-             const std::vector<uint8_t, Alloc2> &in, size_t n) {
+void xor_buf(std::vector<uint8_t, Alloc>& out, const std::vector<uint8_t, Alloc2>& in, size_t n)
+{
     xor_buf(out.data(), in.data(), n);
 }
 
 template <typename Alloc>
-void xor_buf(std::vector<uint8_t, Alloc> &out, const uint8_t *in, size_t n) {
+void xor_buf(std::vector<uint8_t, Alloc>& out, const uint8_t* in, size_t n)
+{
     xor_buf(out.data(), in, n);
 }
 
 template <typename Alloc, typename Alloc2>
-void xor_buf(std::vector<uint8_t, Alloc> &out, const uint8_t *in,
-             const std::vector<uint8_t, Alloc2> &in2, size_t n) {
+void xor_buf(std::vector<uint8_t, Alloc>& out, const uint8_t* in,
+             const std::vector<uint8_t, Alloc2>& in2, size_t n)
+{
     xor_buf(out.data(), in, in2.data(), n);
 }
 
 template <typename Alloc, typename Alloc2>
-std::vector<uint8_t, Alloc> &
-operator^=(std::vector<uint8_t, Alloc> &out,
-           const std::vector<uint8_t, Alloc2> &in) {
-    if (out.size() < in.size())
-        out.resize(in.size());
+std::vector<uint8_t, Alloc>& operator^=(std::vector<uint8_t, Alloc>& out,
+                                        const std::vector<uint8_t, Alloc2>& in)
+{
+    if (out.size() < in.size()) out.resize(in.size());
 
     xor_buf(out.data(), in.data(), in.size());
     return out;
 }
 
-} // namespace crypto
 GLUE_END_NAMESPACE

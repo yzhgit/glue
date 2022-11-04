@@ -12,7 +12,7 @@
 #include <memory>
 #include <vector>
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 using ShapeType = std::vector<uint32_t>;

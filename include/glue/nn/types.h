@@ -5,7 +5,7 @@
 
 #pragma once
 
-namespace glue {
+GLUE_START_NAMESPACE
 namespace ml {
 
 enum class DataType {
