@@ -66,7 +66,7 @@ set_target_properties(${target} PROPERTIES
     DEFINE_SYMBOL   GLUE_EXPORTS
 )
 
-if(GLUE_ENABLE_INSTALL)
+if(GLUE_INSTALL)
   install(TARGETS ${target}
     EXPORT  ${PROJECT_NAME}Targets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
