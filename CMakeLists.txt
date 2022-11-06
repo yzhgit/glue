@@ -34,7 +34,13 @@ endif()
 option(GLUE_INSTALL "Generate and install GLUE target" ${GLUE_STANDALONE_PROJECT})
 option(GLUE_TEST "Build and perform GLUE tests" ${GLUE_STANDALONE_PROJECT})
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
+if(BUILD_SHARED_LIBS)
+  # Only export LEVELDB_EXPORT symbols from the shared library.
+  add_compile_options(-fvisibility=hidden)
+endif(BUILD_SHARED_LIBS)
+
+
+include_directories(include)
 
 add_subdirectory(src)
 

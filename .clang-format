@@ -31,5 +31,6 @@ AlignConsecutiveAssignments: false
 AlignTrailingComments: true
 
 SpaceAfterCStyleCast: true
+CommentPragmas: '^ NO-FORMAT:'
 
 IndentPPDirectives: BeforeHash
