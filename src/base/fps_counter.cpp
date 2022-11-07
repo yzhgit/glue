@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/FpsCounter.h"
+#include "glue/base/fps_counter.h"
 
 #include "glue/base/time.h"
 

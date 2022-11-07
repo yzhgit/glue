@@ -10,22 +10,22 @@
 GLUE_START_NAMESPACE
 
 #if !(DOXYGEN || GLUE_EXCEPTIONS_DISABLED)
-namespace HeapBlockHelper
+namespace HeapBlockHelper {
+template <bool shouldThrow>
+struct ThrowOnFail
 {
-    template <bool shouldThrow>
-    struct ThrowOnFail
-    {
-        static void checkPointer(void*) {}
-    };
+    static void checkPointer(void*)
+    {}
+};
 
-    template <>
-    struct ThrowOnFail<true>
+template <>
+struct ThrowOnFail<true>
+{
+    static void checkPointer(void* data)
     {
-        static void checkPointer(void* data)
-        {
-            if (data == nullptr) throw std::bad_alloc();
-        }
-    };
+        if (data == nullptr) throw std::bad_alloc();
+    }
+};
 } // namespace HeapBlockHelper
 #endif
 
@@ -129,10 +129,16 @@ public:
     /** Destructor.
         This will free the data, if any has been allocated.
     */
-    ~HeapBlock() { std::free(m_data); }
+    ~HeapBlock()
+    {
+        std::free(m_data);
+    }
 
     /** Move constructor */
-    HeapBlock(HeapBlock&& other) noexcept : m_data(other.m_data) { other.m_data = nullptr; }
+    HeapBlock(HeapBlock&& other) noexcept : m_data(other.m_data)
+    {
+        other.m_data = nullptr;
+    }
 
     /** Move assignment operator */
     HeapBlock& operator=(HeapBlock&& other) noexcept
@@ -172,37 +178,55 @@ public:
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator ElementType*() const noexcept { return m_data; }
+    inline operator ElementType*() const noexcept
+    {
+        return m_data;
+    }
 
     /** Returns a raw pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline ElementType* get() const noexcept { return m_data; }
+    inline ElementType* get() const noexcept
+    {
+        return m_data;
+    }
 
     /** Returns a raw pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline ElementType* getData() const noexcept { return m_data; }
+    inline ElementType* getData() const noexcept
+    {
+        return m_data;
+    }
 
     /** Returns a void pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator void*() const noexcept { return static_cast<void*>(m_data); }
+    inline operator void*() const noexcept
+    {
+        return static_cast<void*>(m_data);
+    }
 
     /** Returns a void pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator const void*() const noexcept { return static_cast<const void*>(m_data); }
+    inline operator const void*() const noexcept
+    {
+        return static_cast<const void*>(m_data);
+    }
 
     /** Lets you use indirect calls to the first element in the array.
         Obviously this will cause problems if the array hasn't been initialised, because it'll
         be referencing a null pointer.
     */
-    inline ElementType* operator->() const noexcept { return m_data; }
+    inline ElementType* operator->() const noexcept
+    {
+        return m_data;
+    }
 
     /** Returns a reference to one of the data elements.
         Obviously there's no bounds-checking here, as this object is just a dumb pointer and

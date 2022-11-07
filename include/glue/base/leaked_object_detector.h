@@ -32,8 +32,14 @@ class LeakedObjectDetector
 {
 public:
     //==============================================================================
-    LeakedObjectDetector() noexcept { ++(getCounter().numObjects); }
-    LeakedObjectDetector(const LeakedObjectDetector&) noexcept { ++(getCounter().numObjects); }
+    LeakedObjectDetector() noexcept
+    {
+        ++(getCounter().numObjects);
+    }
+    LeakedObjectDetector(const LeakedObjectDetector&) noexcept
+    {
+        ++(getCounter().numObjects);
+    }
 
     LeakedObjectDetector& operator=(const LeakedObjectDetector&) noexcept = default;
 
@@ -85,7 +91,10 @@ private:
         Atomic<int> numObjects;
     };
 
-    static const char* getLeakedObjectClassName() { return OwnerClass::getLeakedObjectClassName(); }
+    static const char* getLeakedObjectClassName()
+    {
+        return OwnerClass::getLeakedObjectClassName();
+    }
 
     static LeakCounter& getCounter() noexcept
     {
@@ -118,7 +127,10 @@ private:
         */
         #define GLUE_LEAK_DETECTOR(OwnerClass)                                                     \
             friend class glue::LeakedObjectDetector<OwnerClass>;                                   \
-            static const char* getLeakedObjectClassName() noexcept { return #OwnerClass; }         \
+            static const char* getLeakedObjectClassName() noexcept                                 \
+            {                                                                                      \
+                return #OwnerClass;                                                                \
+            }                                                                                      \
             glue::LeakedObjectDetector<OwnerClass> GLUE_JOIN_MACRO(leakDetector, __LINE__);
     #else
         #define GLUE_LEAK_DETECTOR(OwnerClass)

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/Thread.h"
+#include "glue/base/thread.h"
 
 #include "glue/base/log.h"
 

@@ -3,10 +3,9 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/PerformanceCounter.h"
+#include "glue/base/performance_counter.h"
 
 #include "glue/base/log.h"
-#include "glue/base/maths_functions.h"
 
 GLUE_START_NAMESPACE
 
@@ -37,7 +36,10 @@ PerformanceCounter::Statistics::Statistics() noexcept
 
 void PerformanceCounter::Statistics::clear() noexcept
 {
-    averageSeconds = maximumSeconds = minimumSeconds = totalSeconds = 0;
+    averageSeconds = 0;
+    maximumSeconds = 0;
+    minimumSeconds = 0;
+    totalSeconds = 0;
     numRuns = 0;
 }
 
@@ -50,8 +52,8 @@ void PerformanceCounter::Statistics::addResult(double elapsed) noexcept
     }
     else
     {
-        maximumSeconds = jmax(maximumSeconds, elapsed);
-        minimumSeconds = jmin(minimumSeconds, elapsed);
+        maximumSeconds = std::max(maximumSeconds, elapsed);
+        minimumSeconds = std::min(minimumSeconds, elapsed);
     }
 
     ++numRuns;
@@ -78,7 +80,10 @@ std::string PerformanceCounter::Statistics::toString() const
     return s.str();
 }
 
-void PerformanceCounter::start() noexcept { m_startTime = Time::getHighResolutionTicks(); }
+void PerformanceCounter::start() noexcept
+{
+    m_startTime = Time::getHighResolutionTicks();
+}
 
 bool PerformanceCounter::stop()
 {

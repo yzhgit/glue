@@ -515,8 +515,12 @@ private:
 
     static bool m_bAutoSpace; ///< Should space be added between messages?
 
-    Log(Log const&) {}                          // not defined, not copyable
-    Log& operator=(Log& from) { return *this; } // not defined, not assignable
+    Log(Log const&)
+    {} // not defined, not copyable
+    Log& operator=(Log& from)
+    {
+        return *this;
+    } // not defined, not assignable
 
     static std::string& getPadding(); ///< The padding between std::ostream calls.
 };

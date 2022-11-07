@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/WaitableEvent.h"
+#include "glue/base/waitable_event.h"
 
 #include <chrono>
 

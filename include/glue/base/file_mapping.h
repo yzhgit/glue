@@ -18,37 +18,13 @@ GLUE_START_NAMESPACE
 
     @tags{Core}
 */
-class GLUE_API MemoryMappedFile
+class GLUE_API FileMapping
 {
 public:
-    /** The read/write flags used when opening a memory mapped file. */
-    enum AccessMode
-    {
-        readOnly, /**< Indicates that the memory can only be read. */
-        readWrite /**< Indicates that the memory can be read and written to - changes that are
-                       made will be flushed back to disk at the whim of the OS. */
-    };
+    static constexpr uint32_t READ = 1;
+    static constexpr uint32_t WRITE = 2;
 
-    /** Opens a file and maps it to an area of virtual memory.
-
-        The file should already exist, and should already be the size that you want to work with
-        when you call this. If the file is resized after being opened, the behaviour is undefined.
-
-        If the file exists and the operation succeeds, the getData() and getSize() methods will
-        return the location and size of the data that can be read or written. Note that the entire
-        file is not read into memory immediately - the OS simply creates a virtual mapping, which
-        will lazily pull the data into memory when blocks are accessed.
-
-        If the file can't be opened for some reason, the getData() method will return a null
-       pointer.
-
-        If exclusive is false then other apps can also open the same memory mapped file and use this
-        mapping as an effective way of communicating. If exclusive is true then the mapped file will
-        be opened exclusively - preventing other apps to access the file which may improve the
-        performance of accessing the file.
-    */
-    MemoryMappedFile(const fs::path& path, AccessMode mode, bool exclusive = false);
-
+public:
     /** Opens a section of a file and maps it to an area of virtual memory.
 
         The file should already exist, and should already be the size that you want to work with
@@ -64,41 +40,47 @@ public:
 
         NOTE: The start of the actual range used may be rounded-down to a multiple of the OS's
        page-size, so do not assume that the mapped memory will begin at exactly the position you
-       requested - always use getRange() to check the actual range that is being used.
+       requested.
     */
-    MemoryMappedFile(const fs::path& path, const Range<int64>& fileRange, AccessMode mode,
-                     bool exclusive = false);
+    FileMapping(const char* filename, uint32_t permission, uint64_t offset = 0,
+                uint64_t length = UINT64_MAX);
 
     /** Destructor. */
-    ~MemoryMappedFile();
+    ~FileMapping();
 
     /** Returns the address at which this file has been mapped, or a null pointer if
         the file couldn't be successfully mapped.
     */
-    void* getData() const noexcept { return m_address; }
+    char* getData() noexcept
+    {
+        return static_cast<char*>(m_start);
+    }
+
+    const char* getData() const noexcept
+    {
+        return static_cast<char*>(m_start);
+    }
 
     /** Returns the number of bytes of data that are available for reading or writing.
         This will normally be the size of the file.
     */
-    size_t getSize() const noexcept { return (size_t) m_range.getLength(); }
-
-    /** Returns the section of the file at which the mapped memory represents. */
-    Range<int64> getRange() const noexcept { return m_range; }
+    uint64_t getSize() const noexcept
+    {
+        return m_size;
+    }
 
 private:
-    //==============================================================================
-    void* m_address = nullptr;
-    Range<int64> m_range;
-
 #if defined(GLUE_OS_WINDOWS)
-    void* m_fileHandle = nullptr;
+    void* m_fileHandle{nullptr};
 #else
-    int m_fileHandle = 0;
+    int m_fileHandle{0};
 #endif
 
-    void openInternal(const fs::path& path, AccessMode, bool);
+    void* m_base{nullptr};
+    void* m_start{nullptr};
+    uint64_t m_size{0};
 
-    GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MemoryMappedFile)
+    GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FileMapping)
 };
 
 GLUE_END_NAMESPACE

@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/ThreadPool.h"
+#include "glue/base/thread_pool.h"
 
-#include "glue/base/WaitableEvent.h"
-#include "glue/base/Exception.h"
+#include "glue/base/waitable_event.h"
+#include "glue/base/exception.h"
 #include "glue/base/log.h"
-#include "glue/base/Thread.h"
+#include "glue/base/thread.h"
 
 GLUE_START_NAMESPACE
 

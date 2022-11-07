@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/CountDownLatch.h"
+#include "glue/base/countdown_latch.h"
 
 #include "glue/base/log.h"
 

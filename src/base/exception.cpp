@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/Exception.h"
+#include "glue/base/exception.h"
 
 #include <typeinfo>
 

@@ -1,10 +1,9 @@
-
 //
 // Copyright © 2017 zhangyao. All rights reserved.
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/SpinLock.h"
+#include "glue/base/spin_lock.h"
 
 #if defined(GLUE_COMPILER_MSVC)
     #include <windows.h>

@@ -3,128 +3,133 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/MemoryMappedFile.h"
+#include "glue/base/file_mapping.h"
+
+#include "glue/base/log.h"
 
 GLUE_START_NAMESPACE
 
-//==============================================================================
-MemoryMappedFile::MemoryMappedFile(const fs::path& path, MemoryMappedFile::AccessMode mode,
-                                   bool exclusive)
-    : m_range(0, fs::file_size(path))
-{
-    openInternal(path, mode, exclusive);
-}
-
-MemoryMappedFile::MemoryMappedFile(const fs::path& path, const Range<int64>& fileRange,
-                                   AccessMode mode, bool exclusive)
-    : m_range(fileRange.getIntersectionWith(Range<int64>(0, fs::file_size(path))))
-{
-    openInternal(path, mode, exclusive);
-}
-
 #if defined(GLUE_OS_WINDOWS)
 
-//==============================================================================
-void MemoryMappedFile::openInternal(const fs::path& path, AccessMode mode, bool exclusive)
+void FileMapping::FileMapping(const char* filename, uint32_t permission, uint64_t offset,
+                              uint64_t length)
 {
-    if (m_range.getStart() > 0)
-    {
-        SYSTEM_INFO systemInfo;
-        GetNativeSystemInfo(&systemInfo);
+    DWORD flags = 0;
+    if (permission & FileMapping::READ) { flags |= GENERIC_READ; }
+    if (permission & FileMapping::WRITE) { flags |= GENERIC_WRITE; }
 
-        m_range.setStart(m_range.getStart() -
-                         (m_range.getStart() % systemInfo.dwAllocationGranularity));
-    }
-
-    DWORD accessMode = GENERIC_READ, createType = OPEN_EXISTING;
-    DWORD protect = PAGE_READONLY, access = FILE_MAP_READ;
-
-    if (mode == readWrite)
-    {
-        accessMode = GENERIC_READ | GENERIC_WRITE;
-        createType = OPEN_ALWAYS;
-        protect = PAGE_READWRITE;
-        access = FILE_MAP_ALL_ACCESS;
-    }
-
-    auto h = CreateFile(
-        path.generic_u8string().c_str(), accessMode,
-        exclusive
-            ? 0
-            : (FILE_SHARE_READ | FILE_SHARE_DELETE | (mode == readWrite ? FILE_SHARE_WRITE : 0)),
-        nullptr, createType, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
-
+    auto h = CreateFile(filename, flags, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+                        FILE_ATTRIBUTE_NORMAL, nullptr);
     if (h != INVALID_HANDLE_VALUE)
     {
         m_fileHandle = (void*) h;
 
-        auto mappingHandle =
-            CreateFileMapping(h, nullptr, protect, (DWORD) (m_range.getEnd() >> 32),
-                              (DWORD) m_range.getEnd(), nullptr);
+        DWORD file_size = GetFileSize(h, nullptr);
+        if (file_size == 0)
+        {
+            LogError("", "model file size is 0.");
+            return;
+        }
 
+        if (offset >= file_size)
+        {
+            LogError("", "offset[%llu] >= file size[%lu]\n", offset, file_size);
+            return;
+        }
+
+        auto max_length = file_size - offset;
+        if (length > max_length) { length = max_length; }
+
+        flags = 0;
+        if (permission & FileMapping::WRITE) { flags = PAGE_READWRITE; }
+        else if (permission & FileMapping::READ) { flags = PAGE_READONLY; }
+
+        auto mappingHandle = CreateFileMapping(h, nullptr, flags, 0, 0, nullptr);
         if (mappingHandle != nullptr)
         {
-            m_address = MapViewOfFile(mappingHandle, access, (DWORD) (m_range.getStart() >> 32),
-                                      (DWORD) m_range.getStart(), (SIZE_T) m_range.getLength());
+            SYSTEM_INFO sys_info; // system information; used to get granularity
+            GetSystemInfo(&sys_info);
 
-            if (m_address == nullptr) m_range = Range<int64>();
+            uint64_t mapping_start_offset =
+                (offset / sys_info.dwAllocationGranularity) * sys_info.dwAllocationGranularity;
+            DWORD file_offset_high = (mapping_start_offset >> 32),
+                  file_offset_low = (mapping_start_offset & 0xffffffff);
+
+            flags = 0;
+            if (permission & FileMapping::READ) { flags |= FILE_MAP_READ; }
+            if (permission & FileMapping::WRITE) { flags |= FILE_MAP_WRITE; }
+
+            m_base = MapViewOfFile(mappingHandle, flags, file_offset_high, file_offset_low, length);
+            if (m_base != nullptr)
+            {
+                m_start = (char*) m_base + (offset - mapping_start_offset);
+                m_size = length;
+            }
 
             CloseHandle(mappingHandle);
         }
     }
 }
 
-MemoryMappedFile::~MemoryMappedFile()
+FileMapping::~FileMapping()
 {
-    if (m_address != nullptr) UnmapViewOfFile(m_address);
+    if (m_base != nullptr) UnmapViewOfFile(m_base);
 
     if (m_fileHandle != nullptr) CloseHandle((HANDLE) m_fileHandle);
 }
 
 #else
 
-void MemoryMappedFile::openInternal(const fs::path& path, AccessMode mode, bool exclusive)
+void FileMapping::FileMapping(const char* filename, uint32_t permission, uint64_t offset,
+                              uint64_t length)
 {
-    GLUE_ASSERT(mode == readOnly || mode == readWrite);
+    int flags = O_CLOEXEC;
+    if ((permission & FileMapping::READ) && (permission & FileMapping::WRITE)) { flags |= O_RDWR; }
+    else if (permission & FileMapping::WRITE) { flags |= O_WRONLY; }
+    else if (permission & FileMapping::READ) { flags |= O_RDONLY; }
 
-    if (m_range.getStart() > 0)
+    int fd = open(filename, flags);
+    if (fd != -1)
     {
-        auto pageSize = sysconf(_SC_PAGE_SIZE);
-        m_range.setStart(m_range.getStart() - (m_range.getStart() % pageSize));
-    }
+        m_fileHandle = fd;
 
-    auto filename = path.c_str();
-
-    if (mode == readWrite)
-        m_fileHandle = open(filename, O_CREAT | O_RDWR, 00644);
-    else
-        m_fileHandle = open(filename, O_RDONLY);
-
-    if (m_fileHandle != -1)
-    {
-        auto m =
-            mmap(nullptr, (size_t) m_range.getLength(),
-                 mode == readWrite ? (PROT_READ | PROT_WRITE) : PROT_READ,
-                 exclusive ? MAP_PRIVATE : MAP_SHARED, m_fileHandle, (off_t) m_range.getStart());
-
-        if (m != MAP_FAILED)
+        struct stat file_stat_info;
+        memset(&file_stat_info, 0, sizeof(file_stat_info));
+        if (fstat(fd, &file_stat_info) < 0 || file_stat_info.st_size < 0)
         {
-            m_address = m;
-            madvise(m, (size_t) m_range.getLength(), MADV_SEQUENTIAL);
-        }
-        else
-        {
-            m_range = Range<int64>();
+            LogError("", "model file size is 0.");
+            return;
         }
 
-        close(m_fileHandle);
-        m_fileHandle = 0;
+        uint64_t file_size = file_stat_info.st_size;
+        if (offset >= file_size)
+        {
+            LogError("", "offset[%llu] >= file size[%lu]\n", offset, file_size);
+            return;
+        }
+
+        auto max_length = file_size - offset;
+        if (length > max_length) { length = max_length; }
+
+        auto page_size = sysconf(_SC_PAGE_SIZE);
+        auto mapping_start_offset = (offset / page_size) * page_size;
+
+        flags = 0;
+        if (permission & FileMapping::READ) { flags |= PROT_READ; }
+        if (permission & FileMapping::WRITE) { flags |= PROT_WRITE; }
+
+        m_base = mmap(NULL, length, flags, MAP_PRIVATE, fd, mapping_start_offset);
+        if (m_base != MAP_FAILED)
+        {
+            m_start = (char*) m_base + (offset - mapping_start_offset);
+            m_size = length;
+        }
     }
 }
 
-MemoryMappedFile::~MemoryMappedFile()
+FileMapping::~FileMapping()
 {
-    if (m_address != nullptr) munmap(m_address, (size_t) m_range.getLength());
+    if (m_base != nullptr) munmap(m_base, (size_t) m_size);
 
     if (m_fileHandle != 0) close(m_fileHandle);
 }

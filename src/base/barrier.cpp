@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/Barrier.h"
+#include "glue/base/barrier.h"
 
 #include "glue/base/log.h"
 
