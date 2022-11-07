@@ -15,7 +15,7 @@
 #include <vector>
 
 /* for SNPE lib */
-#include "DiagLog/IDiagLog.hpp"
+#include "DiagLog/IDiaglog.hpp"
 #include "DlContainer/IDlContainer.hpp"
 #include "DlSystem/DlError.hpp"
 #include "DlSystem/ITensor.hpp"
