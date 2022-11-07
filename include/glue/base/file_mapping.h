@@ -6,7 +6,6 @@
 #pragma once
 
 #include "glue/base/leaked_object_detector.h"
-#include "glue/base/range.h"
 
 #include "ghc/fs_std.hpp"
 
