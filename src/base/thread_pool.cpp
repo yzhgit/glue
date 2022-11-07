@@ -5,10 +5,10 @@
 
 #include "glue/base/thread_pool.h"
 
-#include "glue/base/waitable_event.h"
 #include "glue/base/exception.h"
 #include "glue/base/log.h"
 #include "glue/base/thread.h"
+#include "glue/base/waitable_event.h"
 
 GLUE_START_NAMESPACE
 
@@ -46,7 +46,8 @@ PooledThread::PooledThread(const std::string& name)
     m_idleTime = std::time(NULL);
 }
 
-PooledThread::~PooledThread() {}
+PooledThread::~PooledThread()
+{}
 
 void PooledThread::start()
 {
@@ -259,7 +260,10 @@ int ThreadPool::allocated() const
     return int(m_threads.size());
 }
 
-void ThreadPool::start(Runnable& target) { getThread()->start(target); }
+void ThreadPool::start(Runnable& target)
+{
+    getThread()->start(target);
+}
 
 void ThreadPool::start(Runnable& target, const std::string& name)
 {
@@ -372,8 +376,14 @@ PooledThread* ThreadPool::createThread()
 class ThreadPoolSingletonHolder
 {
 public:
-    ThreadPoolSingletonHolder() { _pPool = 0; }
-    ~ThreadPoolSingletonHolder() { delete _pPool; }
+    ThreadPoolSingletonHolder()
+    {
+        _pPool = 0;
+    }
+    ~ThreadPoolSingletonHolder()
+    {
+        delete _pPool;
+    }
     ThreadPool* pool()
     {
         FastMutex::ScopedLock lock(_mutex);
@@ -387,11 +397,13 @@ private:
     FastMutex _mutex;
 };
 
-namespace
-{
-    static ThreadPoolSingletonHolder sh;
+namespace {
+static ThreadPoolSingletonHolder sh;
 }
 
-ThreadPool& ThreadPool::defaultPool() { return *sh.pool(); }
+ThreadPool& ThreadPool::defaultPool()
+{
+    return *sh.pool();
+}
 
 GLUE_END_NAMESPACE

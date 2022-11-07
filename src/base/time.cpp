@@ -135,4 +135,5 @@ double Time::getMillisecondCounterHiRes() noexcept
 }
 
 #endif
+
 GLUE_END_NAMESPACE
