@@ -4,21 +4,21 @@
 #
 
 set(source
-  barrier.cpp
-  countdown_latch.cpp
-  exception.cpp
-  file.cpp
-  fps_counter.cpp
-  log.cpp
-  file_mapping.cpp
-  performance_counter.cpp
-  spin_lock.cpp
-  thread.cpp
-  thread_pool.cpp
-  time.cpp
-  version.cpp
-  waitable_event.cpp
-  system_stats.cpp
+  barrier.cc
+  countdown_latch.cc
+  exception.cc
+  file.cc
+  fps_counter.cc
+  log.cc
+  file_mapping.cc
+  performance_counter.cc
+  spin_lock.cc
+  thread.cc
+  thread_pool.cc
+  time.cc
+  version.cc
+  waitable_event.cc
+  system_stats.cc
 )
 
 set(target base)

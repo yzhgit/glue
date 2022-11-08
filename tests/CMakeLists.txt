@@ -25,9 +25,9 @@ set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(gtest)
 
 add_executable(unit_tests
-  aes_test.cpp
-  base64_test.cpp
-  md5_test.cpp
+  aes_test.cc
+  base64_test.cc
+  md5_test.cc
 )
 
 target_link_libraries(unit_tests
