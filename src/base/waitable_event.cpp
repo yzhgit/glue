@@ -9,7 +9,8 @@
 
 GLUE_START_NAMESPACE
 
-WaitableEvent::WaitableEvent() : m_notified(false) {}
+WaitableEvent::WaitableEvent() : m_notified(false)
+{}
 
 void WaitableEvent::wait() const
 {

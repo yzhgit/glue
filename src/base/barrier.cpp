@@ -9,7 +9,8 @@
 
 GLUE_START_NAMESPACE
 
-Barrier::Barrier(int num_threads) : m_num_to_block(num_threads), m_num_to_exit(num_threads) {}
+Barrier::Barrier(int num_threads) : m_num_to_block(num_threads), m_num_to_exit(num_threads)
+{}
 
 bool Barrier::block()
 {

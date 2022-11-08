@@ -42,7 +42,10 @@ void FileMapping::FileMapping(const char* filename, uint32_t permission, uint64_
 
         flags = 0;
         if (permission & FileMapping::WRITE) { flags = PAGE_READWRITE; }
-        else if (permission & FileMapping::READ) { flags = PAGE_READONLY; }
+        else if (permission & FileMapping::READ)
+        {
+            flags = PAGE_READONLY;
+        }
 
         auto mappingHandle = CreateFileMapping(h, nullptr, flags, 0, 0, nullptr);
         if (mappingHandle != nullptr)
@@ -85,8 +88,14 @@ void FileMapping::FileMapping(const char* filename, uint32_t permission, uint64_
 {
     int flags = O_CLOEXEC;
     if ((permission & FileMapping::READ) && (permission & FileMapping::WRITE)) { flags |= O_RDWR; }
-    else if (permission & FileMapping::WRITE) { flags |= O_WRONLY; }
-    else if (permission & FileMapping::READ) { flags |= O_RDONLY; }
+    else if (permission & FileMapping::WRITE)
+    {
+        flags |= O_WRONLY;
+    }
+    else if (permission & FileMapping::READ)
+    {
+        flags |= O_RDONLY;
+    }
 
     int fd = open(filename, flags);
     if (fd != -1)

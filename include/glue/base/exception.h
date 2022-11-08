@@ -90,13 +90,25 @@ private:
 //
 // inlines
 //
-inline const Exception* Exception::nested() const { return m_pNested; }
+inline const Exception* Exception::nested() const
+{
+    return m_pNested;
+}
 
-inline const std::string& Exception::message() const { return m_msg; }
+inline const std::string& Exception::message() const
+{
+    return m_msg;
+}
 
-inline void Exception::message(const std::string& msg) { m_msg = msg; }
+inline void Exception::message(const std::string& msg)
+{
+    m_msg = msg;
+}
 
-inline int Exception::code() const { return m_code; }
+inline int Exception::code() const
+{
+    return m_code;
+}
 
 //
 // Macros for quickly declaring and implementing exception classes.
@@ -124,22 +136,39 @@ inline int Exception::code() const { return m_code; }
 #define GLUE_DECLARE_EXCEPTION(API, CLS, BASE) GLUE_DECLARE_EXCEPTION_CODE(API, CLS, BASE, 0)
 
 #define GLUE_IMPLEMENT_EXCEPTION(CLS, BASE, NAME)                                                  \
-    CLS::CLS(int code) : BASE(code) {}                                                             \
-    CLS::CLS(const std::string& msg, int code) : BASE(msg, code) {}                                \
-    CLS::CLS(const std::string& msg, const std::string& arg, int code) : BASE(msg, arg, code) {}   \
-    CLS::CLS(const std::string& msg, const glue::Exception& exc, int code)                         \
-        : BASE(msg, exc, code) {}                                                                  \
-    CLS::CLS(const CLS& exc) : BASE(exc) {}                                                        \
-    CLS::~CLS() noexcept {}                                                                        \
+    CLS::CLS(int code) : BASE(code)                                                                \
+    {}                                                                                             \
+    CLS::CLS(const std::string& msg, int code) : BASE(msg, code)                                   \
+    {}                                                                                             \
+    CLS::CLS(const std::string& msg, const std::string& arg, int code) : BASE(msg, arg, code)      \
+    {}                                                                                             \
+    CLS::CLS(const std::string& msg, const glue::Exception& exc, int code) : BASE(msg, exc, code)  \
+    {}                                                                                             \
+    CLS::CLS(const CLS& exc) : BASE(exc)                                                           \
+    {}                                                                                             \
+    CLS::~CLS() noexcept                                                                           \
+    {}                                                                                             \
     CLS& CLS::operator=(const CLS& exc)                                                            \
     {                                                                                              \
         BASE::operator=(exc);                                                                      \
         return *this;                                                                              \
     }                                                                                              \
-    const char* CLS::name() const noexcept { return NAME; }                                        \
-    const char* CLS::className() const noexcept { return typeid(*this).name(); }                   \
-    glue::Exception* CLS::clone() const { return new CLS(*this); }                                 \
-    void CLS::rethrow() const { throw *this; }
+    const char* CLS::name() const noexcept                                                         \
+    {                                                                                              \
+        return NAME;                                                                               \
+    }                                                                                              \
+    const char* CLS::className() const noexcept                                                    \
+    {                                                                                              \
+        return typeid(*this).name();                                                               \
+    }                                                                                              \
+    glue::Exception* CLS::clone() const                                                            \
+    {                                                                                              \
+        return new CLS(*this);                                                                     \
+    }                                                                                              \
+    void CLS::rethrow() const                                                                      \
+    {                                                                                              \
+        throw *this;                                                                               \
+    }
 
 //
 // Standard exception classes

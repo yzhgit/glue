@@ -41,7 +41,10 @@ void FpsCounter::newFrame()
     m_nFrameCount++;
 }
 
-void FpsCounter::update() { update(Time::currentTimeMillis() / 1000); }
+void FpsCounter::update()
+{
+    update(Time::currentTimeMillis() / 1000);
+}
 
 void FpsCounter::update(double now)
 {
@@ -59,10 +62,19 @@ void FpsCounter::update(double now)
     }
 }
 
-double FpsCounter::getFps() const { return m_fps; }
+double FpsCounter::getFps() const
+{
+    return m_fps;
+}
 
-uint64_t FpsCounter::getNumFrames() const { return m_nFrameCount; }
+uint64_t FpsCounter::getNumFrames() const
+{
+    return m_nFrameCount;
+}
 
-void FpsCounter::setFilterAlpha(float alpha) { m_filterAlpha = alpha; }
+void FpsCounter::setFilterAlpha(float alpha)
+{
+    m_filterAlpha = alpha;
+}
 
 GLUE_END_NAMESPACE

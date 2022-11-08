@@ -10,18 +10,17 @@
 GLUE_START_NAMESPACE
 
 #ifndef DOXYGEN
-namespace AtomicHelpers
+namespace AtomicHelpers {
+template <typename T>
+struct DiffTypeHelper
 {
-    template <typename T>
-    struct DiffTypeHelper
-    {
-        using Type = T;
-    };
-    template <typename T>
-    struct DiffTypeHelper<T*>
-    {
-        using Type = std::ptrdiff_t;
-    };
+    using Type = T;
+};
+template <typename T>
+struct DiffTypeHelper<T*>
+{
+    using Type = std::ptrdiff_t;
+};
 } // namespace AtomicHelpers
 #endif
 
@@ -37,13 +36,16 @@ struct Atomic final
     using DiffType = typename AtomicHelpers::DiffTypeHelper<Type>::Type;
 
     /** Creates a new value, initialised to zero. */
-    Atomic() noexcept : value(Type()) {}
+    Atomic() noexcept : value(Type())
+    {}
 
     /** Creates a new value, with a given initial value. */
-    Atomic(Type initialValue) noexcept : value(initialValue) {}
+    Atomic(Type initialValue) noexcept : value(initialValue)
+    {}
 
     /** Copies another value (atomically). */
-    Atomic(const Atomic& other) noexcept : value(other.get()) {}
+    Atomic(const Atomic& other) noexcept : value(other.get())
+    {}
 
     /** Destructor. */
     ~Atomic() noexcept
@@ -55,13 +57,22 @@ struct Atomic final
     }
 
     /** Atomically reads and returns the current value. */
-    Type get() const noexcept { return value.load(); }
+    Type get() const noexcept
+    {
+        return value.load();
+    }
 
     /** Atomically sets the current value. */
-    void set(Type newValue) noexcept { value = newValue; }
+    void set(Type newValue) noexcept
+    {
+        value = newValue;
+    }
 
     /** Atomically sets the current value, returning the value that was replaced. */
-    Type exchange(Type newValue) noexcept { return value.exchange(newValue); }
+    Type exchange(Type newValue) noexcept
+    {
+        return value.exchange(newValue);
+    }
 
     /** Atomically compares this value with a target value, and if it is equal, sets
         this to be equal to a new value.
@@ -107,23 +118,38 @@ struct Atomic final
     }
 
     /** Atomically adds a number to this value, returning the new value. */
-    Type operator+=(DiffType amountToAdd) noexcept { return value += amountToAdd; }
+    Type operator+=(DiffType amountToAdd) noexcept
+    {
+        return value += amountToAdd;
+    }
 
     /** Atomically subtracts a number from this value, returning the new value. */
-    Type operator-=(DiffType amountToSubtract) noexcept { return value -= amountToSubtract; }
+    Type operator-=(DiffType amountToSubtract) noexcept
+    {
+        return value -= amountToSubtract;
+    }
 
     /** Atomically increments this value, returning the new value. */
-    Type operator++() noexcept { return ++value; }
+    Type operator++() noexcept
+    {
+        return ++value;
+    }
 
     /** Atomically decrements this value, returning the new value. */
-    Type operator--() noexcept { return --value; }
+    Type operator--() noexcept
+    {
+        return --value;
+    }
 
     /** Implements a memory read/write barrier.
 
         Internally this calls std::atomic_thread_fence with
         memory_order_seq_cst (the strictest std::memory_order).
      */
-    void memoryBarrier() noexcept { atomic_thread_fence(std::memory_order_seq_cst); }
+    void memoryBarrier() noexcept
+    {
+        atomic_thread_fence(std::memory_order_seq_cst);
+    }
 
     /** The std::atomic object that this class operates on. */
     std::atomic<Type> value;

@@ -22,7 +22,10 @@ public:
     explicit WaitableEvent();
 
     // Returns the value of the event's internal "notified" state.
-    bool isNotified() const { return hasBeenNotifiedInternal(&m_notified); }
+    bool isNotified() const
+    {
+        return hasBeenNotifiedInternal(&m_notified);
+    }
 
     // Blocks the calling thread until the event's "notified" state is
     // `true`. Note that if `notify()` has been previously called on this

@@ -12,38 +12,58 @@ GLUE_START_NAMESPACE
 class RunnableHolder : public Runnable
 {
 public:
-    RunnableHolder(Runnable& target) : m_target(target) {}
+    RunnableHolder(Runnable& target) : m_target(target)
+    {}
 
-    ~RunnableHolder() {}
+    ~RunnableHolder()
+    {}
 
-    void run() { m_target.run(); }
+    void run()
+    {
+        m_target.run();
+    }
 
 private:
     Runnable& m_target;
 };
 
-Thread::Thread() : m_threadRunning(false), m_threadDone(true), m_name("") {}
+Thread::Thread() : m_threadRunning(false), m_threadDone(true), m_name("")
+{}
 
-Thread::Thread(const std::string& name)
-    : m_threadRunning(false), m_threadDone(true)
+Thread::Thread(const std::string& name) : m_threadRunning(false), m_threadDone(true)
 {
     setName(name);
 }
 
 //-------------------------------------------------
-bool Thread::isRunning() const { return m_threadRunning; }
+bool Thread::isRunning() const
+{
+    return m_threadRunning;
+}
 
 //-------------------------------------------------
-std::thread::id Thread::getThreadId() const { return m_thread.get_id(); }
+std::thread::id Thread::getThreadId() const
+{
+    return m_thread.get_id();
+}
 
 //-------------------------------------------------
-std::string Thread::getName() const { return m_name; }
+std::string Thread::getName() const
+{
+    return m_name;
+}
 
 //-------------------------------------------------
-void Thread::setName(const std::string& name) { this->m_name = name; }
+void Thread::setName(const std::string& name)
+{
+    this->m_name = name;
+}
 
 //-------------------------------------------------
-void Thread::start(Runnable& target) { start(std::make_shared<RunnableHolder>(target)); }
+void Thread::start(Runnable& target)
+{
+    start(std::make_shared<RunnableHolder>(target));
+}
 
 void Thread::start(std::shared_ptr<Runnable> pTarget)
 {
@@ -62,7 +82,10 @@ void Thread::start(std::shared_ptr<Runnable> pTarget)
 }
 
 //-------------------------------------------------
-void Thread::stop() { m_threadRunning = false; }
+void Thread::stop()
+{
+    m_threadRunning = false;
+}
 
 //-------------------------------------------------
 void Thread::waitForThread(bool callStopThread, long milliseconds)
@@ -103,16 +126,28 @@ void Thread::sleep(long milliseconds)
 }
 
 //-------------------------------------------------
-void Thread::yield() { std::this_thread::yield(); }
+void Thread::yield()
+{
+    std::this_thread::yield();
+}
 
 //-------------------------------------------------
-bool Thread::isCurrentThread() const { return std::this_thread::get_id() == m_thread.get_id(); }
+bool Thread::isCurrentThread() const
+{
+    return std::this_thread::get_id() == m_thread.get_id();
+}
 
 //-------------------------------------------------
-std::thread& Thread::getNativeThread() { return m_thread; }
+std::thread& Thread::getNativeThread()
+{
+    return m_thread;
+}
 
 //-------------------------------------------------
-const std::thread& Thread::getNativeThread() const { return m_thread; }
+const std::thread& Thread::getNativeThread() const
+{
+    return m_thread;
+}
 
 //-------------------------------------------------
 void Thread::threadEntry()

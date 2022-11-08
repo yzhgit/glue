@@ -378,23 +378,23 @@ class ThreadPoolSingletonHolder
 public:
     ThreadPoolSingletonHolder()
     {
-        _pPool = 0;
+        m_pool = 0;
     }
     ~ThreadPoolSingletonHolder()
     {
-        delete _pPool;
+        delete m_pool;
     }
     ThreadPool* pool()
     {
-        FastMutex::ScopedLock lock(_mutex);
+        FastMutex::ScopedLock lock(m_mutex);
 
-        if (!_pPool) { _pPool = new ThreadPool("default"); }
-        return _pPool;
+        if (!m_pool) { m_pool = new ThreadPool("default"); }
+        return m_pool;
     }
 
 private:
-    ThreadPool* _pPool;
-    FastMutex _mutex;
+    ThreadPool* m_pool;
+    FastMutex m_mutex;
 };
 
 namespace {

@@ -105,7 +105,10 @@ public:
     /// as the thread pool is also implicitly managed in
     /// calls to start(), addCapacity() and joinAll().
 
-    const std::string& name() const { return m_name; };
+    const std::string& name() const
+    {
+        return m_name;
+    };
     /// Returns the name of the thread pool,
     /// or an empty string if no name has been
     /// specified in the constructor.

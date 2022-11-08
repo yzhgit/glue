@@ -44,6 +44,7 @@ void SpinLock::lock() noexcept
             __yield();
 #else
             // TODO: Issue PAGE/YIELD on other architectures.
+            std::thread::yield();
 #endif
         }
     }

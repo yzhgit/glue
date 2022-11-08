@@ -11,7 +11,10 @@ GLUE_START_NAMESPACE
 
 //==============================================================================
 /** Fills a block of memory with zeros. */
-inline void zeromem(void* memory, size_t numBytes) noexcept { memset(memory, 0, numBytes); }
+inline void zeromem(void* memory, size_t numBytes) noexcept
+{
+    memset(memory, 0, numBytes);
+}
 
 /** Overwrites a structure or object with zeros. */
 template <typename Type>
@@ -138,10 +141,20 @@ GLUE_API void glueDLL_free(void*);
 
     #define GLUE_LEAK_DETECTOR(OwnerClass)                                                         \
     public:                                                                                        \
-        static void* operator new(size_t sz) { return glue::glueDLL_malloc(sz); }                  \
-        static void* operator new(size_t, void* p) { return p; }                                   \
-        static void operator delete(void* p) { glue::glueDLL_free(p); }                            \
-        static void operator delete(void*, void*) {}
+        static void* operator new(size_t sz)                                                       \
+        {                                                                                          \
+            return glue::glueDLL_malloc(sz);                                                       \
+        }                                                                                          \
+        static void* operator new(size_t, void* p)                                                 \
+        {                                                                                          \
+            return p;                                                                              \
+        }                                                                                          \
+        static void operator delete(void* p)                                                       \
+        {                                                                                          \
+            glue::glueDLL_free(p);                                                                 \
+        }                                                                                          \
+        static void operator delete(void*, void*)                                                  \
+        {}
 #endif
 
 /** Converts an owning raw pointer into a unique_ptr, deriving the

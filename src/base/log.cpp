@@ -27,7 +27,8 @@ static map<string, LogLevel>& getModules()
     return *modules;
 }
 
-static void noopDeleter(BaseLoggerChannel*) {}
+static void noopDeleter(BaseLoggerChannel*)
+{}
 
 shared_ptr<BaseLoggerChannel>& Log::channel()
 {
@@ -49,11 +50,20 @@ shared_ptr<BaseLoggerChannel>& Log::channel()
     return channel;
 }
 
-void SetLogLevel(LogLevel level) { currentLogLevel = level; }
+void SetLogLevel(LogLevel level)
+{
+    currentLogLevel = level;
+}
 
-void SetLogLevel(string module, LogLevel level) { getModules()[module] = level; }
+void SetLogLevel(string module, LogLevel level)
+{
+    getModules()[module] = level;
+}
 
-LogLevel GetLogLevel() { return currentLogLevel; }
+LogLevel GetLogLevel()
+{
+    return currentLogLevel;
+}
 
 LogLevel GetLogLevel(string module)
 {
@@ -202,16 +212,25 @@ LogFatal::LogFatal(const string& _module, const string& _message)
     m_bPrinted = true;
 }
 
-void Log::setChannel(shared_ptr<BaseLoggerChannel> _channel) { channel() = _channel; }
+void Log::setChannel(shared_ptr<BaseLoggerChannel> _channel)
+{
+    channel() = _channel;
+}
 
 void SetLoggerChannel(shared_ptr<BaseLoggerChannel> loggerChannel)
 {
     Log::setChannel(loggerChannel);
 }
 
-shared_ptr<BaseLoggerChannel> Log::getChannel() { return channel(); }
+shared_ptr<BaseLoggerChannel> Log::getChannel()
+{
+    return channel();
+}
 
-shared_ptr<BaseLoggerChannel> GetLoggerChannel() { return Log::getChannel(); }
+shared_ptr<BaseLoggerChannel> GetLoggerChannel()
+{
+    return Log::getChannel();
+}
 
 string GetLogLevelName(LogLevel level, bool pad)
 {
@@ -282,16 +301,23 @@ void DebugViewLoggerChannel::log(LogLevel level, const string& module, const str
 }
 #endif
 
-FileLoggerChannel::FileLoggerChannel() {}
+FileLoggerChannel::FileLoggerChannel()
+{}
 
 FileLoggerChannel::FileLoggerChannel(const std::string& path, bool append)
 {
     setFile(path, append);
 }
 
-FileLoggerChannel::~FileLoggerChannel() { close(); }
+FileLoggerChannel::~FileLoggerChannel()
+{
+    close();
+}
 
-void FileLoggerChannel::close() { m_fileStream.close(); }
+void FileLoggerChannel::close()
+{
+    m_fileStream.close();
+}
 
 void FileLoggerChannel::setFile(const std::string& path, bool append)
 {

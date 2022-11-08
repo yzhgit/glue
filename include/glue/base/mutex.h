@@ -30,7 +30,8 @@ class GLUE_API Mutex : public std::recursive_mutex
 public:
     using ScopedLock = ScopedLock<Mutex>;
 
-    Mutex() noexcept : std::recursive_mutex() {}
+    Mutex() noexcept : std::recursive_mutex()
+    {}
 
 private:
     GLUE_DECLARE_NON_COPYABLE(Mutex)
@@ -41,7 +42,8 @@ class GLUE_API FastMutex : public std::mutex
 public:
     using ScopedLock = ScopedLock<FastMutex>;
 
-    FastMutex() noexcept : std::mutex() {}
+    FastMutex() noexcept : std::mutex()
+    {}
 
 private:
     GLUE_DECLARE_NON_COPYABLE(FastMutex)
@@ -60,14 +62,19 @@ private:
 class GLUE_API EmptyMutex
 {
 public:
-    using ScopedLock = ScopedLock<FastMutex>;
+    using ScopedLock = ScopedLock<EmptyMutex>;
 
     inline EmptyMutex() = default;
     inline ~EmptyMutex() = default;
 
-    inline void lock() noexcept {}
-    inline bool try_lock() noexcept { return true; }
-    inline void unlock() noexcept {}
+    inline void lock() noexcept
+    {}
+    inline bool try_lock() noexcept
+    {
+        return true;
+    }
+    inline void unlock() noexcept
+    {}
 
 private:
     GLUE_DECLARE_NON_COPYABLE(EmptyMutex)

@@ -50,14 +50,20 @@ public:
         otherwise there are no guarantees what will happen! Best just to use it
         as a local stack object, rather than creating one with the new() operator.
     */
-    inline explicit ScopedLock(LockType& lock) noexcept : m_lock(lock) { m_lock.lock(); }
+    inline explicit ScopedLock(LockType& lock) noexcept : m_lock(lock)
+    {
+        m_lock.lock();
+    }
 
     /** Destructor.
         The lock will be released when the destructor is called.
         Make sure this object is created and deleted by the same thread, otherwise there are
         no guarantees what will happen!
     */
-    inline ~ScopedLock() noexcept { m_lock.unlock(); }
+    inline ~ScopedLock() noexcept
+    {
+        m_lock.unlock();
+    }
 
 private:
     //==============================================================================
@@ -121,7 +127,10 @@ public:
         otherwise there are no guarantees what will happen! Best just to use it
         as a local stack object, rather than creating one with the new() operator.
     */
-    inline explicit ScopedUnlock(LockType& lock) noexcept : m_lock(lock) { lock.unlock(); }
+    inline explicit ScopedUnlock(LockType& lock) noexcept : m_lock(lock)
+    {
+        lock.unlock();
+    }
 
     /** Destructor.
 
@@ -130,7 +139,10 @@ public:
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
     */
-    inline ~ScopedUnlock() noexcept { m_lock.lock(); }
+    inline ~ScopedUnlock() noexcept
+    {
+        m_lock.lock();
+    }
 
 private:
     //==============================================================================

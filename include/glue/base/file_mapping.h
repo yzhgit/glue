@@ -7,8 +7,6 @@
 
 #include "glue/base/leaked_object_detector.h"
 
-#include "ghc/fs_std.hpp"
-
 GLUE_START_NAMESPACE
 
 //==============================================================================
