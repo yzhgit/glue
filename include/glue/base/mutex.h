@@ -10,44 +10,8 @@
 GLUE_START_NAMESPACE
 
 //==============================================================================
-/**
-    A re-entrant mutex.
 
-    A Mutex acts as a re-entrant mutex object. The best way to lock and unlock
-    one of these is by using RAII in the form of a local ScopedLock object - have a look
-    through the codebase for many examples of how to do this.
-
-    In almost all cases you'll want to declare your Mutex as a member variable.
-    Occasionally you may want to declare one as a static variable, but in that case the usual
-    C++ static object order-of-construction warnings should be heeded.
-
-    @see ScopedLock, ScopedUnlock, SpinLock, ReadWriteLock, Thread
-
-    @tags{Core}
-*/
-class GLUE_API Mutex : public std::recursive_mutex
-{
-public:
-    using ScopedLock = ScopedLock<Mutex>;
-
-    Mutex() noexcept : std::recursive_mutex()
-    {}
-
-private:
-    GLUE_DECLARE_NON_COPYABLE(Mutex)
-};
-
-class GLUE_API FastMutex : public std::mutex
-{
-public:
-    using ScopedLock = ScopedLock<FastMutex>;
-
-    FastMutex() noexcept : std::mutex()
-    {}
-
-private:
-    GLUE_DECLARE_NON_COPYABLE(FastMutex)
-};
+typedef std::mutex Mutex;
 
 //==============================================================================
 /**

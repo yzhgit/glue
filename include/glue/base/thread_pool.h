@@ -136,7 +136,7 @@ private:
     int m_serial;
     int m_age;
     ThreadVec m_threads;
-    mutable FastMutex m_mutex;
+    mutable Mutex m_mutex;
 };
 
 GLUE_END_NAMESPACE
