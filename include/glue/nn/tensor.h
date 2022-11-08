@@ -13,7 +13,7 @@
 #include <vector>
 
 GLUE_START_NAMESPACE
-namespace ml {
+
 
 using ShapeType = std::vector<uint32_t>;
 
@@ -181,5 +181,5 @@ inline std::vector<float> Dequantize(const std::vector<T> &data, float scale,
     return f;
 }
 
-} // namespace ml
+
 GLUE_END_NAMESPACE

@@ -62,7 +62,7 @@
 #endif
 
 GLUE_START_NAMESPACE
-namespace ml {
+
 
 PredictorTensorRt::~PredictorTensorRt() = default;
 
@@ -521,5 +521,5 @@ int32_t PredictorTensorRt::AllocateBuffers(
     return kRetOk;
 }
 
-} // namespace ml
+
 GLUE_END_NAMESPACE

@@ -17,7 +17,7 @@
 #include "glue/nn/predictor.h"
 
 GLUE_START_NAMESPACE
-namespace ml {
+
 
 class PredictorNcnn : public Predictor {
   public:
@@ -41,5 +41,5 @@ class PredictorNcnn : public Predictor {
     int32_t num_threads_;
 };
 
-} // namespace ml
+
 GLUE_END_NAMESPACE

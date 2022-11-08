@@ -13,7 +13,7 @@
 #include <vector>
 
 GLUE_START_NAMESPACE
-namespace ml {
+
 
 class TensorInfo {
   public:
@@ -250,5 +250,5 @@ class Predictor {
     PredictorType helper_type_;
 };
 
-} // namespace ml
+
 GLUE_END_NAMESPACE

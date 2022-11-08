@@ -44,7 +44,7 @@
 #define PRINT_E(...) INFERENCE_HELPER_LOG_PRINT_E(TAG, __VA_ARGS__)
 
 GLUE_START_NAMESPACE
-namespace ml {
+
 
 PredictorSnpe::PredictorSnpe() {
     num_threads_ = 1;
@@ -374,5 +374,5 @@ int32_t PredictorSnpe::GetAllTensorInfo(
     return kRetOk;
 }
 
-} // namespace ml
+
 GLUE_END_NAMESPACE

@@ -11,24 +11,22 @@
 #include <stdint.h>
 
 GLUE_START_NAMESPACE
-namespace ml {
 
 using paddle::zynqmp::float16;
 
-typedef void (*tensor_func_fpga)(const uint8_t *src, float16 *output,
-                                 ImageFormat srcFormat, ImageFormat dstFormat,
-                                 int srcw, int srch, int dstw, int dsth,
-                                 float *means, float *scales);
+typedef void (*tensor_func_fpga)(const uint8_t* src, float16* output, ImageFormat srcFormat,
+                                 ImageFormat dstFormat, int srcw, int srch, int dstw, int dsth,
+                                 float* means, float* scales);
 
-class Image2TensorFpga {
-  public:
-    void choose(const uint8_t *src, Tensor *dst, ImageFormat srcFormat,
-                ImageFormat dstFormat, LayoutType layout, int srcw, int srch,
-                int dstw, int dsth, float *means, float *scales);
+class Image2TensorFpga
+{
+public:
+    void choose(const uint8_t* src, Tensor* dst, ImageFormat srcFormat, ImageFormat dstFormat,
+                LayoutType layout, int srcw, int srch, int dstw, int dsth, float* means,
+                float* scales);
 
-  private:
+private:
     tensor_func_fpga impl_{nullptr};
 };
 
-} // namespace ml
 GLUE_END_NAMESPACE

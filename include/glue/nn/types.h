@@ -6,7 +6,7 @@
 #pragma once
 
 GLUE_START_NAMESPACE
-namespace ml {
+
 
 enum class DataType {
     Float16 = 0,
@@ -37,5 +37,5 @@ enum class RoundingPolicy { TO_ZERO, RTNE };
 
 enum class ResizeType { NEAREST_NEIGHBOR, BILINEAR, AREA };
 
-} // namespace ml
+
 GLUE_END_NAMESPACE

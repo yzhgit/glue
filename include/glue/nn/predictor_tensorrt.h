@@ -22,7 +22,7 @@ class IExecutionContext;
 } // namespace nvinfer1
 
 GLUE_START_NAMESPACE
-namespace ml {
+
 
 class PredictorTensorRt : public Predictor {
   public:
@@ -58,5 +58,5 @@ class PredictorTensorRt : public Predictor {
     std::vector<void *> buffer_list_gpu_;
 };
 
-} // namespace ml
+
 GLUE_END_NAMESPACE

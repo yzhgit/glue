@@ -36,7 +36,7 @@
 #define PRINT_E(...) INFERENCE_HELPER_LOG_PRINT_E(TAG, __VA_ARGS__)
 
 GLUE_START_NAMESPACE
-namespace ml {
+
 
 Predictor *Predictor::Create(const Predictor::PredictorType type) {
     Predictor *p = nullptr;
@@ -234,5 +234,5 @@ template void Predictor::PreProcessBlob<uint8_t>(
 template void Predictor::PreProcessBlob<int8_t>(
     int32_t num_thread, const InputTensorInfo &input_tensor_info, int8_t *dst);
 
-} // namespace ml
+
 GLUE_END_NAMESPACE

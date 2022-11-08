@@ -34,7 +34,7 @@ class UserBufferMap;
 } // namespace zdl
 
 GLUE_START_NAMESPACE
-namespace ml {
+
 
 class PredictorSnpe : public Predictor {
   private:
@@ -87,5 +87,5 @@ class PredictorSnpe : public Predictor {
         application_output_buffers_;
 };
 
-} // namespace ml
+
 GLUE_END_NAMESPACE

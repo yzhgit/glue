@@ -26,7 +26,7 @@
 
 
 GLUE_START_NAMESPACE
-namespace ml {
+
 
 PredictorNcnn::PredictorNcnn() {
     num_threads_ = 1;
@@ -219,5 +219,5 @@ int32_t PredictorNcnn::Process(
     return kRetOk;
 }
 
-} // namespace ml
+
 GLUE_END_NAMESPACE

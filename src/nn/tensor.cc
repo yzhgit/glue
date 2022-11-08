@@ -6,7 +6,7 @@
 #include "glue/nn/tensor.h"
 
 GLUE_START_NAMESPACE
-namespace ml {
+
 
 constexpr uint32_t GetDataTypeSize(DataType dataType) {
     switch (dataType) {
@@ -47,5 +47,5 @@ uint32_t TensorInfo::GetNumBytes() const {
     return GetNumElements() * GetDataTypeSize(m_DataType);
 }
 
-} // namespace ml
+
 GLUE_END_NAMESPACE
