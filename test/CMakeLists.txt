@@ -14,36 +14,29 @@
 # limitations under the License.
 #
 
-include(FetchContent)
-FetchContent_Declare(gtest
-  QUIET
-  URL https://github.com/google/googletest/archive/release-1.12.1.tar.gz
-)
-# configure build of googletest
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(gtest)
+include_directories("${CMAKE_SOURCE_DIR}/include/glue/base")
+include_directories("${CMAKE_SOURCE_DIR}/thirdparty")
 
-add_executable(unit_tests
-  aes_test.cc
-  base64_test.cc
-  md5_test.cc
-)
+set(source_files
+  src/main.cpp
 
-target_link_libraries(unit_tests
-  PRIVATE
-    base
-    crypto
-    gtest_main
+  src/base/result.test.cpp
+  src/base/result.constexpr.test.cpp
+  src/base/result.failure.test.cpp
+
+  # src/crypto/aes.test.cpp
+  # src/crypto/base64.test.cpp
+  # src/crypto/md5.test.cpp
 )
 
-# automatic discovery of unit tests
-include(GoogleTest)
-gtest_discover_tests(unit_tests
-  PROPERTIES
-    LABELS "unit"
-  DISCOVERY_TIMEOUT  # how long to wait (in seconds) before crashing
-    240
+add_executable(${PROJECT_NAME}_test
+  ${source_files}
 )
 
-add_test(NAME unit_tests COMMAND unit_tests)
+##############################################################################
+# CTest
+##############################################################################
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Catch2")
+
+include(Catch)
+catch_discover_tests(${PROJECT_NAME}_test)

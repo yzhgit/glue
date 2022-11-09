@@ -8,9 +8,9 @@ def get_version():
 
     try:
         content = tools.load("CMakeLists.txt")
-        major   = re.search(".*BIT_CORE_VERSION_MAJOR ([0-9]+) .*", content).group(1)
-        minor   = re.search(".*BIT_CORE_VERSION_MINOR ([0-9]+) .*", content).group(1)
-        patch   = re.search(".*BIT_CORE_VERSION_PATCH ([0-9]+) .*", content).group(1)
+        major   = re.search(".*GLUE_VERSION_MAJOR ([0-9]+) .*", content).group(1)
+        minor   = re.search(".*GLUE_VERSION_MINOR ([0-9]+) .*", content).group(1)
+        patch   = re.search(".*GLUE_VERSION_PATCH ([0-9]+) .*", content).group(1)
 
         version = "{}.{}.{}".format(major,minor,patch)
 
@@ -23,11 +23,11 @@ def get_version():
     except Exception:
         return None
 
-class CppBitsCoreConan(ConanFile):
-    name = "CppBitsCore"
+class GlueConan(ConanFile):
+    name = "GLUE"
     version = get_version()
     description = "A header-only standard template library"
-    author = "cppbits"
+    author = "zhangyao"
     generators = "cmake"
     exports_sources = ("CMakeLists.txt",
                        "CMake/Templates/*.in",
@@ -48,21 +48,12 @@ class CppBitsCoreConan(ConanFile):
             self.requires("Catch2/2.4.1@cppbits/stable",private=True)
         return
 
-    def source(self):
-        pass
-
-    def build(self):
-        pass
-
-    def test(self):
-        pass
-
     def package(self):
         cmake = CMake(self)
-        cmake.definitions["BIT_CORE_COMPILE_SELF_CONTAINMENT_TESTS"] = "OFF"
-        cmake.definitions["BIT_CORE_COMPILE_UNIT_TESTS"] = "OFF"
-        cmake.definitions["BIT_CORE_GENERATE_DOCS"] = "ON" if self.options.install_docs else "OFF"
-        cmake.definitions["BIT_CORE_INSTALL_DOCS"]  = "ON" if self.options.install_docs else "OFF"
+        cmake.definitions["GLUE_COMPILE_SELF_CONTAINMENT_TESTS"] = "OFF"
+        cmake.definitions["GLUE_COMPILE_UNIT_TESTS"] = "OFF"
+        cmake.definitions["GLUE_GENERATE_DOCS"] = "ON" if self.options.install_docs else "OFF"
+        cmake.definitions["GLUE_INSTALL_DOCS"]  = "ON" if self.options.install_docs else "OFF"
         cmake.configure()
 
         # If we have specified to build install_docs, install them
