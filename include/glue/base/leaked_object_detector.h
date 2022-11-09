@@ -126,12 +126,12 @@ private:
             @see GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR, LeakedObjectDetector
         */
         #define GLUE_LEAK_DETECTOR(OwnerClass)                                                     \
-            friend class glue::LeakedObjectDetector<OwnerClass>;                                   \
+            friend class GLUE_NAMESPACE::LeakedObjectDetector<OwnerClass>;                                   \
             static const char* getLeakedObjectClassName() noexcept                                 \
             {                                                                                      \
                 return #OwnerClass;                                                                \
             }                                                                                      \
-            glue::LeakedObjectDetector<OwnerClass> GLUE_JOIN_MACRO(leakDetector, __LINE__);
+            GLUE_NAMESPACE::LeakedObjectDetector<OwnerClass> GLUE_JOIN_MACRO(leakDetector, __LINE__);
     #else
         #define GLUE_LEAK_DETECTOR(OwnerClass)
     #endif

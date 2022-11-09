@@ -8,7 +8,7 @@
 //==============================================================================
 /** Current GLUE version number.
 
-    See also glue::getVersion() for a string version.
+    See also GLUE_NAMESPACE::getVersion() for a string version.
 */
 #define GLUE_MAJOR_VERSION 0
 #define GLUE_MINOR_VERSION 1
@@ -20,7 +20,7 @@
     Bits 8 to 16 = minor version.
     Bits 0 to 8 = point release.
 
-    See also glue::getVersion() for a string version.
+    See also GLUE_NAMESPACE::getVersion() for a string version.
 */
 #define GLUE_VERSION ((GLUE_MAJOR_VERSION << 16) + (GLUE_MINOR_VERSION << 8) + GLUE_PATCH_VERSION)
 
@@ -57,7 +57,7 @@
 // #include <vector>
 
 //==============================================================================
-#include "glue/base/PlatformDefs.h"
+#include "glue/base/platform_defs.h"
 
 //==============================================================================
 // Now we'll include some common OS headers..
@@ -195,15 +195,5 @@ using ssize_t = pointer_sized_int;
     #define GLUE_STRING_UTF_TYPE 8
 #endif
 
-//==============================================================================
-/** Config: GLUE_CHECK_MEMORY_LEAKS
-
-    Enables a memory-leak check for certain objects when the app terminates. See the
-   LeakedObjectDetector class and the GLUE_LEAK_DETECTOR macro for more details about enabling leak
-   checking for specific classes.
-*/
-#if defined(GLUE_DEBUG) && !defined(GLUE_CHECK_MEMORY_LEAKS)
-    #define GLUE_CHECK_MEMORY_LEAKS 1
-#endif
 
 GLUE_API bool GLUE_CALLTYPE glue_isRunningUnderDebugger() noexcept;

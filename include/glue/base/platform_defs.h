@@ -67,7 +67,7 @@
 //==============================================================================
 #if defined(GLUE_OS_WINDOWS)
     #ifdef _DEBUG
-        #define GLUE_DEBUG
+        #define GLUE_DEBUG 1
     #endif
 
     #ifdef _MSC_VER
@@ -91,7 +91,7 @@
     #define GLUE_LITTLE_ENDIAN
 #elif defined(GLUE_OS_LINUX) || defined(GLUE_OS_ANDROID)
     #ifdef _DEBUG
-        #define GLUE_DEBUG
+        #define GLUE_DEBUG 1
     #endif
 
     // Allow override for big-endian Linux platforms
@@ -106,6 +106,36 @@
     #else
         #define GLUE_32BIT
     #endif
+#endif
+
+//==============================================================================
+/** Config: GLUE_LOG_ASSERTIONS
+
+    If this flag is enabled, the jassert and jassertfalse macros will always use
+   Logger::writeToLog() to write a message when an assertion happens.
+
+    Enabling it will also leave this turned on in release builds. When it's disabled,
+    however, the jassert and jassertfalse macros will not be compiled in a
+    release build.
+
+    @see jassert, jassertfalse, Logger
+*/
+#ifndef GLUE_LOG_ASSERTIONS
+    #if GLUE_ANDROID
+        #define GLUE_LOG_ASSERTIONS 1
+    #else
+        #define GLUE_LOG_ASSERTIONS 0
+    #endif
+#endif
+
+/** Config: GLUE_CHECK_MEMORY_LEAKS
+
+    Enables a memory-leak check for certain objects when the app terminates. See the
+   LeakedObjectDetector class and the GLUE_LEAK_DETECTOR macro for more details about enabling leak
+   checking for specific classes.
+*/
+#if defined(GLUE_DEBUG) && !defined(GLUE_CHECK_MEMORY_LEAKS)
+    #define GLUE_CHECK_MEMORY_LEAKS 1
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -214,6 +244,17 @@
 #endif
 
 //==============================================================================
+// Debugging and assertion macros
+
+#ifndef GLUE_LOG_CURRENT_ASSERTION
+    #if GLUE_LOG_ASSERTIONS || GLUE_DEBUG
+        #define GLUE_LOG_CURRENT_ASSERTION GLUE_NAMESPACE::logAssertion(__FILE__, __LINE__);
+    #else
+        #define GLUE_LOG_CURRENT_ASSERTION
+    #endif
+#endif
+
+//==============================================================================
 #if defined(GLUE_OS_LINUX) || defined(GLUE_OS_BSD)
     /** This will try to break into the debugger if the app is currently being debugged.
         If called by an app that's not being debugged, the behaviour isn't defined - it may
@@ -237,7 +278,6 @@
         {                                                                                          \
             asm("int $3");                                                                         \
         }
-#endif
 #elif defined(GLUE_OS_ANDROID)
     #define GLUE_BREAK_IN_DEBUGGER                                                                 \
         {                                                                                          \
@@ -250,17 +290,48 @@
         }
 #endif
 
-#if defined(GLUE_COMPILER_CLANG) && defined(__has_feature) && !defined(GLUE_ANALYZER_NORETURN)
-    #if __has_feature(attribute_analyzer_noreturn)
-inline void __attribute__((analyzer_noreturn)) glue_assert_noreturn()
-{}
-        #define GLUE_ANALYZER_NORETURN glue::glue_assert_noreturn();
-    #endif
+//==============================================================================
+#if GLUE_MSVC && !defined(DOXYGEN)
+    #define GLUE_WHILE_LOOP(x)                                                                     \
+        __pragma(warning(push)) __pragma(warning(disable : 4127)) do                               \
+        {                                                                                          \
+            x                                                                                      \
+        }                                                                                          \
+        while (false) __pragma(warning(pop))
+#else
+    /** This is the good old C++ trick for creating a macro that forces the user to put
+       a semicolon after it when they use it.
+    */
+    #define GLUE_WHILE_LOOP(x)                                                                     \
+        do {                                                                                       \
+            x                                                                                      \
+        } while (false)
 #endif
 
-#ifndef GLUE_ANALYZER_NORETURN
-    #define GLUE_ANALYZER_NORETURN
-#endif
+//==============================================================================
+/** This will always cause an assertion failure.
+    It is only compiled in a debug build, (unless GLUE_LOG_ASSERTIONS is enabled for your
+   build).
+    @see jassert
+*/
+#define jassertfalse GLUE_WHILE_LOOP(GLUE_LOG_CURRENT_ASSERTION)
+
+/** Platform-independent assertion macro.
+
+    This macro gets turned into a no-op when you're building with debugging turned off, so be
+    careful that the expression you pass to it doesn't perform any actions that are vital for
+   the correct behaviour of your program!
+    @see jassertfalse
+*/
+#define jassert(expression) GLUE_WHILE_LOOP(if (!(expression)) jassertfalse;)
+
+/** Platform-independent assertion macro which suppresses ignored-variable
+    warnings in all build modes. You should probably use a plain jassert()
+    by default, and only replace it with jassertquiet() once you've
+    convinced yourself that any unused-variable warnings emitted by the
+    compiler are harmless.
+*/
+#define jassertquiet(expression) GLUE_WHILE_LOOP(if (!(expression)) jassertfalse;)
 
 /** Used to silence Wimplicit-fallthrough on Clang and GCC where available
     as there are a few places in the codebase where we need to do this
@@ -653,14 +724,14 @@ private:                                                                        
     #endif
 #endif
 
-// GLUE_PREDICT_TRUE, GLUE_PREDICT_FALSE
+// GLUE_LIKELY, GLUE_UNLIKELY
 //
 // Enables the compiler to prioritize compilation using static analysis for
 // likely paths within a boolean branch.
 //
 // Example:
 //
-//   if (GLUE_PREDICT_TRUE(expression)) {
+//   if (GLUE_LIKELY(expression)) {
 //     return result;                        // Faster if more likely
 //   } else {
 //     return 0;
@@ -675,32 +746,12 @@ private:                                                                        
 // branch in a codebase is likely counterproductive; however, annotating
 // specific branches that are both hot and consistently mispredicted is likely
 // to yield performance improvements.
-#if GLUE_HAVE_BUILTIN(__builtin_expect) || (defined(GLUE_COMPILER_GCC)
-    #define GLUE_PREDICT_FALSE(x) (__builtin_expect(false || (x), false))
-    #define GLUE_PREDICT_TRUE(x) (__builtin_expect(false || (x), true))
+#if GLUE_HAVE_BUILTIN(__builtin_expect) || defined(GLUE_COMPILER_GCC)
+    #define GLUE_LIKELY(x) __builtin_expect(!!(x), 1)
+    #define GLUE_UNLIKELY(x) __builtin_expect(!!(x), 0)
 #else
-    #define GLUE_PREDICT_FALSE(x) (x)
-    #define GLUE_PREDICT_TRUE(x) (x)
-#endif
-
-// GLUE_ASSERT()
-//
-// In C++11, `assert` can't be used portably within constexpr functions.
-// GLUE_ASSERT functions as a runtime assert but works in C++11 constexpr
-// functions.  Example:
-//
-// constexpr double Divide(double a, double b) {
-//   return GLUE_ASSERT(b != 0), a / b;
-// }
-//
-// This macro is inspired by
-// https://akrzemi1.wordpress.com/2017/05/18/asserts-in-constexpr-functions/
-#if defined(NDEBUG)
-    #define GLUE_ASSERT(expr) (false ? static_cast<void>(expr) : static_cast<void>(0))
-#else
-    #define GLUE_ASSERT(expr)                                                                      \
-        (GLUE_PREDICT_TRUE((expr)) ? static_cast<void>(0)                                          \
-                                   : [] { assert(false && #expr); }()) // NOLINT
+    #define GLUE_LIKELY(x) (x)
+    #define GLUE_UNLIKELY(x) (x)
 #endif
 
 /*
@@ -716,7 +767,11 @@ private:                                                                        
 ////////////////////////////////////////////////////////////////////////////////
 // Cpp
 ////////////////////////////////////////////////////////////////////////////////
-#define GLUE_START_NAMESPACE GLUE_START_NAMESPACE
+#ifndef GLUE_NAMESPACE
+    #define GLUE_NAMESPACE glue
+#endif
+
+#define GLUE_START_NAMESPACE namespace GLUE_NAMESPACE {
 #define GLUE_END_NAMESPACE }
 
 #define GLUE_START_EXTERN_C extern "C" {

@@ -143,7 +143,7 @@ GLUE_API void glueDLL_free(void*);
     public:                                                                                        \
         static void* operator new(size_t sz)                                                       \
         {                                                                                          \
-            return glue::glueDLL_malloc(sz);                                                       \
+            return GLUE_NAMESPACE::glueDLL_malloc(sz);                                                       \
         }                                                                                          \
         static void* operator new(size_t, void* p)                                                 \
         {                                                                                          \
@@ -151,7 +151,7 @@ GLUE_API void glueDLL_free(void*);
         }                                                                                          \
         static void operator delete(void* p)                                                       \
         {                                                                                          \
-            glue::glueDLL_free(p);                                                                 \
+            GLUE_NAMESPACE::glueDLL_free(p);                                                                 \
         }                                                                                          \
         static void operator delete(void*, void*)                                                  \
         {}
