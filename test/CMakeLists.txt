@@ -14,25 +14,30 @@
 # limitations under the License.
 #
 
-include_directories("${CMAKE_SOURCE_DIR}/include/glue/base")
-include_directories("${CMAKE_SOURCE_DIR}/thirdparty")
-
 set(source_files
   src/main.cpp
 
-  src/base/tribool.test.cpp
-  src/base/expected.test.cpp
-  src/base/optional.test.cpp
+  src/base/barrier_test.cpp
 
-  src/base/object_pool.test.cpp
+  src/base/tribool_test.cpp
+  src/base/expected_test.cpp
+  src/base/optional_test.cpp
 
-  # src/crypto/aes.test.cpp
-  # src/crypto/base64.test.cpp
-  # src/crypto/md5.test.cpp
+  src/base/file_mapping_test.cpp
+  src/base/object_pool_test.cpp
+
+  # src/crypto/aes_test.cpp
+  # src/crypto/base64_test.cpp
+  # src/crypto/md5_test.cpp
 )
 
 add_executable(${PROJECT_NAME}_test
   ${source_files}
+)
+
+target_include_directories(${PROJECT_NAME}_test
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/thirdparty
 )
 
 target_link_libraries(${PROJECT_NAME}_test

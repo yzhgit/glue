@@ -7,6 +7,8 @@
 
 #include "glue/base/log.hpp"
 
+#include <functional>
+
 namespace glue {
 
 class RunnableHolder : public Runnable

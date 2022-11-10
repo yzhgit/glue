@@ -23,7 +23,7 @@ bool Barrier::block()
                  m_num_to_block, m_num_to_exit);
     }
 
-    m_cond.wait(lock, [this]() { return m_num_to_block != 0; });
+    m_cond.wait(lock, [this]() { return m_num_to_block == 0; });
 
     // Determine which thread can safely delete this Barrier object
     m_num_to_exit--;
