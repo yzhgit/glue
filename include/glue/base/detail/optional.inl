@@ -120,7 +120,7 @@ template <typename T>
 template <typename... Args>
 inline void glue::detail::optional_base<T, false>::construct(Args&&... args)
 {
-    BIT_ASSERT(!m_engaged);
+    GLUE_ASSERT(!m_engaged);
 
     new (&m_storage.something) T(std::forward<Args>(args)...);
     m_engaged = true;
@@ -129,7 +129,7 @@ inline void glue::detail::optional_base<T, false>::construct(Args&&... args)
 template <typename T>
 inline void glue::detail::optional_base<T, false>::destruct()
 {
-    BIT_ASSERT(m_engaged);
+    GLUE_ASSERT(m_engaged);
 
     if (m_engaged)
     {
@@ -314,7 +314,9 @@ inline constexpr bool glue::optional<T>::has_value() const noexcept
 template <typename T>
 inline constexpr typename glue::optional<T>::value_type* glue::optional<T>::operator->() noexcept
 {
-    BIT_ASSERT(has_value(), "optional must be engaged!");
+    // GLUE_ASSERT(has_value(), "optional must be engaged!");
+
+    GLUE_ASSERT(has_value());
 
     return base_type::val();
 }
@@ -323,7 +325,8 @@ template <typename T>
 inline constexpr const typename glue::optional<T>::value_type*
 glue::optional<T>::operator->() const noexcept
 {
-    BIT_ASSERT(has_value(), "optional must be engaged!");
+    // GLUE_ASSERT(has_value(), "optional must be engaged!");
+    GLUE_ASSERT(has_value());
 
     return base_type::val();
 }
@@ -333,7 +336,8 @@ glue::optional<T>::operator->() const noexcept
 template <typename T>
 inline constexpr typename glue::optional<T>::value_type& glue::optional<T>::operator*() & noexcept
 {
-    BIT_ASSERT(has_value(), "optional must be engaged!");
+    // GLUE_ASSERT(has_value(), "optional must be engaged!");
+    GLUE_ASSERT(has_value());
 
     return *base_type::val();
 }
@@ -341,7 +345,8 @@ inline constexpr typename glue::optional<T>::value_type& glue::optional<T>::oper
 template <typename T>
 inline constexpr typename glue::optional<T>::value_type&& glue::optional<T>::operator*() && noexcept
 {
-    BIT_ASSERT(has_value(), "optional must be engaged!");
+    // GLUE_ASSERT(has_value(), "optional must be engaged!");
+    GLUE_ASSERT(has_value());
 
     return std::move(*base_type::val());
 }
@@ -352,7 +357,8 @@ template <typename T>
 inline constexpr const typename glue::optional<T>::value_type&
 glue::optional<T>::operator*() const& noexcept
 {
-    BIT_ASSERT(has_value(), "optional must be engaged!");
+    // GLUE_ASSERT(has_value(), "optional must be engaged!");
+    GLUE_ASSERT(has_value());
 
     return *base_type::val();
 }
@@ -361,7 +367,8 @@ template <typename T>
 inline constexpr const typename glue::optional<T>::value_type&&
 glue::optional<T>::operator*() const&& noexcept
 {
-    BIT_ASSERT(has_value(), "optional must be engaged!");
+    // GLUE_ASSERT(has_value(), "optional must be engaged!");
+    GLUE_ASSERT(has_value());
 
     return std::move(*base_type::val());
 }

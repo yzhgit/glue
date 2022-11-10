@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "glue/base/common.hpp"
+
 #include <cassert>
 #include <cstdint>
 #include <memory>
@@ -190,8 +192,8 @@ namespace detail {
 
     const uint32_t MIN_BLOCK_ALIGN = 64;
 
-    void* aligned_malloc(size_t size, size_t align);
-    void aligned_free(void* ptr);
+    GLUE_API void* aligned_malloc(size_t size, size_t align);
+    GLUE_API void aligned_free(void* ptr);
 
     // Aligns n to align. N will be unchanged if it is already aligned
     inline size_t align_to(size_t n, size_t align)

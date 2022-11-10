@@ -35,6 +35,11 @@ add_executable(${PROJECT_NAME}_test
   ${source_files}
 )
 
+target_link_libraries(${PROJECT_NAME}_test
+  PRIVATE
+    glue::base
+)
+
 ##############################################################################
 # CTest
 ##############################################################################

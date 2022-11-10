@@ -365,7 +365,7 @@ namespace core {
         }
 
         template <typename CharT>
-        constexpr hash_t string_hash(const CharT* str, std::size_t count) noexcept;
+        constexpr glue::hash_t string_hash(const CharT* str, std::size_t count) noexcept;
 
     } // namespace detail
 } // namespace core

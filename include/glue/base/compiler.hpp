@@ -30,9 +30,11 @@
         #error "GLUE requires GCC 5.0 or later"
     #endif
 
-    #ifndef GLUE_EXCEPTIONS_DISABLED
-        #if !__EXCEPTIONS
-            #define GLUE_EXCEPTIONS_DISABLED 1
+    #ifndef GLUE_NO_EXCEPTIONS
+        #if defined(__cpp_exceptions) || defined(__EXCEPTIONS) || (_HAS_EXCEPTIONS)
+            #define GLUE_NO_EXCEPTIONS 0
+        #else
+            #define GLUE_NO_EXCEPTIONS 1
         #endif
     #endif
 
@@ -50,9 +52,9 @@
         #error "GLUE requires Clang 3.4 or later"
     #endif
 
-    #ifndef GLUE_EXCEPTIONS_DISABLED
+    #ifndef GLUE_NO_EXCEPTIONS
         #if !__has_feature(cxx_exceptions)
-            #define GLUE_EXCEPTIONS_DISABLED 1
+            #define GLUE_NO_EXCEPTIONS 1
         #endif
     #endif
 
@@ -70,9 +72,9 @@
         #error "GLUE requires Visual Studio 2017 or later"
     #endif
 
-    #ifndef GLUE_EXCEPTIONS_DISABLED
+    #ifndef GLUE_NO_EXCEPTIONS
         #if !_CPPUNWIND
-            #define GLUE_EXCEPTIONS_DISABLED 1
+            #define GLUE_NO_EXCEPTIONS 1
         #endif
     #endif
 

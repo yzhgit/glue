@@ -287,38 +287,38 @@ template <typename T, typename E>
 template <typename... Args>
 inline void glue::detail::expected_base<true, T, E>::emplace_value(Args&&... args)
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     try
     {
-#endif // BIT_COMPILER_EXCEPTIONS_ENABLED
+#endif // GLUE_EXCEPTIONS_ENABLED
         new (&m_storage.value) T(std::forward<Args>(args)...);
         m_has_value = true;
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     } catch (...)
     {
         m_has_value = indeterminate;
         throw;
     }
-#endif // BIT_COMPILER_EXCEPTIONS_ENABLED
+#endif // GLUE_EXCEPTIONS_ENABLED
 }
 
 template <typename T, typename E>
 template <typename... Args>
 inline void glue::detail::expected_base<true, T, E>::emplace_error(Args&&... args)
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     try
     {
-#endif // BIT_COMPILER_EXCEPTIONS_ENABLED
+#endif // GLUE_EXCEPTIONS_ENABLED
         new (&m_storage.error) unexpected_type<E>(std::forward<Args>(args)...);
         m_has_value = false;
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     } catch (...)
     {
         m_has_value = indeterminate;
         throw;
     }
-#endif // BIT_COMPILER_EXCEPTIONS_ENABLED
+#endif // GLUE_EXCEPTIONS_ENABLED
 }
 
 //-----------------------------------------------------------------------------
@@ -477,19 +477,19 @@ template <typename... Args>
 inline void glue::detail::expected_base<false, T, E>::emplace_value(Args&&... args)
 {
     destruct();
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     try
     {
-#endif // BIT_COMPILER_EXCEPTIONS_ENABLED
+#endif // GLUE_EXCEPTIONS_ENABLED
         new (&m_storage.value) T{std::forward<Args>(args)...};
         m_has_value = true;
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     } catch (...)
     {
         m_has_value = indeterminate;
         throw;
     }
-#endif // BIT_COMPILER_EXCEPTIONS_ENABLED
+#endif // GLUE_EXCEPTIONS_ENABLED
 }
 
 template <typename T, typename E>
@@ -497,19 +497,19 @@ template <typename... Args>
 void glue::detail::expected_base<false, T, E>::emplace_error(Args&&... args)
 {
     destruct();
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     try
     {
-#endif // BIT_COMPILER_EXCEPTIONS_ENABLED
+#endif // GLUE_EXCEPTIONS_ENABLED
         new (&m_storage.error) unexpected_type<E>(std::forward<Args>(args)...);
         m_has_value = false;
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     } catch (...)
     {
         m_has_value = indeterminate;
         throw;
     }
-#endif // BIT_COMPILER_EXCEPTIONS_ENABLED
+#endif // GLUE_EXCEPTIONS_ENABLED
 }
 
 //-----------------------------------------------------------------------------
@@ -805,7 +805,7 @@ inline constexpr const T&& glue::expected<T, E>::operator*() const&&
 template <typename T, typename E>
 inline constexpr T& glue::expected<T, E>::value() &
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (has_error()) { throw bad_expected_access<E>(base_type::get_unexpected().value()); }
     else if (valueless_by_exception())
     {
@@ -820,7 +820,7 @@ inline constexpr T& glue::expected<T, E>::value() &
 template <typename T, typename E>
 inline constexpr T&& glue::expected<T, E>::value() &&
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (has_error()) { throw bad_expected_access<E>(base_type::get_unexpected().value()); }
     else if (valueless_by_exception())
     {
@@ -835,7 +835,7 @@ inline constexpr T&& glue::expected<T, E>::value() &&
 template <typename T, typename E>
 inline constexpr const T& glue::expected<T, E>::value() const&
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (has_error()) { throw bad_expected_access<E>(base_type::get_unexpected().value()); }
     else if (valueless_by_exception())
     {
@@ -850,7 +850,7 @@ inline constexpr const T& glue::expected<T, E>::value() const&
 template <typename T, typename E>
 inline constexpr const T&& glue::expected<T, E>::value() const&&
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (has_error()) { throw bad_expected_access<E>(base_type::get_unexpected().value()); }
     else if (valueless_by_exception())
     {
@@ -923,10 +923,10 @@ inline constexpr E glue::expected<T, E>::error_or(U&& default_value) &&
 template <typename T, typename E>
 inline constexpr glue::unexpected_type<E>& glue::expected<T, E>::get_unexpected() &
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
-    BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT(has_error(), "expected must have error");
 #endif
 
     return base_type::get_unexpected();
@@ -935,10 +935,10 @@ inline constexpr glue::unexpected_type<E>& glue::expected<T, E>::get_unexpected(
 template <typename T, typename E>
 inline constexpr glue::unexpected_type<E>&& glue::expected<T, E>::get_unexpected() &&
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
-    BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT(has_error(), "expected must have error");
 #endif
 
     return std::move(base_type::get_unexpected());
@@ -947,10 +947,10 @@ inline constexpr glue::unexpected_type<E>&& glue::expected<T, E>::get_unexpected
 template <typename T, typename E>
 inline constexpr const glue::unexpected_type<E>& glue::expected<T, E>::get_unexpected() const&
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
-    BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT(has_error(), "expected must have error");
 #endif
 
     return base_type::get_unexpected();
@@ -959,10 +959,10 @@ inline constexpr const glue::unexpected_type<E>& glue::expected<T, E>::get_unexp
 template <typename T, typename E>
 inline constexpr const glue::unexpected_type<E>&& glue::expected<T, E>::get_unexpected() const&&
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
-    BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT(has_error(), "expected must have error");
 #endif
 
     return std::move(base_type::get_unexpected());
@@ -980,10 +980,10 @@ glue::invoke_result_t<Fn, const T&> glue::expected<T, E>::flat_map(Fn&& fn) cons
         return std::forward<Fn>(fn);
     else if (has_error())
         return {get_unexpected()};
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     throw bad_expected_access<void>{};
 #else
-    BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT(has_error(), "expected must have error");
 #endif
 }
 
@@ -995,10 +995,10 @@ glue::expected<glue::invoke_result_t<Fn, const T&>, E> glue::expected<T, E>::map
         return {std::forward<Fn>(fn)};
     else if (has_error())
         return {get_unexpected()};
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     throw bad_expected_access<void>{};
 #else
-    BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT(has_error(), "expected must have error");
 #endif
 }
 
@@ -1172,7 +1172,7 @@ inline constexpr glue::expected<void, E>::operator bool() const noexcept
 template <typename E>
 inline void glue::expected<void, E>::value() const
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (has_error()) { throw bad_expected_access<E>(base_type::get_unexpected().value()); }
     else if (valueless_by_exception())
     {
@@ -1228,7 +1228,7 @@ inline constexpr E glue::expected<void, E>::error_or(U&& default_value) &&
 template <typename E>
 inline constexpr glue::unexpected_type<E>& glue::expected<void, E>::get_unexpected() &
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
     BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
@@ -1240,7 +1240,7 @@ inline constexpr glue::unexpected_type<E>& glue::expected<void, E>::get_unexpect
 template <typename E>
 inline constexpr glue::unexpected_type<E>&& glue::expected<void, E>::get_unexpected() &&
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
     BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
@@ -1252,7 +1252,7 @@ inline constexpr glue::unexpected_type<E>&& glue::expected<void, E>::get_unexpec
 template <typename E>
 inline constexpr const glue::unexpected_type<E>& glue::expected<void, E>::get_unexpected() const&
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
     BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
@@ -1264,7 +1264,7 @@ inline constexpr const glue::unexpected_type<E>& glue::expected<void, E>::get_un
 template <typename E>
 inline constexpr const glue::unexpected_type<E>&& glue::expected<void, E>::get_unexpected() const&&
 {
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
     BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
@@ -1285,7 +1285,7 @@ glue::invoke_result_t<Fn> glue::expected<void, E>::flat_map(Fn&& fn) const
         return std::forward<Fn>(fn);
     else if (has_error())
         return {get_unexpected()};
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     throw bad_expected_access<void>{};
 #else
     BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
@@ -1300,7 +1300,7 @@ glue::expected<glue::invoke_result_t<Fn>, E> glue::expected<void, E>::map(Fn&& f
         return {std::forward<Fn>(fn)};
     else if (has_error())
         return {get_unexpected()};
-#if BIT_COMPILER_EXCEPTIONS_ENABLED
+#ifndef GLUE_NO_EXCEPTIONS
     throw bad_expected_access<void>{};
 #else
     BIT_ALWAYS_ASSERT(has_error(), "expected must have error");

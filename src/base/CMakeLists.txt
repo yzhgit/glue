@@ -24,6 +24,7 @@ set(source
 set(target base)
 
 add_library(${target} SHARED ${source})
+add_library(glue::base ALIAS ${target})
 
 target_include_directories(${target}
   PUBLIC

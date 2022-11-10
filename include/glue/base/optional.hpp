@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "glue/base/common.hpp"
+
 #include "glue/base/hash.hpp"     // hash_t
 #include "glue/base/in_place.hpp" // in_place_t
 #include "glue/base/invoke.hpp"   // invoke_result_t, invoke
