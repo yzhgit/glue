@@ -60,6 +60,7 @@ private:                                                                        
 #if defined(NDEBUG)
     #define GLUE_ASSERT(expr) (false ? static_cast<void>(expr) : static_cast<void>(0))
 #else
+    #include <cassert>
     #define GLUE_ASSERT(expr)                                                                      \
         (GLUE_LIKELY((expr)) ? static_cast<void>(0) : [] { assert(false && #expr); }())
 #endif

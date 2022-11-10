@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "glue/base/common.h"
+#include "glue/base/common.hpp"
 
-#include "glue/base/exception.h"
+#include "glue/base/exception.hpp"
 
 namespace glue {
 

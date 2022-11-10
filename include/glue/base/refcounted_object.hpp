@@ -5,8 +5,9 @@
 
 #pragma once
 
-#include "glue/base/atomic.h"
-#include "glue/base/common.h"
+#include "glue/base/common.hpp"
+
+#include "glue/base/atomic.hpp"
 
 namespace glue {
 

@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/file_mapping.h"
+#include "glue/base/file_mapping.hpp"
 
-#include "glue/base/log.h"
+#include "glue/base/log.hpp"
 
 namespace glue {
 

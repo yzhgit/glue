@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/countdown_latch.h"
+#include "glue/base/countdown_latch.hpp"
 
-#include "glue/base/log.h"
+#include "glue/base/log.hpp"
 
 namespace glue {
 

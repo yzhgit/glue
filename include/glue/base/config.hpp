@@ -32,7 +32,7 @@
 /** Config: GLUE_CHECK_MEMORY_LEAKS
 
     Enables a memory-leak check for certain objects when the app terminates. See the
-   LeakedObjectDetector class and the GLUE_LEAK_DETECTOR macro for more details about enabling leak
+   LeakedDetector class and the GLUE_LEAK_DETECTOR macro for more details about enabling leak
    checking for specific classes.
 */
 #if defined(GLUE_DEBUG) && !defined(GLUE_CHECK_MEMORY_LEAKS)

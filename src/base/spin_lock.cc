@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/spin_lock.h"
+#include "glue/base/spin_lock.hpp"
 
 #if defined(GLUE_COMPILER_MSVC)
     #include <windows.h>

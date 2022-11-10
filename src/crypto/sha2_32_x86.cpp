@@ -7,7 +7,7 @@
 
 #if defined(GL_HAS_SHA2_32_X86)
 
-    #include "glue/compiler.h"
+    #include "glue/compiler.hpp"
     #include <immintrin.h>
 
 namespace glue {

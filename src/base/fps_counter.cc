@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/fps_counter.h"
+#include "glue/base/fps_counter.hpp"
 
-#include "glue/base/time.h"
+#include "glue/base/time.hpp"
 
 namespace glue {
 

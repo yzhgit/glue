@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "glue/base/common.h"
+#include "glue/base/common.hpp"
 
 #include <condition_variable>
 #include <mutex>

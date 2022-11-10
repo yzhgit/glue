@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "glue/base/leaked_object_detector.h"
+#include "glue/base/leaked_detector.hpp"
 
 namespace glue {
 

@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "glue/base/common.h"
+#include "glue/base/common.hpp"
 
-#include "glue/base/atomic.h"
-#include "glue/base/log.h"
+#include "glue/base/atomic.hpp"
+#include "glue/base/log.hpp"
 
 namespace glue {
 
@@ -28,22 +28,22 @@ namespace glue {
     @tags{Core}
 */
 template <class OwnerClass>
-class LeakedObjectDetector
+class LeakedDetector
 {
 public:
     //==============================================================================
-    LeakedObjectDetector() noexcept
+    LeakedDetector() noexcept
     {
         ++(getCounter().numObjects);
     }
-    LeakedObjectDetector(const LeakedObjectDetector&) noexcept
+    LeakedDetector(const LeakedDetector&) noexcept
     {
         ++(getCounter().numObjects);
     }
 
-    LeakedObjectDetector& operator=(const LeakedObjectDetector&) noexcept = default;
+    LeakedDetector& operator=(const LeakedDetector&) noexcept = default;
 
-    ~LeakedObjectDetector()
+    ~LeakedDetector()
     {
         if (--(getCounter().numObjects) < 0)
         {
@@ -123,15 +123,15 @@ private:
             };
             @endcode
 
-            @see GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR, LeakedObjectDetector
+            @see GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR, LeakedDetector
         */
         #define GLUE_LEAK_DETECTOR(OwnerClass)                                                     \
-            friend class glue::LeakedObjectDetector<OwnerClass>;                                   \
+            friend class glue::LeakedDetector<OwnerClass>;                                   \
             static const char* getLeakedObjectClassName() noexcept                                 \
             {                                                                                      \
                 return #OwnerClass;                                                                \
             }                                                                                      \
-            glue::LeakedObjectDetector<OwnerClass> GLUE_JOIN_MACRO(leakDetector, __LINE__);
+            glue::LeakedDetector<OwnerClass> GLUE_JOIN_MACRO(leakDetector, __LINE__);
     #else
         #define GLUE_LEAK_DETECTOR(OwnerClass)
     #endif

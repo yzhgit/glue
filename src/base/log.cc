@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/log.h"
+#include "glue/base/log.hpp"
 
 #include <functional>
 #include <iostream>

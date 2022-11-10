@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/time.h"
+#include "glue/base/time.hpp"
 
 namespace glue {
 

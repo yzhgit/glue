@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/barrier.h"
+#include "glue/base/barrier.hpp"
 
-#include "glue/base/log.h"
+#include "glue/base/log.hpp"
 
 namespace glue {
 

@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/performance_counter.h"
+#include "glue/base/performance_counter.hpp"
 
-#include "glue/base/log.h"
+#include "glue/base/log.hpp"
 
 namespace glue {
 

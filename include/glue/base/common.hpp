@@ -6,17 +6,17 @@
 #pragma once
 
 //==============================================================================
-#include "glue/base/config.h"
+#include "glue/base/config.hpp"
 
-#include "glue/base/platform.h"
+#include "glue/base/platform.hpp"
 
-#include "glue/base/compiler.h"
+#include "glue/base/compiler.hpp"
 
-#include "glue/base/types.h"
+#include "glue/base/types.hpp"
 
-#include "glue/base/macros.h"
+#include "glue/base/macros.hpp"
 
-#include "glue/base/export.h"
+#include "glue/base/export.hpp"
 
 //==============================================================================
 // Now we'll include some common OS headers..
