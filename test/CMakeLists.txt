@@ -20,9 +20,9 @@ include_directories("${CMAKE_SOURCE_DIR}/thirdparty")
 set(source_files
   src/main.cpp
 
-  src/base/result.test.cpp
-  src/base/result.constexpr.test.cpp
-  src/base/result.failure.test.cpp
+  src/base/tribool.test.cpp
+  src/base/expected.test.cpp
+  src/base/optional.test.cpp
 
   src/base/object_pool.test.cpp
 

@@ -9,6 +9,7 @@
 
 namespace glue {
 namespace test {
+
     namespace {
         /// Returns true if the pointer is of the given alignment
         inline bool is_aligned_to(const void* ptr, size_t align)
