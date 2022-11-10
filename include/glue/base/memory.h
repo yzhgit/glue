@@ -130,36 +130,6 @@ inline const Type* addBytesToPointer(const Type* basePointer, IntegerType bytes)
     return unalignedPointerCast<const Type*>(reinterpret_cast<const char*>(basePointer) + bytes);
 }
 
-//==============================================================================
-/* In a Windows DLL build, we'll expose some malloc/free functions that live inside the DLL, and use
-   these for allocating all the objects - that way all glue objects in the DLL and in the host will
-   live in the same heap, avoiding problems when an object is created in one module and passed
-   across to another where it is deleted. By piggy-backing on the GLUE_LEAK_DETECTOR macro, these
-   allocators can be injected into most glue classes.
-*/
-#if defined(GLUE_COMPILER_MSVC) && defined(GLUE_DLL) && !(GLUE_DISABLE_DLL_ALLOCATORS || DOXYGEN)
-
-GLUE_API void* glueDLL_malloc(size_t);
-GLUE_API void glueDLL_free(void*);
-
-    #define GLUE_LEAK_DETECTOR(OwnerClass)                                                         \
-    public:                                                                                        \
-        static void* operator new(size_t sz)                                                       \
-        {                                                                                          \
-            return glue::glueDLL_malloc(sz);                                                       \
-        }                                                                                          \
-        static void* operator new(size_t, void* p)                                                 \
-        {                                                                                          \
-            return p;                                                                              \
-        }                                                                                          \
-        static void operator delete(void* p)                                                       \
-        {                                                                                          \
-            glue::glueDLL_free(p);                                                                 \
-        }                                                                                          \
-        static void operator delete(void*, void*)                                                  \
-        {}
-#endif
-
 /** Converts an owning raw pointer into a unique_ptr, deriving the
     type of the unique_ptr automatically.
 
@@ -173,5 +143,119 @@ std::unique_ptr<T> rawToUniquePtr(T* ptr)
 {
     return std::unique_ptr<T>(ptr);
 }
+
+namespace memory_internal {
+
+    // Traits to select proper overload and return type for `glue::make_unique<>`.
+    template <typename T>
+    struct MakeUniqueResult
+    {
+        using scalar = std::unique_ptr<T>;
+    };
+    template <typename T>
+    struct MakeUniqueResult<T[]>
+    {
+        using array = std::unique_ptr<T[]>;
+    };
+    template <typename T, size_t N>
+    struct MakeUniqueResult<T[N]>
+    {
+        using invalid = void;
+    };
+
+} // namespace memory_internal
+
+// gcc 4.8 has __cplusplus at 201301 but the libstdc++ shipped with it doesn't
+// define make_unique.  Other supported compilers either just define __cplusplus
+// as 201103 but have make_unique (msvc), or have make_unique whenever
+// __cplusplus > 201103 (clang).
+#if (__cplusplus > 201103L || defined(_MSC_VER)) &&                                                \
+    !(defined(__GLIBCXX__) && !defined(__cpp_lib_make_unique))
+using std::make_unique;
+#else
+// -----------------------------------------------------------------------------
+// Function Template: make_unique<T>()
+// -----------------------------------------------------------------------------
+//
+// Creates a `std::unique_ptr<>`, while avoiding issues creating temporaries
+// during the construction process. `glue::make_unique<>` also avoids redundant
+// type declarations, by avoiding the need to explicitly use the `new` operator.
+//
+// This implementation of `glue::make_unique<>` is designed for C++11 code and
+// will be replaced in C++14 by the equivalent `std::make_unique<>` abstraction.
+// `glue::make_unique<>` is designed to be 100% compatible with
+// `std::make_unique<>` so that the eventual migration will involve a simple
+// rename operation.
+//
+// For more background on why `std::unique_ptr<T>(new T(a,b))` is problematic,
+// see Herb Sutter's explanation on
+// (Exception-Safe Function Calls)[https://herbsutter.com/gotw/_102/].
+// (In general, reviewers should treat `new T(a,b)` with scrutiny.)
+//
+// Example usage:
+//
+//    auto p = make_unique<X>(args...);  // 'p'  is a std::unique_ptr<X>
+//    auto pa = make_unique<X[]>(5);     // 'pa' is a std::unique_ptr<X[]>
+//
+// Three overloads of `glue::make_unique` are required:
+//
+//   - For non-array T:
+//
+//       Allocates a T with `new T(std::forward<Args> args...)`,
+//       forwarding all `args` to T's constructor.
+//       Returns a `std::unique_ptr<T>` owning that object.
+//
+//   - For an array of unknown bounds T[]:
+//
+//       `glue::make_unique<>` will allocate an array T of type U[] with
+//       `new U[n]()` and return a `std::unique_ptr<U[]>` owning that array.
+//
+//       Note that 'U[n]()' is different from 'U[n]', and elements will be
+//       value-initialized. Note as well that `std::unique_ptr` will perform its
+//       own destruction of the array elements upon leaving scope, even though
+//       the array [] does not have a default destructor.
+//
+//       NOTE: an array of unknown bounds T[] may still be (and often will be)
+//       initialized to have a size, and will still use this overload. E.g:
+//
+//         auto my_array = glue::make_unique<int[]>(10);
+//
+//   - For an array of known bounds T[N]:
+//
+//       `glue::make_unique<>` is deleted (like with `std::make_unique<>`) as
+//       this overload is not useful.
+//
+//       NOTE: an array of known bounds T[N] is not considered a useful
+//       construction, and may cause undefined behavior in templates. E.g:
+//
+//         auto my_array = glue::make_unique<int[10]>();
+//
+//       In those cases, of course, you can still use the overload above and
+//       simply initialize it to its desired size:
+//
+//         auto my_array = glue::make_unique<int[]>(10);
+
+// `glue::make_unique` overload for non-array types.
+template <typename T, typename... Args>
+typename memory_internal::MakeUniqueResult<T>::scalar make_unique(Args&&... args)
+{
+    return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+// `glue::make_unique` overload for an array T[] of unknown bounds.
+// The array allocation needs to use the `new T[size]` form and cannot take
+// element constructor arguments. The `std::unique_ptr` will manage destructing
+// these array elements.
+template <typename T>
+typename memory_internal::MakeUniqueResult<T>::array make_unique(size_t n)
+{
+    return std::unique_ptr<T>(new typename std::remove_extent<T>::type[n]());
+}
+
+// `glue::make_unique` overload for an array T[N] of known bounds.
+// This construction will be rejected.
+template <typename T, typename... Args>
+typename memory_internal::MakeUniqueResult<T>::invalid make_unique(Args&&... /* args */) = delete;
+#endif
 
 } // namespace glue

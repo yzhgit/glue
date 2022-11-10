@@ -20,14 +20,14 @@ class Buffer
 /// is needed.
 {
 public:
-    Buffer(std::size_t length) : _capacity(length), _used(length), _ptr(0), _ownMem(true)
+    Buffer(std::size_t length) : m_capacity(length), m_used(length), m_ptr(0), m_ownMem(true)
     /// Creates and allocates the Buffer.
     {
-        if (length > 0) { _ptr = new T[length]; }
+        if (length > 0) { m_ptr = new T[length]; }
     }
 
     Buffer(T* pMem, std::size_t length)
-        : _capacity(length), _used(length), _ptr(pMem), _ownMem(false)
+        : m_capacity(length), m_used(length), m_ptr(pMem), m_ownMem(false)
     /// Creates the Buffer. Length argument specifies the length
     /// of the supplied memory pointed to by pMem in the number
     /// of elements of type T. Supplied pointer is considered
@@ -37,44 +37,44 @@ public:
     {}
 
     Buffer(const T* pMem, std::size_t length)
-        : _capacity(length), _used(length), _ptr(0), _ownMem(true)
+        : m_capacity(length), m_used(length), m_ptr(0), m_ownMem(true)
     /// Creates and allocates the Buffer; copies the contents of
     /// the supplied memory into the buffer. Length argument specifies
     /// the length of the supplied memory pointed to by pMem in the
     /// number of elements of type T.
     {
-        if (_capacity > 0)
+        if (m_capacity > 0)
         {
-            _ptr = new T[_capacity];
-            std::memcpy(_ptr, pMem, _used * sizeof(T));
+            m_ptr = new T[m_capacity];
+            std::memcpy(m_ptr, pMem, m_used * sizeof(T));
         }
     }
 
     Buffer(const Buffer& other)
         : /// Copy constructor.
-        _capacity(other._used)
-        , _used(other._used)
-        , _ptr(0)
-        , _ownMem(true)
+        m_capacity(other.m_used)
+        , m_used(other.m_used)
+        , m_ptr(0)
+        , m_ownMem(true)
     {
-        if (_used)
+        if (m_used)
         {
-            _ptr = new T[_used];
-            std::memcpy(_ptr, other._ptr, _used * sizeof(T));
+            m_ptr = new T[m_used];
+            std::memcpy(m_ptr, other.m_ptr, m_used * sizeof(T));
         }
     }
 
     Buffer(Buffer&& other) noexcept
         : /// Move constructor.
-        _capacity(other._capacity)
-        , _used(other._used)
-        , _ptr(other._ptr)
-        , _ownMem(other._ownMem)
+        m_capacity(other.m_capacity)
+        , m_used(other.m_used)
+        , m_ptr(other.m_ptr)
+        , m_ownMem(other.m_ownMem)
     {
-        other._capacity = 0;
-        other._used = 0;
-        other._ownMem = false;
-        other._ptr = nullptr;
+        other.m_capacity = 0;
+        other.m_used = 0;
+        other.m_ownMem = false;
+        other.m_ptr = nullptr;
     }
 
     Buffer& operator=(const Buffer& other)
@@ -92,17 +92,17 @@ public:
     Buffer& operator=(Buffer&& other) noexcept
     /// Move assignment operator.
     {
-        if (_ownMem) delete[] _ptr;
+        if (m_ownMem) delete[] m_ptr;
 
-        _capacity = other._capacity;
-        _used = other._used;
-        _ptr = other._ptr;
-        _ownMem = other._ownMem;
+        m_capacity = other.m_capacity;
+        m_used = other.m_used;
+        m_ptr = other.m_ptr;
+        m_ownMem = other.m_ownMem;
 
-        other._capacity = 0;
-        other._used = 0;
-        other._ownMem = false;
-        other._ptr = nullptr;
+        other.m_capacity = 0;
+        other.m_used = 0;
+        other.m_ownMem = false;
+        other.m_ptr = nullptr;
 
         return *this;
     }
@@ -110,7 +110,7 @@ public:
     ~Buffer()
     /// Destroys the Buffer.
     {
-        if (_ownMem) delete[] _ptr;
+        if (m_ownMem) delete[] m_ptr;
     }
 
     void resize(std::size_t newCapacity, bool preserveContent = true)
@@ -124,20 +124,20 @@ public:
     /// resized. If resize is attempted on those, IllegalAccessException
     /// is thrown.
     {
-        if (!_ownMem)
+        if (!m_ownMem)
             throw glue::InvalidAccessException(
                 "Cannot resize buffer which does not own its storage.");
 
-        if (newCapacity > _capacity)
+        if (newCapacity > m_capacity)
         {
             T* ptr = new T[newCapacity];
-            if (preserveContent && _ptr) { std::memcpy(ptr, _ptr, _used * sizeof(T)); }
-            delete[] _ptr;
-            _ptr = ptr;
-            _capacity = newCapacity;
+            if (preserveContent && m_ptr) { std::memcpy(ptr, m_ptr, m_used * sizeof(T)); }
+            delete[] m_ptr;
+            m_ptr = ptr;
+            m_capacity = newCapacity;
         }
 
-        _used = newCapacity;
+        m_used = newCapacity;
     }
 
     void setCapacity(std::size_t newCapacity, bool preserveContent = true)
@@ -152,27 +152,27 @@ public:
     /// resized. If resize is attempted on those, IllegalAccessException
     /// is thrown.
     {
-        if (!_ownMem)
+        if (!m_ownMem)
             throw glue::InvalidAccessException(
                 "Cannot resize buffer which does not own its storage.");
 
-        if (newCapacity != _capacity)
+        if (newCapacity != m_capacity)
         {
             T* ptr = 0;
             if (newCapacity > 0)
             {
                 ptr = new T[newCapacity];
-                if (preserveContent && _ptr)
+                if (preserveContent && m_ptr)
                 {
-                    std::size_t newSz = _used < newCapacity ? _used : newCapacity;
-                    std::memcpy(ptr, _ptr, newSz * sizeof(T));
+                    std::size_t newSz = m_used < newCapacity ? m_used : newCapacity;
+                    std::memcpy(ptr, m_ptr, newSz * sizeof(T));
                 }
             }
-            delete[] _ptr;
-            _ptr = ptr;
-            _capacity = newCapacity;
+            delete[] m_ptr;
+            m_ptr = ptr;
+            m_capacity = newCapacity;
 
-            if (newCapacity < _used) _used = newCapacity;
+            if (newCapacity < m_used) m_used = newCapacity;
         }
     }
 
@@ -181,24 +181,24 @@ public:
     /// If necessary, resizes the buffer.
     {
         if (0 == sz) return;
-        if (sz > _capacity) resize(sz, false);
-        std::memcpy(_ptr, buf, sz * sizeof(T));
-        _used = sz;
+        if (sz > m_capacity) resize(sz, false);
+        std::memcpy(m_ptr, buf, sz * sizeof(T));
+        m_used = sz;
     }
 
     void append(const T* buf, std::size_t sz)
     /// Resizes this buffer and appends the argument buffer.
     {
         if (0 == sz) return;
-        resize(_used + sz, true);
-        std::memcpy(_ptr + _used - sz, buf, sz * sizeof(T));
+        resize(m_used + sz, true);
+        std::memcpy(m_ptr + m_used - sz, buf, sz * sizeof(T));
     }
 
     void append(T val)
     /// Resizes this buffer by one element and appends the argument value.
     {
-        resize(_used + 1, true);
-        _ptr[_used - 1] = val;
+        resize(m_used + 1, true);
+        m_ptr[m_used - 1] = val;
     }
 
     void append(const Buffer& buf)
@@ -210,13 +210,13 @@ public:
     std::size_t capacity() const
     /// Returns the allocated memory size in elements.
     {
-        return _capacity;
+        return m_capacity;
     }
 
     std::size_t capacityBytes() const
     /// Returns the allocated memory size in bytes.
     {
-        return _capacity * sizeof(T);
+        return m_capacity * sizeof(T);
     }
 
     void swap(Buffer& other)
@@ -224,10 +224,10 @@ public:
     {
         using std::swap;
 
-        swap(_ptr, other._ptr);
-        swap(_capacity, other._capacity);
-        swap(_used, other._used);
-        swap(_ownMem, other._ownMem);
+        swap(m_ptr, other.m_ptr);
+        swap(m_capacity, other.m_capacity);
+        swap(m_used, other.m_used);
+        swap(m_ownMem, other.m_ownMem);
     }
 
     bool operator==(const Buffer& other) const
@@ -235,14 +235,15 @@ public:
     {
         if (this != &other)
         {
-            if (_used == other._used)
+            if (m_used == other.m_used)
             {
-                if (_ptr && other._ptr && std::memcmp(_ptr, other._ptr, _used * sizeof(T)) == 0)
+                if (m_ptr && other.m_ptr &&
+                    std::memcmp(m_ptr, other.m_ptr, m_used * sizeof(T)) == 0)
                 {
                     return true;
                 }
                 else
-                    return _used == 0;
+                    return m_used == 0;
             }
             return false;
         }
@@ -259,72 +260,72 @@ public:
     void clear()
     /// Sets the contents of the buffer to zero.
     {
-        std::memset(_ptr, 0, _used * sizeof(T));
+        std::memset(m_ptr, 0, m_used * sizeof(T));
     }
 
     std::size_t size() const
     /// Returns the used size of the buffer in elements.
     {
-        return _used;
+        return m_used;
     }
 
     std::size_t sizeBytes() const
     /// Returns the used size of the buffer in bytes.
     {
-        return _used * sizeof(T);
+        return m_used * sizeof(T);
     }
 
     T* begin()
     /// Returns a pointer to the beginning of the buffer.
     {
-        return _ptr;
+        return m_ptr;
     }
 
     const T* begin() const
     /// Returns a pointer to the beginning of the buffer.
     {
-        return _ptr;
+        return m_ptr;
     }
 
     T* end()
     /// Returns a pointer to end of the buffer.
     {
-        return _ptr + _used;
+        return m_ptr + m_used;
     }
 
     const T* end() const
     /// Returns a pointer to the end of the buffer.
     {
-        return _ptr + _used;
+        return m_ptr + m_used;
     }
 
     bool empty() const
     /// Return true if buffer is empty.
     {
-        return 0 == _used;
+        return 0 == m_used;
     }
 
     T& operator[](std::size_t index)
     {
-        GLUE_ASSERT(index < _used);
+        GLUE_ASSERT(index < m_used);
 
-        return _ptr[index];
+        return m_ptr[index];
     }
 
     const T& operator[](std::size_t index) const
     {
-        GLUE_ASSERT(index < _used);
+        GLUE_ASSERT(index < m_used);
 
-        return _ptr[index];
+        return m_ptr[index];
     }
 
 private:
     Buffer();
 
-    std::size_t _capacity;
-    std::size_t _used;
-    T* _ptr;
-    bool _ownMem;
+    std::size_t m_capacity;
+    std::size_t m_used;
+    T* m_ptr;
+    bool m_ownMem;
 };
 
 } // namespace glue
