@@ -50,7 +50,7 @@ endif()
 option(GLUE_ENABLE_INSTALL "Generate and install GLUE target" ${GLUE_STANDALONE_PROJECT})
 option(GLUE_ENABLE_TEST "Build and perform GLUE tests" ${GLUE_STANDALONE_PROJECT})
 
-# add_subdirectory(src)
+add_subdirectory(src)
 
 if (GLUE_ENABLE_TEST)
     enable_testing()

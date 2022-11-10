@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "glue/base/mutex.h"
+#include "glue/base/mutex.hpp"
 
 #include <string>
 #include <vector>

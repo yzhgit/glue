@@ -5,7 +5,9 @@
 
 #pragma once
 
-#include "glue/base/scoped_lock.h"
+#include "glue/base/scoped_lock.hpp"
+
+#include <mutex>
 
 namespace glue {
 

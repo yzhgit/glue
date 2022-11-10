@@ -10,6 +10,8 @@
 #include "glue/base/thread.hpp"
 #include "glue/base/waitable_event.hpp"
 
+#include <ctime>
+
 namespace glue {
 
 class PooledThread : public Runnable
@@ -398,7 +400,7 @@ private:
 };
 
 namespace {
-static ThreadPoolSingletonHolder sh;
+    static ThreadPoolSingletonHolder sh;
 }
 
 ThreadPool& ThreadPool::defaultPool()
@@ -406,4 +408,4 @@ ThreadPool& ThreadPool::defaultPool()
     return *sh.pool();
 }
 
-}
+} // namespace glue

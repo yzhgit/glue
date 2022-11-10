@@ -7,6 +7,8 @@
 
 #include "glue/base/common.hpp"
 
+#include <list>
+
 #include "ghc/fs_std.hpp"
 
 namespace glue {

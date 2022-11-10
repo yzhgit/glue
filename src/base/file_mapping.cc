@@ -11,7 +11,7 @@ namespace glue {
 
 #if defined(GLUE_OS_WINDOWS)
 
-void FileMapping::FileMapping(const char* filename, uint32_t permission, uint64_t offset,
+FileMapping::FileMapping(const char* filename, uint32_t permission, uint64_t offset,
                               uint64_t length)
 {
     DWORD flags = 0;
@@ -83,7 +83,7 @@ FileMapping::~FileMapping()
 
 #else
 
-void FileMapping::FileMapping(const char* filename, uint32_t permission, uint64_t offset,
+FileMapping::FileMapping(const char* filename, uint32_t permission, uint64_t offset,
                               uint64_t length)
 {
     int flags = O_CLOEXEC;

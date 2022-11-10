@@ -7,6 +7,8 @@
 
 #include "glue/base/log.hpp"
 
+#include <ctime>
+
 namespace glue {
 
 PerformanceCounter::PerformanceCounter(const char* name, int runsPerPrintout,
@@ -52,8 +54,8 @@ void PerformanceCounter::Statistics::addResult(double elapsed) noexcept
     }
     else
     {
-        maximumSeconds = std::max(maximumSeconds, elapsed);
-        minimumSeconds = std::min(minimumSeconds, elapsed);
+        maximumSeconds = max(maximumSeconds, elapsed);
+        minimumSeconds = min(minimumSeconds, elapsed);
     }
 
     ++numRuns;
@@ -114,4 +116,4 @@ PerformanceCounter::Statistics PerformanceCounter::getStatisticsAndReset()
     return s;
 }
 
-}
+} // namespace glue

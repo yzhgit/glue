@@ -25,39 +25,10 @@ set(target base)
 
 add_library(${target} SHARED ${source})
 
-# target_precompile_headers(${target}
-#   PUBLIC
-#     <algorithm>
-#     <array>
-#     <atomic>
-#     <cassert>
-#     <cmath>
-#     <condition_variable>
-#     <cstddef>
-#     <ctime>
-#     <fstream>
-#     <functional>
-#     <iomanip>
-#     <iostream>
-#     <limits>
-#     <list>
-#     <map>
-#     <memory>
-#     <mutex>
-#     <numeric>
-#     <queue>
-#     <set>
-#     <sstream>
-#     <stdarg.h>
-#     <stdexcept>
-#     <string>
-#     <thread>
-#     <typeindex>
-#     <unordered_map>
-#     <unordered_set>
-#     <utility>
-#     <vector>
-# )
+target_include_directories(${target}
+  PUBLIC
+    ${PROJECT_SOURCE_DIR}/include
+)
 
 set_target_properties(${target} PROPERTIES
     VERSION         "${PROJECT_VERSION}"
