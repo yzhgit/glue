@@ -6,7 +6,7 @@
 #include "glue/crypto/ed25519/ed25519.h"
 #include "glue/crypto/ed25519/ed25519_internal.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 void ed25519_gen_keypair(uint8_t* pk, uint8_t* sk, const uint8_t seed[32])
 {
@@ -82,4 +82,4 @@ bool ed25519_verify(const uint8_t* m, size_t mlen, const uint8_t sig[64], const 
     return constant_time_compare(rcheck, sig, 32);
 }
 
-GLUE_END_NAMESPACE
+}

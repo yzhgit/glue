@@ -21,7 +21,7 @@
 #define AES_192_ROUNDS 12
 #define AES_256_ROUNDS 14
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /*********************** FUNCTION DECLARATIONS **********************/
 void ccm_prepare_first_ctr_blk(BYTE counter[], const BYTE nonce[], int nonce_len,
@@ -1215,4 +1215,4 @@ void aes_decrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize)
     out[15] = state[3][3];
 }
 
-GLUE_END_NAMESPACE
+}

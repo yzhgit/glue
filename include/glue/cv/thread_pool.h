@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 class ThreadPool
 {
@@ -45,4 +45,4 @@ private:
     int thread_num_ = 0;
 };
 
-GLUE_END_NAMESPACE
+}

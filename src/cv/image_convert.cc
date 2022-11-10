@@ -10,7 +10,7 @@
 #include <math.h>
 #include <string.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 void nv_to_bgr(const uint8_t* src, uint8_t* dst, int srcw, int srch, int x_num, int y_num);
 
@@ -2139,4 +2139,4 @@ void hwc3_trans_hwc4(const uint8_t* src, uint8_t* dst, int srcw, int srch)
     }
 }
 
-GLUE_END_NAMESPACE
+}

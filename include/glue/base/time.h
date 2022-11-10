@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 //==============================================================================
 /**
@@ -72,4 +72,4 @@ public:
     static int64 secondsToHighResolutionTicks(double seconds) noexcept;
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

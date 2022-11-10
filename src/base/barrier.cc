@@ -7,7 +7,7 @@
 
 #include "glue/base/log.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 Barrier::Barrier(int num_threads) : m_num_to_block(num_threads), m_num_to_exit(num_threads)
 {}
@@ -35,4 +35,4 @@ bool Barrier::block()
     return m_num_to_exit == 0;
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

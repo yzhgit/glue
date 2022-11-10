@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <vector>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 class ImageRotate
 {
@@ -22,4 +22,4 @@ void rotate_hwc1(const uint8_t* src, uint8_t* dst, int srcw, int srch, float deg
 void rotate_hwc3(const uint8_t* src, uint8_t* dst, int srcw, int srch, float degree);
 void rotate_hwc4(const uint8_t* src, uint8_t* dst, int srcw, int srch, float degree);
 
-GLUE_END_NAMESPACE
+}

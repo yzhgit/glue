@@ -12,7 +12,7 @@
 
 #include <algorithm>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /*
  * SHA-256 F1 Function
@@ -218,4 +218,4 @@ void SHA_256::compress_n(const uint8_t input[], size_t blocks)
     SHA_256::compress_digest(m_digest, input, blocks);
 }
 
-GLUE_END_NAMESPACE
+}

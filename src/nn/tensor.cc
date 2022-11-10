@@ -5,7 +5,7 @@
 
 #include "glue/nn/tensor.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 
 constexpr uint32_t GetDataTypeSize(DataType dataType) {
@@ -48,4 +48,4 @@ uint32_t TensorInfo::GetNumBytes() const {
 }
 
 
-GLUE_END_NAMESPACE
+}

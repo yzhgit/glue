@@ -7,7 +7,7 @@
 
 #include "glue/base/log.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 CountDownLatch::CountDownLatch(int initial_count)
     : m_done(initial_count == 0 ? true : false), m_num_waiting(0), m_count(initial_count)
@@ -47,4 +47,4 @@ void CountDownLatch::wait() noexcept
     // after we return from this method.
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

@@ -10,7 +10,7 @@
 #include <math.h>
 #include <stdint.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 class ImageResize
 {
@@ -22,4 +22,4 @@ public:
 void resize(const uint8_t* src, uint8_t* dst, ImageFormat srcFormat, int srcw, int srch, int dstw,
             int dsth);
 
-GLUE_END_NAMESPACE
+}

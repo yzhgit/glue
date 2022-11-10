@@ -10,7 +10,7 @@
 #include "lite/backends/fpga/KD/llapi/zynqmp_api.h"
 #include <stdint.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 using paddle::zynqmp::float16;
 
@@ -29,4 +29,4 @@ private:
     tensor_func_fpga impl_{nullptr};
 };
 
-GLUE_END_NAMESPACE
+}

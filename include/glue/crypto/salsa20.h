@@ -5,11 +5,13 @@
 
 #pragma once
 
-#include "glue/crypto/key_spec.h"
+#include "glue/base/common.h"
 
 #include <vector>
 
-GLUE_START_NAMESPACE
+#include "glue/crypto/key_spec.h"
+
+namespace glue {
 
 /**
  * DJB's Salsa20 (and XSalsa20)
@@ -76,4 +78,4 @@ private:
     size_t m_position = 0;
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

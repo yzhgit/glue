@@ -5,12 +5,13 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "glue/base/common.h"
+
 #include <vector>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
-class MD5 final
+class GLUE_API MD5 final
 {
 public:
     enum
@@ -45,4 +46,4 @@ private:
     std::vector<uint32_t> m_digest;
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

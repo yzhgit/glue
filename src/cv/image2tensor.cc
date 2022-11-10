@@ -8,7 +8,7 @@
 
 #include <arm_neon.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 void gray_to_tensor(const uint8_t* src, float* output, int width, int height, float* means,
                     float* scales);
@@ -652,4 +652,4 @@ void bgra_to_tensor_hwc(const uint8_t* src, float* output, int width, int height
     LITE_PARALLEL_END();
 }
 
-GLUE_END_NAMESPACE
+}

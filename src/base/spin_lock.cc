@@ -17,7 +17,7 @@
     #include <sched.h>
 #endif
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 void SpinLock::lock() noexcept
 {
@@ -63,4 +63,4 @@ void SpinLock::unlock() noexcept
     m_flag.store(false, std::memory_order_release);
 }
 
-GLUE_END_NAMESPACE
+}

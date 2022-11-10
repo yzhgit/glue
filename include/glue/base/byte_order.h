@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 //==============================================================================
 /** Contains static methods for converting the byte order between different
@@ -277,4 +277,4 @@ inline void ByteOrder::bigEndian24BitToChars(int32_t value, void* destBytes) noe
     static_cast<uint8_t*>(destBytes)[2] = (uint8_t) value;
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

@@ -7,7 +7,7 @@
     #include "glue/compiler.h"
     #include <arm_neon.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /*
  * SHA-256 using CPU instructions in ARMv8
@@ -194,6 +194,6 @@ void SHA_256::compress_digest_armv8(secure_vector<uint32_t>& digest, const uint8
     vst1q_u32(&digest[4], STATE1);
 }
 
-GLUE_END_NAMESPACE
+}
 
 #endif

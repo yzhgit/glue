@@ -5,7 +5,7 @@
 
 #include "glue/crypto/ed25519/ed25519_internal.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /*
 Input:
@@ -151,4 +151,4 @@ void sc_reduce(uint8_t* s)
     s[31] = static_cast<uint8_t>(s11 >> 17);
 }
 
-GLUE_END_NAMESPACE
+}

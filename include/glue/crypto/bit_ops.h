@@ -5,7 +5,9 @@
 
 #pragma once
 
-GLUE_START_NAMESPACE
+#include "glue/base/common.h"
+
+namespace glue {
 
 /**
  * If top bit of arg is set, return ~0. Otherwise return 0.
@@ -134,4 +136,4 @@ inline size_t var_ctz32(uint32_t n)
 #endif
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

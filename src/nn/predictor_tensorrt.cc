@@ -61,7 +61,7 @@
     #include "tensorrt/EntropyCalibrator.h"
 #endif
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 
 PredictorTensorRt::~PredictorTensorRt() = default;
@@ -522,4 +522,4 @@ int32_t PredictorTensorRt::AllocateBuffers(
 }
 
 
-GLUE_END_NAMESPACE
+}

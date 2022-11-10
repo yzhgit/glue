@@ -7,7 +7,7 @@
 
 #include "glue/base/time.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 FpsCounter::FpsCounter()
     : m_nFrameCount(0)
@@ -77,4 +77,4 @@ void FpsCounter::setFilterAlpha(float alpha)
     m_filterAlpha = alpha;
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

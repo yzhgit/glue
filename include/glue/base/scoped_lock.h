@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 //==============================================================================
 /**
@@ -151,4 +151,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(ScopedUnlock)
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

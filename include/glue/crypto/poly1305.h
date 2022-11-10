@@ -5,17 +5,19 @@
 
 #pragma once
 
-#include "glue/crypto/key_spec.h"
+#include "glue/base/common.h"
 
 #include <vector>
 
-GLUE_START_NAMESPACE
+#include "glue/crypto/key_spec.h"
+
+namespace glue {
 
 /**
  * DJB's Poly1305
  * Important note: each key can only be used once
  */
-class Poly1305 final
+class GLUE_API Poly1305 final
 {
 public:
     void clear();
@@ -69,4 +71,4 @@ private:
     size_t m_buf_pos = 0;
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

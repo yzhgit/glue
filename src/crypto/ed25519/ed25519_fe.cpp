@@ -6,7 +6,7 @@
 #include "glue/crypto/ed25519/ed25519_fe.h"
 #include "glue/crypto/ed25519/ed25519_internal.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 // static
 FE_25519 FE_25519::invert(const FE_25519& z)
@@ -751,4 +751,4 @@ void FE_25519::to_bytes(uint8_t s[32]) const
     s[31] = static_cast<uint8_t>(h9 >> 18);
 }
 
-GLUE_END_NAMESPACE
+}

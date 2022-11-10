@@ -5,45 +5,45 @@
 
 #include "glue/base/log.h"
 
-using std::map;
-using std::shared_ptr;
-using std::string;
+#include <functional>
+#include <iostream>
+#include <map>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 static LogLevel currentLogLevel = GLUE_LOG_INFO;
 
 bool Log::m_bAutoSpace = false;
 
-string& Log::getPadding()
+std::string& Log::getPadding()
 {
-    static string* padding = new string;
+    static std::string* padding = new std::string;
     return *padding;
 }
 
-static map<string, LogLevel>& getModules()
+static std::map<std::string, LogLevel>& getModules()
 {
-    static map<string, LogLevel>* modules = new map<string, LogLevel>;
+    static std::map<std::string, LogLevel>* modules = new std::map<std::string, LogLevel>;
     return *modules;
 }
 
 static void noopDeleter(BaseLoggerChannel*)
 {}
 
-shared_ptr<BaseLoggerChannel>& Log::channel()
+std::shared_ptr<BaseLoggerChannel>& Log::channel()
 {
 #if defined(GLUE_OS_ANDROID)
-    static shared_ptr<BaseLoggerChannel> channel = shared_ptr<AndroidLogChannel>(
+    static std::shared_ptr<BaseLoggerChannel> channel = std::shared_ptr<AndroidLogChannel>(
         new AndroidLogChannel, std::function<void(BaseLoggerChannel*)>(noopDeleter));
 #elif defined(GLUE_OS_WINDOWS)
-    static shared_ptr<BaseLoggerChannel> channel =
+    static std::shared_ptr<BaseLoggerChannel> channel =
         IsDebuggerPresent()
-            ? shared_ptr<BaseLoggerChannel>(new DebugViewLoggerChannel,
-                                            std::function<void(BaseLoggerChannel*)>(noopDeleter))
-            : shared_ptr<BaseLoggerChannel>(new ConsoleLoggerChannel,
-                                            std::function<void(BaseLoggerChannel*)>(noopDeleter));
+            ? std::shared_ptr<BaseLoggerChannel>(
+                  new DebugViewLoggerChannel, std::function<void(BaseLoggerChannel*)>(noopDeleter))
+            : std::shared_ptr<BaseLoggerChannel>(
+                  new ConsoleLoggerChannel, std::function<void(BaseLoggerChannel*)>(noopDeleter));
 #else
-    static shared_ptr<BaseLoggerChannel> channel = shared_ptr<ConsoleLoggerChannel>(
+    static std::shared_ptr<BaseLoggerChannel> channel = std::shared_ptr<ConsoleLoggerChannel>(
         new ConsoleLoggerChannel, std::function<void(BaseLoggerChannel*)>(noopDeleter));
 #endif
 
@@ -55,7 +55,7 @@ void SetLogLevel(LogLevel level)
     currentLogLevel = level;
 }
 
-void SetLogLevel(string module, LogLevel level)
+void SetLogLevel(std::string module, LogLevel level)
 {
     getModules()[module] = level;
 }
@@ -65,7 +65,7 @@ LogLevel GetLogLevel()
     return currentLogLevel;
 }
 
-LogLevel GetLogLevel(string module)
+LogLevel GetLogLevel(std::string module)
 {
     if (getModules().find(module) == getModules().end()) { return currentLogLevel; }
     else
@@ -81,14 +81,14 @@ void LogToFile(const std::string& path, bool append)
 
 void LogToConsole()
 {
-    Log::setChannel(shared_ptr<ConsoleLoggerChannel>(
+    Log::setChannel(std::shared_ptr<ConsoleLoggerChannel>(
         new ConsoleLoggerChannel, std::function<void(BaseLoggerChannel*)>(noopDeleter)));
 }
 
 #if defined(GLUE_OS_WINDOWS)
 void LogToDebugView()
 {
-    Log::setChannel(shared_ptr<DebugViewLoggerChannel>(
+    Log::setChannel(std::shared_ptr<DebugViewLoggerChannel>(
         new DebugViewLoggerChannel, std::function<void(BaseLoggerChannel*)>(noopDeleter)));
 }
 #endif
@@ -107,7 +107,7 @@ Log::Log(LogLevel _level)
     m_bPrinted = false;
 }
 
-Log::Log(LogLevel level, const string& message)
+Log::Log(LogLevel level, const std::string& message)
 {
     _log(level, "", message);
     m_bPrinted = true;
@@ -129,7 +129,7 @@ Log::~Log()
     if (!m_bPrinted) { _log(m_level, m_module, m_message.str()); }
 }
 
-bool Log::checkLog(LogLevel level, const string& module)
+bool Log::checkLog(LogLevel level, const std::string& module)
 {
     if (getModules().find(module) == getModules().end())
     {
@@ -142,97 +142,97 @@ bool Log::checkLog(LogLevel level, const string& module)
     return false;
 }
 
-void Log::_log(LogLevel level, const string& module, const string& message)
+void Log::_log(LogLevel level, const std::string& module, const std::string& message)
 {
     if (checkLog(level, module)) { channel()->log(level, module, message); }
 }
 
-LogDebug::LogDebug(const string& _module)
+LogDebug::LogDebug(const std::string& _module)
 {
     m_level = GLUE_LOG_DEBUG;
     m_module = _module;
     m_bPrinted = false;
 }
 
-LogDebug::LogDebug(const string& _module, const string& _message)
+LogDebug::LogDebug(const std::string& _module, const std::string& _message)
 {
     _log(GLUE_LOG_DEBUG, _module, _message);
     m_bPrinted = true;
 }
 
-LogInfo::LogInfo(const string& _module)
+LogInfo::LogInfo(const std::string& _module)
 {
     m_level = GLUE_LOG_INFO;
     m_module = _module;
     m_bPrinted = false;
 }
 
-LogInfo::LogInfo(const string& _module, const string& _message)
+LogInfo::LogInfo(const std::string& _module, const std::string& _message)
 {
     _log(GLUE_LOG_INFO, _module, _message);
     m_bPrinted = true;
 }
 
-LogWarn::LogWarn(const string& _module)
+LogWarn::LogWarn(const std::string& _module)
 {
     m_level = GLUE_LOG_WARN;
     m_module = _module;
     m_bPrinted = false;
 }
 
-LogWarn::LogWarn(const string& _module, const string& _message)
+LogWarn::LogWarn(const std::string& _module, const std::string& _message)
 {
     _log(GLUE_LOG_WARN, _module, _message);
     m_bPrinted = true;
 }
 
-LogError::LogError(const string& _module)
+LogError::LogError(const std::string& _module)
 {
     m_level = GLUE_LOG_ERROR;
     m_module = _module;
     m_bPrinted = false;
 }
 
-LogError::LogError(const string& _module, const string& _message)
+LogError::LogError(const std::string& _module, const std::string& _message)
 {
     _log(GLUE_LOG_ERROR, _module, _message);
     m_bPrinted = true;
 }
 
-LogFatal::LogFatal(const string& _module)
+LogFatal::LogFatal(const std::string& _module)
 {
     m_level = GLUE_LOG_FATAL;
     m_module = _module;
     m_bPrinted = false;
 }
 
-LogFatal::LogFatal(const string& _module, const string& _message)
+LogFatal::LogFatal(const std::string& _module, const std::string& _message)
 {
     _log(GLUE_LOG_FATAL, _module, _message);
     m_bPrinted = true;
 }
 
-void Log::setChannel(shared_ptr<BaseLoggerChannel> _channel)
+void Log::setChannel(std::shared_ptr<BaseLoggerChannel> _channel)
 {
     channel() = _channel;
 }
 
-void SetLoggerChannel(shared_ptr<BaseLoggerChannel> loggerChannel)
+void SetLoggerChannel(std::shared_ptr<BaseLoggerChannel> loggerChannel)
 {
     Log::setChannel(loggerChannel);
 }
 
-shared_ptr<BaseLoggerChannel> Log::getChannel()
+std::shared_ptr<BaseLoggerChannel> Log::getChannel()
 {
     return channel();
 }
 
-shared_ptr<BaseLoggerChannel> GetLoggerChannel()
+std::shared_ptr<BaseLoggerChannel> GetLoggerChannel()
 {
     return Log::getChannel();
 }
 
-string GetLogLevelName(LogLevel level, bool pad)
+std::string GetLogLevelName(LogLevel level, bool pad)
 {
     switch (level)
     {
@@ -253,7 +253,8 @@ string GetLogLevelName(LogLevel level, bool pad)
     }
 }
 
-void ConsoleLoggerChannel::log(LogLevel level, const string& module, const string& message)
+void ConsoleLoggerChannel::log(LogLevel level, const std::string& module,
+                               const std::string& message)
 {
     std::ostream& out = level < GLUE_LOG_ERROR ? std::cout : std::cerr;
     out << "[" << GetLogLevelName(level, true) << "] ";
@@ -262,7 +263,7 @@ void ConsoleLoggerChannel::log(LogLevel level, const string& module, const strin
 }
 
 #if defined(GLUE_OS_ANDROID)
-void AndroidLogChannel::log(LogLevel level, const string& module, const string& msg)
+void AndroidLogChannel::log(LogLevel level, const std::string& module, const std::string& msg)
 {
     android_LogPriority androidPrio;
     switch (level)
@@ -291,7 +292,8 @@ void AndroidLogChannel::log(LogLevel level, const string& module, const string& 
 #endif
 
 #if defined(GLUE_OS_WINDOWS)
-void DebugViewLoggerChannel::log(LogLevel level, const string& module, const string& message)
+void DebugViewLoggerChannel::log(LogLevel level, const std::string& module,
+                                 const std::string& message)
 {
     std::stringstream out;
     out << "[" << GetLogLevelName(level, true) << "] ";
@@ -324,11 +326,11 @@ void FileLoggerChannel::setFile(const std::string& path, bool append)
     m_fileStream.open(path, append ? std::ios::app : std::ios::trunc);
 }
 
-void FileLoggerChannel::log(LogLevel level, const string& module, const string& message)
+void FileLoggerChannel::log(LogLevel level, const std::string& module, const std::string& message)
 {
     m_fileStream << "[" << GetLogLevelName(level, true) << "] ";
     if (module != "") { m_fileStream << module << ": "; }
     m_fileStream << message << std::endl;
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

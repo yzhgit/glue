@@ -5,7 +5,7 @@
 
 #pragma once
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /**
  * Round up
@@ -43,4 +43,4 @@ inline size_t clamp(size_t n, size_t lower_bound, size_t upper_bound)
     return n;
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

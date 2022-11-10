@@ -7,7 +7,7 @@
 
 #include "glue/base/log.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 #if defined(GLUE_OS_WINDOWS)
 
@@ -145,4 +145,4 @@ FileMapping::~FileMapping()
 
 #endif
 
-GLUE_END_NAMESPACE
+} // namespace glue

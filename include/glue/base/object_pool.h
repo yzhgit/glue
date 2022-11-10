@@ -10,69 +10,69 @@
 #include <memory>
 #include <vector>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /// Internal details - look below this namespace for public classes!
 namespace detail {
-/// Default index type, this dictates the maximum number of entries in a
-/// single pool block.
-typedef uint32_t index_t;
+    /// Default index type, this dictates the maximum number of entries in a
+    /// single pool block.
+    typedef uint32_t index_t;
 
-/// Base object pool block. This contains a list of indices of free and used
-/// entries and the storage for the entries themselves. Everything is allocated
-/// in a single allocation in the static create function, and indices_begin()
-/// and memory_begin() methods will return pointers offset from this for their
-/// respective data.
-template <typename T>
-class ObjectPoolBlock
-{
-    /// Index of the first free entry
-    index_t free_head_index_;
-    const index_t entries_per_block_;
+    /// Base object pool block. This contains a list of indices of free and used
+    /// entries and the storage for the entries themselves. Everything is allocated
+    /// in a single allocation in the static create function, and indices_begin()
+    /// and memory_begin() methods will return pointers offset from this for their
+    /// respective data.
+    template <typename T>
+    class ObjectPoolBlock
+    {
+        /// Index of the first free entry
+        index_t free_head_index_;
+        const index_t entries_per_block_;
 
-    /// Constructor and destructor are private as create and destroy should
-    /// be used instead.
-    ObjectPoolBlock(index_t entries_per_block);
-    ~ObjectPoolBlock();
+        /// Constructor and destructor are private as create and destroy should
+        /// be used instead.
+        ObjectPoolBlock(index_t entries_per_block);
+        ~ObjectPoolBlock();
 
-    ObjectPoolBlock(const ObjectPoolBlock&) = delete;
-    ObjectPoolBlock& operator=(const ObjectPoolBlock&) = delete;
+        ObjectPoolBlock(const ObjectPoolBlock&) = delete;
+        ObjectPoolBlock& operator=(const ObjectPoolBlock&) = delete;
 
-    /// returns start of indices
-    index_t* indices_begin() const;
+        /// returns start of indices
+        index_t* indices_begin() const;
 
-    /// returns start of pool memory
-    T* memory_begin() const;
+        /// returns start of pool memory
+        T* memory_begin() const;
 
-public:
-    /// Creates to ObjectPoolBlock object and storage in a single aligned
-    /// allocation.
-    static ObjectPoolBlock<T>* create(index_t entries_per_block);
+    public:
+        /// Creates to ObjectPoolBlock object and storage in a single aligned
+        /// allocation.
+        static ObjectPoolBlock<T>* create(index_t entries_per_block);
 
-    /// Destroys the ObjectPoolBlock and associated storage.
-    static void destroy(ObjectPoolBlock<T>* ptr);
+        /// Destroys the ObjectPoolBlock and associated storage.
+        static void destroy(ObjectPoolBlock<T>* ptr);
 
-    /// Allocates a new object from this block. Returns nullptr if there is
-    /// no available space.
-    template <class... P>
-    T* new_object(P&&... params);
+        /// Allocates a new object from this block. Returns nullptr if there is
+        /// no available space.
+        template <class... P>
+        T* new_object(P&&... params);
 
-    /// Deletes the given pointer. The pointer must be owned by this block.
-    void delete_object(const T* ptr);
+        /// Deletes the given pointer. The pointer must be owned by this block.
+        void delete_object(const T* ptr);
 
-    /// Delete all current allocations and reinitialise the block
-    void delete_all();
+        /// Delete all current allocations and reinitialise the block
+        void delete_all();
 
-    /// Calls given function for all allocated entries
-    template <typename F>
-    void for_each(const F func) const;
+        /// Calls given function for all allocated entries
+        template <typename F>
+        void for_each(const F func) const;
 
-    /// returns start of pool memory
-    const T* memory_offset() const;
+        /// returns start of pool memory
+        const T* memory_offset() const;
 
-    /// Calculates the number of allocated entries
-    index_t num_allocations() const;
-};
+        /// Calculates the number of allocated entries
+        index_t num_allocations() const;
+    };
 
 } // namespace detail
 
@@ -188,179 +188,179 @@ private:
 /// Internal implementation
 namespace detail {
 
-const uint32_t MIN_BLOCK_ALIGN = 64;
+    const uint32_t MIN_BLOCK_ALIGN = 64;
 
-void* aligned_malloc(size_t size, size_t align);
-void aligned_free(void* ptr);
+    void* aligned_malloc(size_t size, size_t align);
+    void aligned_free(void* ptr);
 
-// Aligns n to align. N will be unchanged if it is already aligned
-inline size_t align_to(size_t n, size_t align)
-{
-    return (1 + (n - 1) / align) * align;
-}
-
-template <typename T>
-ObjectPoolBlock<T>* ObjectPoolBlock<T>::create(index_t entries_per_block)
-{
-    // the header size
-    const size_t header_size = sizeof(ObjectPoolBlock<T>);
-#if _MSC_VER <= 1800
-    const size_t entry_align = __alignof(T);
-#else
-    const size_t entry_align = alignof(T);
-#endif
-    // extend indices size by alignment of T
-    // const size_t indices_size = align_to(sizeof(index_t) * entries_per_block, entry_align);
-    const size_t indices_size = align_to(sizeof(index_t) * entries_per_block, sizeof(index_t));
-    // align block to cache line size, or entry alignment if larger
-    const size_t entries_size = sizeof(T) * entries_per_block;
-    // block size includes indices + entry alignment + entries
-    const size_t block_size = header_size + indices_size + entries_size;
-    ObjectPoolBlock<T>* ptr =
-        reinterpret_cast<ObjectPoolBlock<T>*>(aligned_malloc(block_size, MIN_BLOCK_ALIGN));
-    if (ptr)
+    // Aligns n to align. N will be unchanged if it is already aligned
+    inline size_t align_to(size_t n, size_t align)
     {
-        new (ptr) ObjectPoolBlock(entries_per_block);
-        assert(reinterpret_cast<uint8_t*>(ptr->indices_begin()) ==
-               reinterpret_cast<uint8_t*>(ptr) + header_size);
-        assert(reinterpret_cast<uint8_t*>(ptr->memory_begin()) ==
-               reinterpret_cast<uint8_t*>(ptr) + header_size + indices_size);
+        return (1 + (n - 1) / align) * align;
     }
-    return ptr;
-}
 
-template <typename T>
-void ObjectPoolBlock<T>::destroy(ObjectPoolBlock<T>* ptr)
-{
-    ptr->~ObjectPoolBlock();
-    aligned_free(ptr);
-}
-
-template <typename T>
-ObjectPoolBlock<T>::ObjectPoolBlock(index_t entries_per_block)
-    : free_head_index_(0), entries_per_block_(entries_per_block)
-{
-    index_t* indices = indices_begin();
-    for (index_t i = 0; i < entries_per_block; ++i) { indices[i] = i + 1; }
-}
-
-template <typename T>
-void destruct_all(ObjectPoolBlock<T>&,
-                  typename std::enable_if<std::is_trivially_destructible<T>::value>::type* = 0)
-{
-    // skip calling destructors for trivially destructible types
-}
-
-template <typename T>
-void destruct_all(ObjectPoolBlock<T>& t,
-                  typename std::enable_if<!std::is_trivially_destructible<T>::value>::type* = 0)
-{
-    // call destructors on all live objects in the pool
-    t.for_each([](T* ptr) { ptr->~T(); });
-}
-
-template <typename T>
-ObjectPoolBlock<T>::~ObjectPoolBlock()
-{
-    // destruct any allocated objects
-    destruct_all(*this);
-}
-
-template <typename T>
-index_t* ObjectPoolBlock<T>::indices_begin() const
-{
-    // calculcates the start of the indicies
-    return reinterpret_cast<index_t*>(const_cast<ObjectPoolBlock<T>*>(this + 1));
-}
-
-template <typename T>
-T* ObjectPoolBlock<T>::memory_begin() const
-{
-    // calculates the start of pool memory
-    return reinterpret_cast<T*>(indices_begin() + entries_per_block_);
-}
-
-template <typename T>
-const T* ObjectPoolBlock<T>::memory_offset() const
-{
-    return memory_begin();
-}
-
-template <typename T>
-template <class... P>
-T* ObjectPoolBlock<T>::new_object(P&&... params)
-{
-    // get the head of the free list
-    const index_t index = free_head_index_;
-    if (index != entries_per_block_)
+    template <typename T>
+    ObjectPoolBlock<T>* ObjectPoolBlock<T>::create(index_t entries_per_block)
     {
-        index_t* indices = indices_begin();
-        // assert that this index is not in use
-        assert(indices[index] != index);
-        // update head of the free list
-        free_head_index_ = indices[index];
-        // flag index as used by assigning it's own index
-        indices[index] = index;
-        // get object memory
-        T* ptr = memory_begin() + index;
-        // construct the entry
-        new (ptr) T(std::forward<P>(params)...);
+        // the header size
+        const size_t header_size = sizeof(ObjectPoolBlock<T>);
+#if _MSC_VER <= 1800
+        const size_t entry_align = __alignof(T);
+#else
+        const size_t entry_align = alignof(T);
+#endif
+        // extend indices size by alignment of T
+        // const size_t indices_size = align_to(sizeof(index_t) * entries_per_block, entry_align);
+        const size_t indices_size = align_to(sizeof(index_t) * entries_per_block, sizeof(index_t));
+        // align block to cache line size, or entry alignment if larger
+        const size_t entries_size = sizeof(T) * entries_per_block;
+        // block size includes indices + entry alignment + entries
+        const size_t block_size = header_size + indices_size + entries_size;
+        ObjectPoolBlock<T>* ptr =
+            reinterpret_cast<ObjectPoolBlock<T>*>(aligned_malloc(block_size, MIN_BLOCK_ALIGN));
+        if (ptr)
+        {
+            new (ptr) ObjectPoolBlock(entries_per_block);
+            assert(reinterpret_cast<uint8_t*>(ptr->indices_begin()) ==
+                   reinterpret_cast<uint8_t*>(ptr) + header_size);
+            assert(reinterpret_cast<uint8_t*>(ptr->memory_begin()) ==
+                   reinterpret_cast<uint8_t*>(ptr) + header_size + indices_size);
+        }
         return ptr;
     }
-    return nullptr;
-}
 
-template <typename T>
-void ObjectPoolBlock<T>::delete_object(const T* ptr)
-{
-    if (ptr)
+    template <typename T>
+    void ObjectPoolBlock<T>::destroy(ObjectPoolBlock<T>* ptr)
     {
-        // assert that pointer is in range
-        const T* begin = memory_begin();
-        assert(ptr >= begin && ptr < (begin + entries_per_block_));
-        // destruct this object
-        ptr->~T();
-        // get the index of this pointer
-        const index_t index = static_cast<index_t>(ptr - begin);
+        ptr->~ObjectPoolBlock();
+        aligned_free(ptr);
+    }
+
+    template <typename T>
+    ObjectPoolBlock<T>::ObjectPoolBlock(index_t entries_per_block)
+        : free_head_index_(0), entries_per_block_(entries_per_block)
+    {
         index_t* indices = indices_begin();
-        // assert this index is allocated
-        assert(indices[index] == index);
-        // remove index from used list
-        indices[index] = free_head_index_;
-        // store index of next free entry in this entry
-        free_head_index_ = index;
+        for (index_t i = 0; i < entries_per_block; ++i) { indices[i] = i + 1; }
     }
-}
 
-template <typename T>
-template <typename F>
-void ObjectPoolBlock<T>::for_each(const F func) const
-{
-    const index_t* indices = indices_begin();
-    T* first = memory_begin();
-    for (index_t i = 0, count = entries_per_block_; i != count; ++i)
+    template <typename T>
+    void destruct_all(ObjectPoolBlock<T>&,
+                      typename std::enable_if<std::is_trivially_destructible<T>::value>::type* = 0)
     {
-        if (indices[i] == i) { func(first + i); }
+        // skip calling destructors for trivially destructible types
     }
-}
 
-template <typename T>
-void ObjectPoolBlock<T>::delete_all()
-{
-    // destruct any allocated objects
-    destruct_all(*this);
-    free_head_index_ = 0;
-    index_t* indices = indices_begin();
-    for (index_t i = 0; i < entries_per_block_; ++i) { indices[i] = i + 1; }
-}
+    template <typename T>
+    void destruct_all(ObjectPoolBlock<T>& t,
+                      typename std::enable_if<!std::is_trivially_destructible<T>::value>::type* = 0)
+    {
+        // call destructors on all live objects in the pool
+        t.for_each([](T* ptr) { ptr->~T(); });
+    }
 
-template <typename T>
-index_t ObjectPoolBlock<T>::num_allocations() const
-{
-    index_t num_allocs = 0;
-    for_each([&num_allocs](const T*) { ++num_allocs; });
-    return num_allocs;
-}
+    template <typename T>
+    ObjectPoolBlock<T>::~ObjectPoolBlock()
+    {
+        // destruct any allocated objects
+        destruct_all(*this);
+    }
+
+    template <typename T>
+    index_t* ObjectPoolBlock<T>::indices_begin() const
+    {
+        // calculcates the start of the indicies
+        return reinterpret_cast<index_t*>(const_cast<ObjectPoolBlock<T>*>(this + 1));
+    }
+
+    template <typename T>
+    T* ObjectPoolBlock<T>::memory_begin() const
+    {
+        // calculates the start of pool memory
+        return reinterpret_cast<T*>(indices_begin() + entries_per_block_);
+    }
+
+    template <typename T>
+    const T* ObjectPoolBlock<T>::memory_offset() const
+    {
+        return memory_begin();
+    }
+
+    template <typename T>
+    template <class... P>
+    T* ObjectPoolBlock<T>::new_object(P&&... params)
+    {
+        // get the head of the free list
+        const index_t index = free_head_index_;
+        if (index != entries_per_block_)
+        {
+            index_t* indices = indices_begin();
+            // assert that this index is not in use
+            assert(indices[index] != index);
+            // update head of the free list
+            free_head_index_ = indices[index];
+            // flag index as used by assigning it's own index
+            indices[index] = index;
+            // get object memory
+            T* ptr = memory_begin() + index;
+            // construct the entry
+            new (ptr) T(std::forward<P>(params)...);
+            return ptr;
+        }
+        return nullptr;
+    }
+
+    template <typename T>
+    void ObjectPoolBlock<T>::delete_object(const T* ptr)
+    {
+        if (ptr)
+        {
+            // assert that pointer is in range
+            const T* begin = memory_begin();
+            assert(ptr >= begin && ptr < (begin + entries_per_block_));
+            // destruct this object
+            ptr->~T();
+            // get the index of this pointer
+            const index_t index = static_cast<index_t>(ptr - begin);
+            index_t* indices = indices_begin();
+            // assert this index is allocated
+            assert(indices[index] == index);
+            // remove index from used list
+            indices[index] = free_head_index_;
+            // store index of next free entry in this entry
+            free_head_index_ = index;
+        }
+    }
+
+    template <typename T>
+    template <typename F>
+    void ObjectPoolBlock<T>::for_each(const F func) const
+    {
+        const index_t* indices = indices_begin();
+        T* first = memory_begin();
+        for (index_t i = 0, count = entries_per_block_; i != count; ++i)
+        {
+            if (indices[i] == i) { func(first + i); }
+        }
+    }
+
+    template <typename T>
+    void ObjectPoolBlock<T>::delete_all()
+    {
+        // destruct any allocated objects
+        destruct_all(*this);
+        free_head_index_ = 0;
+        index_t* indices = indices_begin();
+        for (index_t i = 0; i < entries_per_block_; ++i) { indices[i] = i + 1; }
+    }
+
+    template <typename T>
+    index_t ObjectPoolBlock<T>::num_allocations() const
+    {
+        index_t num_allocs = 0;
+        for_each([&num_allocs](const T*) { ++num_allocs; });
+        return num_allocs;
+    }
 
 } // namespace detail
 
@@ -592,4 +592,4 @@ ObjectPoolStats DynamicObjectPool<T>::calc_stats() const
     return stats;
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

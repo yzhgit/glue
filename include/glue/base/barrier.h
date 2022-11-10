@@ -5,9 +5,12 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+#include <condition_variable>
+#include <mutex>
+
+namespace glue {
 
 // Barrier
 //
@@ -58,4 +61,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(Barrier)
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

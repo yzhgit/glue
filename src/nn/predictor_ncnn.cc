@@ -25,7 +25,7 @@
 #define PRINT_E(...) INFERENCE_HELPER_LOG_PRINT_E(TAG, __VA_ARGS__)
 
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 
 PredictorNcnn::PredictorNcnn() {
@@ -220,4 +220,4 @@ int32_t PredictorNcnn::Process(
 }
 
 
-GLUE_END_NAMESPACE
+}

@@ -10,7 +10,7 @@
     #include "glue/compiler.h"
     #include <immintrin.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 GLUE_FUNC_ISA("sha,sse4.1,ssse3")
 void SHA_256::compress_digest_x86(secure_vector<uint32_t>& digest, const uint8_t input[],
@@ -211,6 +211,6 @@ void SHA_256::compress_digest_x86(secure_vector<uint32_t>& digest, const uint8_t
     _mm_storeu_si128(reinterpret_cast<__m128i*>(&state[4]), STATE1);
 }
 
-GLUE_END_NAMESPACE
+}
 
 #endif

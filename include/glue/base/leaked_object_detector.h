@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
 #include "glue/base/atomic.h"
 #include "glue/base/log.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 //==============================================================================
 /**
@@ -126,15 +126,15 @@ private:
             @see GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR, LeakedObjectDetector
         */
         #define GLUE_LEAK_DETECTOR(OwnerClass)                                                     \
-            friend class GLUE_NAMESPACE::LeakedObjectDetector<OwnerClass>;                                   \
+            friend class glue::LeakedObjectDetector<OwnerClass>;                                   \
             static const char* getLeakedObjectClassName() noexcept                                 \
             {                                                                                      \
                 return #OwnerClass;                                                                \
             }                                                                                      \
-            GLUE_NAMESPACE::LeakedObjectDetector<OwnerClass> GLUE_JOIN_MACRO(leakDetector, __LINE__);
+            glue::LeakedObjectDetector<OwnerClass> GLUE_JOIN_MACRO(leakDetector, __LINE__);
     #else
         #define GLUE_LEAK_DETECTOR(OwnerClass)
     #endif
 #endif
 
-GLUE_END_NAMESPACE
+} // namespace glue

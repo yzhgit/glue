@@ -5,12 +5,14 @@
 
 #pragma once
 
-GLUE_START_NAMESPACE
+#include "glue/base/common.h"
+
+namespace glue {
 
 /**
  * Represents the length requirements on an algorithm key
  */
-class KeySpec final
+class GLUE_API KeySpec final
 {
 public:
     /**
@@ -78,4 +80,4 @@ private:
     size_t m_min_keylen, m_max_keylen, m_keylen_mod;
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

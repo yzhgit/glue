@@ -6,8 +6,9 @@
 #pragma once
 
 #include "glue/base/atomic.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 //==============================================================================
 /**
@@ -436,4 +437,4 @@ bool operator!=(const Type* object1, const RefCountedObjectPtr<Type>& object2) n
     return object1 != object2.get();
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

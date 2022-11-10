@@ -7,7 +7,7 @@
 
 #include <exception>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 void hex_encode(char output[], const uint8_t input[], size_t input_length, bool uppercase)
 {
@@ -147,4 +147,4 @@ std::vector<uint8_t> hex_decode(const std::string& input, bool ignore_ws)
     return hex_decode(input.data(), input.size(), ignore_ws);
 }
 
-GLUE_END_NAMESPACE
+}

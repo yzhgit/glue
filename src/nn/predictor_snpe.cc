@@ -43,7 +43,7 @@
 #define PRINT(...) INFERENCE_HELPER_LOG_PRINT(TAG, __VA_ARGS__)
 #define PRINT_E(...) INFERENCE_HELPER_LOG_PRINT_E(TAG, __VA_ARGS__)
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 
 PredictorSnpe::PredictorSnpe() {
@@ -375,4 +375,4 @@ int32_t PredictorSnpe::GetAllTensorInfo(
 }
 
 
-GLUE_END_NAMESPACE
+}

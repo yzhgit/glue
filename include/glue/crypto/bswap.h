@@ -5,11 +5,9 @@
 
 #pragma once
 
-#if defined(GLUE_COMPILER_MSVC)
-    #include <stdlib.h>
-#endif
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /**
  * Swap a 16 bit integer
@@ -95,4 +93,4 @@ inline void bswap_4(T x[4])
     x[3] = reverse_bytes(x[3]);
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

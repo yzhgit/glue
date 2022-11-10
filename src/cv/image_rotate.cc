@@ -10,7 +10,7 @@
 #include <math.h>
 #include <string.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 void ImageRotate::choose(const uint8_t* src, uint8_t* dst, ImageFormat srcFormat, int srcw,
                          int srch, float degree)
@@ -1947,4 +1947,4 @@ void rotate_hwc4_270(const uint8_t* src, uint8_t* dst, int w_in, int h_in, int w
     }
 }
 
-GLUE_END_NAMESPACE
+}

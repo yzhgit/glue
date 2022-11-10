@@ -8,7 +8,7 @@
 
 #include <string.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 ThreadPool* ThreadPool::gInstance = nullptr;
 static std::mutex gInitMutex; // confirm thread-safe when use singleton mode
@@ -172,4 +172,4 @@ void ThreadPool::Enqueue(TASK_COMMON&& task)
     } while (!complete);
 }
 
-GLUE_END_NAMESPACE
+}

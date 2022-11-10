@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 typedef void (*tensor_func)(const uint8_t* src, float* dst, int srcw, int srch, float* means,
                             float* scales);
@@ -24,4 +24,4 @@ private:
     tensor_func impl_{nullptr};
 };
 
-GLUE_END_NAMESPACE
+}

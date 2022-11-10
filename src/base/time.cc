@@ -5,7 +5,7 @@
 
 #include "glue/base/time.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 int64 Time::currentTimeMillis() noexcept
 {
@@ -136,4 +136,4 @@ double Time::getMillisecondCounterHiRes() noexcept
 
 #endif
 
-GLUE_END_NAMESPACE
+}

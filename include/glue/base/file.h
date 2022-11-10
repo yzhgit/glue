@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
 #include "ghc/fs_std.hpp"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 //==============================================================================
 /**
@@ -31,4 +31,4 @@ public:
     static std::list<std::string> readLines(const fs::path& path);
 };
 
-GLUE_END_NAMESPACE
+}

@@ -10,7 +10,7 @@
 #include "glue/crypto/rotate.h"
 #include "glue/crypto/secmem.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 namespace {
 
@@ -207,4 +207,4 @@ void MD5::compress_n(const uint8_t input[], size_t blocks)
     }
 }
 
-GLUE_END_NAMESPACE
+}

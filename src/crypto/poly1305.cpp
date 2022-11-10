@@ -9,7 +9,7 @@
 #include "glue/crypto/loadstor.h"
 #include "glue/crypto/secmem.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 namespace {
 
@@ -231,4 +231,4 @@ void Poly1305::verify_key_set(bool cond) const
     if (cond == false) throw std::runtime_error("[Poly1305] Key not set");
 }
 
-GLUE_END_NAMESPACE
+}

@@ -10,7 +10,7 @@
 
 #include <exception>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 namespace {
 
@@ -295,4 +295,4 @@ void Salsa20::verify_key_set(bool cond) const
     if (cond == false) throw std::runtime_error("[Salsa20] Key not set");
 }
 
-GLUE_END_NAMESPACE
+}

@@ -9,7 +9,7 @@
 
 #include "glue/base/time.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 //==============================================================================
 /** A timer for measuring performance of code and dumping the results to a file.
@@ -148,4 +148,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScopedTimeMeasurement)
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

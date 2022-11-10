@@ -5,9 +5,13 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+#include <fstream>
+#include <sstream>
+#include <string>
+
+namespace glue {
 
 /// \file
 /// Log provides an interface for writing text output from your app.
@@ -737,4 +741,4 @@ private:
 
 /// \endcond
 
-GLUE_END_NAMESPACE
+} // namespace glue

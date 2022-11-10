@@ -7,7 +7,7 @@
 
 #include "glue/base/log.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 PerformanceCounter::PerformanceCounter(const char* name, int runsPerPrintout,
                                        const char* loggingFile)
@@ -114,4 +114,4 @@ PerformanceCounter::Statistics PerformanceCounter::getStatisticsAndReset()
     return s;
 }
 
-GLUE_END_NAMESPACE
+}

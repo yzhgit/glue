@@ -24,7 +24,7 @@
 
 #endif
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /**
  * Byte extraction
@@ -659,4 +659,4 @@ void copy_out_vec_le(uint8_t out[], size_t out_bytes, const std::vector<T, Alloc
     copy_out_le(out, out_bytes, in.data());
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

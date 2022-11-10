@@ -9,7 +9,7 @@
 #include <math.h>
 #include <string.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 void ImageFlip::choose(const uint8_t* src, uint8_t* dst, ImageFormat srcFormat, int srcw, int srch,
                        FlipParam flip_param)
@@ -2090,4 +2090,4 @@ void flip_hwc4_xy(const uint8_t* src, uint8_t* dst, int w_in, int h_in)
     delete[] zerobuff2;
 }
 
-GLUE_END_NAMESPACE
+}

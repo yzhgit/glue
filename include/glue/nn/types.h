@@ -5,10 +5,10 @@
 
 #pragma once
 
-GLUE_START_NAMESPACE
+namespace glue {
 
-
-enum class DataType {
+enum class DataType
+{
     Float16 = 0,
     Float32 = 1,
     QAsymmU8 = 2,
@@ -21,21 +21,58 @@ enum class DataType {
     Signed64 = 9,
 };
 
-enum class DataLayout { NCHW, NHWC};
+enum class DataLayout
+{
+    NCHW,
+    NHWC
+};
 
-enum class QuantType { NONE, ASYMMETRIC, SYMMETRIC_PER_CHANNEL };
+enum class QuantType
+{
+    NONE,
+    ASYMMETRIC,
+    SYMMETRIC_PER_CHANNEL
+};
 
-enum class PadType { NONE = -1, AUTO, VALID, SAME };
+enum class PadType
+{
+    NONE = -1,
+    AUTO,
+    VALID,
+    SAME
+};
 
-enum class PoolType { MAX, AVG, L2, AVG_ANDROID };
+enum class PoolType
+{
+    MAX,
+    AVG,
+    L2,
+    AVG_ANDROID
+};
 
-enum class RoundType { CEILING, FLOOR };
+enum class RoundType
+{
+    CEILING,
+    FLOOR
+};
 
-enum class OverflowPolicy { WRAP, SATURATE };
+enum class OverflowPolicy
+{
+    WRAP,
+    SATURATE
+};
 
-enum class RoundingPolicy { TO_ZERO, RTNE };
+enum class RoundingPolicy
+{
+    TO_ZERO,
+    RTNE
+};
 
-enum class ResizeType { NEAREST_NEIGHBOR, BILINEAR, AREA };
+enum class ResizeType
+{
+    NEAREST_NEIGHBOR,
+    BILINEAR,
+    AREA
+};
 
-
-GLUE_END_NAMESPACE
+} // namespace glue

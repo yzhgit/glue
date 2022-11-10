@@ -7,7 +7,7 @@
 
 #include "glue/crypto/mul128.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 class donna128 final
 {
@@ -145,4 +145,4 @@ inline uint64_t combine_lower(const uint128_t a, size_t s1, const uint128_t b, s
 }
 #endif
 
-GLUE_END_NAMESPACE
+} // namespace glue

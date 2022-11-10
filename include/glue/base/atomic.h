@@ -5,22 +5,22 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include <atomic>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 #ifndef DOXYGEN
 namespace AtomicHelpers {
-template <typename T>
-struct DiffTypeHelper
-{
-    using Type = T;
-};
-template <typename T>
-struct DiffTypeHelper<T*>
-{
-    using Type = std::ptrdiff_t;
-};
+    template <typename T>
+    struct DiffTypeHelper
+    {
+        using Type = T;
+    };
+    template <typename T>
+    struct DiffTypeHelper<T*>
+    {
+        using Type = std::ptrdiff_t;
+    };
 } // namespace AtomicHelpers
 #endif
 
@@ -155,4 +155,4 @@ struct Atomic final
     std::atomic<Type> value;
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

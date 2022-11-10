@@ -5,9 +5,12 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+#include <exception>
+#include <string>
+
+namespace glue {
 
 class GLUE_API Exception : public std::exception
 /// This is the base class for all exceptions defined
@@ -123,13 +126,13 @@ inline int Exception::code() const
         CLS(int code = CODE);                                                                      \
         CLS(const std::string& msg, int code = CODE);                                              \
         CLS(const std::string& msg, const std::string& arg, int code = CODE);                      \
-        CLS(const std::string& msg, const GLUE_NAMESPACE::Exception& exc, int code = CODE);                  \
+        CLS(const std::string& msg, const glue::Exception& exc, int code = CODE);                  \
         CLS(const CLS& exc);                                                                       \
         ~CLS() noexcept;                                                                           \
         CLS& operator=(const CLS& exc);                                                            \
         const char* name() const noexcept;                                                         \
         const char* className() const noexcept;                                                    \
-        GLUE_NAMESPACE::Exception* clone() const;                                                            \
+        glue::Exception* clone() const;                                                            \
         void rethrow() const;                                                                      \
     };
 
@@ -142,7 +145,7 @@ inline int Exception::code() const
     {}                                                                                             \
     CLS::CLS(const std::string& msg, const std::string& arg, int code) : BASE(msg, arg, code)      \
     {}                                                                                             \
-    CLS::CLS(const std::string& msg, const GLUE_NAMESPACE::Exception& exc, int code) : BASE(msg, exc, code)  \
+    CLS::CLS(const std::string& msg, const glue::Exception& exc, int code) : BASE(msg, exc, code)  \
     {}                                                                                             \
     CLS::CLS(const CLS& exc) : BASE(exc)                                                           \
     {}                                                                                             \
@@ -161,7 +164,7 @@ inline int Exception::code() const
     {                                                                                              \
         return typeid(*this).name();                                                               \
     }                                                                                              \
-    GLUE_NAMESPACE::Exception* CLS::clone() const                                                            \
+    glue::Exception* CLS::clone() const                                                            \
     {                                                                                              \
         return new CLS(*this);                                                                     \
     }                                                                                              \
@@ -225,4 +228,4 @@ GLUE_DECLARE_EXCEPTION(GLUE_API, URISyntaxException, SyntaxException)
 GLUE_DECLARE_EXCEPTION(GLUE_API, ApplicationException, Exception)
 GLUE_DECLARE_EXCEPTION(GLUE_API, BadCastException, RuntimeException)
 
-GLUE_END_NAMESPACE
+} // namespace glue

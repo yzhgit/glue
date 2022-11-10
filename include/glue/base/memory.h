@@ -5,9 +5,12 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+#include <memory>
+#include <type_traits>
+
+namespace glue {
 
 //==============================================================================
 /** Fills a block of memory with zeros. */
@@ -143,7 +146,7 @@ GLUE_API void glueDLL_free(void*);
     public:                                                                                        \
         static void* operator new(size_t sz)                                                       \
         {                                                                                          \
-            return GLUE_NAMESPACE::glueDLL_malloc(sz);                                                       \
+            return glue::glueDLL_malloc(sz);                                                       \
         }                                                                                          \
         static void* operator new(size_t, void* p)                                                 \
         {                                                                                          \
@@ -151,7 +154,7 @@ GLUE_API void glueDLL_free(void*);
         }                                                                                          \
         static void operator delete(void* p)                                                       \
         {                                                                                          \
-            GLUE_NAMESPACE::glueDLL_free(p);                                                                 \
+            glue::glueDLL_free(p);                                                                 \
         }                                                                                          \
         static void operator delete(void*, void*)                                                  \
         {}
@@ -171,4 +174,4 @@ std::unique_ptr<T> rawToUniquePtr(T* ptr)
     return std::unique_ptr<T>(ptr);
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

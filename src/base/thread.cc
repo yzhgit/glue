@@ -7,7 +7,7 @@
 
 #include "glue/base/log.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 class RunnableHolder : public Runnable
 {
@@ -175,4 +175,4 @@ void Thread::threadEntry()
     m_condition.notify_all();
 }
 
-GLUE_END_NAMESPACE
+}

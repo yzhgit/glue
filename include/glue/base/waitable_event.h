@@ -5,9 +5,12 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+#include <atomic>
+#include <mutex>
+
+namespace glue {
 
 /// An Event is a synchronization object that
 /// allows one thread to signal one or more
@@ -58,4 +61,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(WaitableEvent)
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

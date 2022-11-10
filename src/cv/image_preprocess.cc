@@ -18,7 +18,7 @@
 #include <math.h>
 #include <string.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 #define PI 3.14159265f
 #define Degrees2Radians(degrees) ((degrees) * (SK_ScalarPI / 180))
@@ -209,4 +209,4 @@ ImagePreprocess::image_crop(const uint8_t* src, uint8_t* dst, ImageFormat srcFor
     }
 }
 
-GLUE_END_NAMESPACE
+}

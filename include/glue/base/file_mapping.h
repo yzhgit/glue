@@ -7,7 +7,7 @@
 
 #include "glue/base/leaked_object_detector.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 //==============================================================================
 /**
@@ -80,4 +80,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FileMapping)
 };
 
-GLUE_END_NAMESPACE
+}

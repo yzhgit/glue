@@ -5,9 +5,13 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+#include <atomic>
+#include <condition_variable>
+#include <mutex>
+
+namespace glue {
 
 // CountDownLatch
 //
@@ -77,4 +81,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(CountDownLatch)
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

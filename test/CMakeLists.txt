@@ -24,6 +24,8 @@ set(source_files
   src/base/result.constexpr.test.cpp
   src/base/result.failure.test.cpp
 
+  src/base/object_pool.test.cpp
+
   # src/crypto/aes.test.cpp
   # src/crypto/base64.test.cpp
   # src/crypto/md5.test.cpp

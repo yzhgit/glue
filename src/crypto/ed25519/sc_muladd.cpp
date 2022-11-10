@@ -5,7 +5,7 @@
 
 #include "glue/crypto/ed25519/ed25519_internal.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /*
 Input:
@@ -220,4 +220,4 @@ void sc_muladd(uint8_t* s, const uint8_t* a, const uint8_t* b, const uint8_t* c)
     s[31] = static_cast<uint8_t>(s11 >> 17);
 }
 
-GLUE_END_NAMESPACE
+}

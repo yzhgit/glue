@@ -10,7 +10,7 @@
 #include <math.h>
 #include <string.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 void rotate90_hwc(const uint8_t* src, uint8_t* dst, int w_in, int h_in);
 
@@ -1853,4 +1853,4 @@ void rotate180_hwc(const uint8_t* src, uint8_t* dst, int w, int h_in)
 }
 #endif
 
-GLUE_END_NAMESPACE
+}

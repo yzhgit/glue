@@ -5,9 +5,11 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+#include <queue>
+
+namespace glue {
 
 class GLUE_API FpsCounter final
 {
@@ -39,4 +41,4 @@ private:
     std::queue<double> m_timestamps;
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

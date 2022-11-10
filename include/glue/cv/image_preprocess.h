@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <vector>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 // color enum
 enum ImageFormat
@@ -213,4 +213,4 @@ private:
     TransParam transParam_;
 };
 
-GLUE_END_NAMESPACE
+}

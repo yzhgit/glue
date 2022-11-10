@@ -10,7 +10,7 @@
 #include "glue/base/thread.h"
 #include "glue/base/waitable_event.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 class PooledThread : public Runnable
 {
@@ -406,4 +406,4 @@ ThreadPool& ThreadPool::defaultPool()
     return *sh.pool();
 }
 
-GLUE_END_NAMESPACE
+}

@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
 #include <exception>
 #include <type_traits>
 #include <utility>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 ///////////////////////////////////////////////////////////////////////////
 /// \brief This class leverages RAII to perform cleanup actions at the end
@@ -150,4 +150,4 @@ inline constexpr ScopeGuard<std::decay_t<Fn>> on_scope_clean_exit(Fn&& fn)
     return {scope::on_clean_exit, std::forward<Fn>(fn)};
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

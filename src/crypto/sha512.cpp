@@ -12,7 +12,7 @@
 
 #include <algorithm>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 namespace {
 
@@ -231,4 +231,4 @@ void SHA_512::compress_n(const uint8_t input[], size_t blocks)
     SHA64_compress(m_digest.data(), input, blocks);
 }
 
-GLUE_END_NAMESPACE
+}

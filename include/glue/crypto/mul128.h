@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 #if defined(__SIZEOF_INT128__) && defined(GLUE_64BIT)
     #define GLUE_TARGET_HAS_NATIVE_UINT128
@@ -20,7 +20,7 @@ typedef unsigned __int128 uint128_t;
     #endif
 #endif
 
-GLUE_END_NAMESPACE
+} // namespace glue
 
 #if defined(GLUE_TARGET_HAS_NATIVE_UINT128)
 
@@ -78,7 +78,7 @@ GLUE_END_NAMESPACE
 
 #endif
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /**
  * Perform a 64x64->128 bit multiplication
@@ -121,4 +121,4 @@ inline void mul64x64_128(uint64_t a, uint64_t b, uint64_t* lo, uint64_t* hi)
 #endif
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

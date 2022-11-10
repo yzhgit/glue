@@ -6,7 +6,7 @@
 #include "glue/crypto/ed25519/ed25519_internal.h"
 #include <assert.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 namespace {
 
@@ -2931,4 +2931,4 @@ void ge_scalarmult_base(uint8_t out[32], const uint8_t a[32])
     ge_p3_tobytes(out, &h);
 }
 
-GLUE_END_NAMESPACE
+}

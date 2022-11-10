@@ -5,12 +5,13 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "glue/base/common.h"
+
 #include <vector>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
-class SHA_512
+class GLUE_API SHA_512
 {
 public:
     /// split into 128 byte blocks (=> 1024 bits), hash is 64 bytes long
@@ -44,4 +45,4 @@ private:
     std::vector<uint64_t> m_digest;
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

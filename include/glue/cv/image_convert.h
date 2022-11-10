@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 typedef void (*convert_func)(const uint8_t* src, uint8_t* dst, int srcw, int srch);
 
@@ -24,4 +24,4 @@ private:
     convert_func impl_{nullptr};
 };
 
-GLUE_END_NAMESPACE
+}

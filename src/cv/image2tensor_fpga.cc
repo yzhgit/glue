@@ -13,7 +13,7 @@
 
 #include "lite/utils/log/logging.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 void bgr_to_tensor_hwc(const uint8_t* src, paddle::zynqmp::float16* output, ImageFormat srcFormat,
                        ImageFormat dstFormat, int srcw, int srch, int dstw, int dsth, float* means,
@@ -143,4 +143,4 @@ void bgr_to_tensor_hwc(const uint8_t* src, paddle::zynqmp::float16* output, Imag
     paddle::zynqmp::fpga_free(img);
 }
 
-GLUE_END_NAMESPACE
+}

@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 ///////////////////////////////////////////////////////////////////////////
 /// \brief Source location is a small, immutable type used for representing
@@ -80,23 +80,22 @@ inline bool operator!=(const source_location& lhs, const source_location& rhs) n
     return !(lhs == rhs);
 }
 
-inline constexpr GLUE_NAMESPACE::source_location::source_location(const char* file_name,
-                                                                  const char* function_name,
-                                                                  std::size_t line)
+inline constexpr glue::source_location::source_location(const char* file_name,
+                                                        const char* function_name, std::size_t line)
     : m_file{file_name}, m_function{function_name}, m_line{line}
 {}
 
-inline constexpr std::size_t GLUE_NAMESPACE::source_location::line() const noexcept
+inline constexpr std::size_t glue::source_location::line() const noexcept
 {
     return m_line;
 }
 
-inline constexpr const char* GLUE_NAMESPACE::source_location::function_name() const noexcept
+inline constexpr const char* glue::source_location::function_name() const noexcept
 {
     return m_function;
 }
 
-inline constexpr const char* GLUE_NAMESPACE::source_location::file_name() const noexcept
+inline constexpr const char* glue::source_location::file_name() const noexcept
 {
     return m_file;
 }
@@ -105,6 +104,6 @@ inline constexpr const char* GLUE_NAMESPACE::source_location::file_name() const 
 //!
 //! \brief Retrieves the current source location for where this macro is
 //!        invoked
-#define GLUE_MAKE_SOURCE_LOCATION() ::GLUE_NAMESPACE::source_location(__FILE__, __func__, __LINE__)
+#define GLUE_MAKE_SOURCE_LOCATION() ::glue::source_location(__FILE__, __func__, __LINE__)
 
-GLUE_END_NAMESPACE
+} // namespace glue

@@ -7,7 +7,7 @@
 
 #include <chrono>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 WaitableEvent::WaitableEvent() : m_notified(false)
 {}
@@ -47,4 +47,4 @@ void WaitableEvent::reset()
     m_notified = false;
 }
 
-GLUE_END_NAMESPACE
+}

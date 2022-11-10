@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <string.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 void ImageResize::choose(const uint8_t* src, uint8_t* dst, ImageFormat srcFormat, int srcw,
                          int srch, int dstw, int dsth)
@@ -912,4 +912,4 @@ void resize(const uint8_t* src, uint8_t* dst, ImageFormat srcFormat, int srcw, i
     return;
 }
 
-GLUE_END_NAMESPACE
+}

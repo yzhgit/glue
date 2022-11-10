@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <vector>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 class ImageFlip
 {
@@ -23,4 +23,4 @@ void flip_hwc1(const uint8_t* src, uint8_t* dst, int srcw, int srch, FlipParam f
 void flip_hwc3(const uint8_t* src, uint8_t* dst, int srcw, int srch, FlipParam flip_param);
 void flip_hwc4(const uint8_t* src, uint8_t* dst, int srcw, int srch, FlipParam flip_param);
 
-GLUE_END_NAMESPACE
+}

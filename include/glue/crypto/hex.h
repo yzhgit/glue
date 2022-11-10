@@ -5,10 +5,12 @@
 
 #pragma once
 
+#include "glue/base/common.h"
+
 #include <string>
 #include <vector>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /**
  * Perform hex encoding
@@ -17,8 +19,8 @@ GLUE_START_NAMESPACE
  * @param input_length length of input in bytes
  * @param uppercase should output be upper or lower case?
  */
-void hex_encode(char output[], const uint8_t input[], size_t input_length,
-                bool uppercase = true);
+GLUE_API void hex_encode(char output[], const uint8_t input[], size_t input_length,
+                         bool uppercase = true);
 
 /**
  * Perform hex encoding
@@ -27,8 +29,7 @@ void hex_encode(char output[], const uint8_t input[], size_t input_length,
  * @param uppercase should output be upper or lower case?
  * @return hexadecimal representation of input
  */
-std::string hex_encode(const uint8_t input[], size_t input_length,
-                       bool uppercase = true);
+GLUE_API std::string hex_encode(const uint8_t input[], size_t input_length, bool uppercase = true);
 
 /**
  * Perform hex encoding
@@ -37,8 +38,8 @@ std::string hex_encode(const uint8_t input[], size_t input_length,
  * @return hexadecimal representation of input
  */
 template <typename Alloc>
-std::string hex_encode(const std::vector<uint8_t, Alloc> &input,
-                       bool uppercase = true) {
+std::string hex_encode(const std::vector<uint8_t, Alloc>& input, bool uppercase = true)
+{
     return hex_encode(input.data(), input.size(), uppercase);
 }
 
@@ -55,8 +56,8 @@ std::string hex_encode(const std::vector<uint8_t, Alloc> &input,
                 exception if whitespace is encountered
 * @return number of bytes written to output
 */
-size_t hex_decode(uint8_t output[], const char input[], size_t input_length,
-                  size_t &input_consumed, bool ignore_ws = true);
+GLUE_API size_t hex_decode(uint8_t output[], const char input[], size_t input_length,
+                           size_t& input_consumed, bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -67,8 +68,8 @@ size_t hex_decode(uint8_t output[], const char input[], size_t input_length,
                 exception if whitespace is encountered
 * @return number of bytes written to output
 */
-size_t hex_decode(uint8_t output[], const char input[], size_t input_length,
-                  bool ignore_ws = true);
+GLUE_API size_t hex_decode(uint8_t output[], const char input[], size_t input_length,
+                           bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -78,8 +79,7 @@ size_t hex_decode(uint8_t output[], const char input[], size_t input_length,
                 exception if whitespace is encountered
 * @return number of bytes written to output
 */
-size_t hex_decode(uint8_t output[], const std::string &input,
-                  bool ignore_ws = true);
+GLUE_API size_t hex_decode(uint8_t output[], const std::string& input, bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -89,8 +89,8 @@ size_t hex_decode(uint8_t output[], const std::string &input,
                 exception if whitespace is encountered
 * @return decoded hex output
 */
-std::vector<uint8_t> hex_decode(const char input[], size_t input_length,
-                                bool ignore_ws = true);
+GLUE_API std::vector<uint8_t> hex_decode(const char input[], size_t input_length,
+                                         bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -99,8 +99,6 @@ std::vector<uint8_t> hex_decode(const char input[], size_t input_length,
                 exception if whitespace is encountered
 * @return decoded hex output
 */
-std::vector<uint8_t> hex_decode(const std::string &input,
-                                bool ignore_ws = true);
+GLUE_API std::vector<uint8_t> hex_decode(const std::string& input, bool ignore_ws = true);
 
-
-GLUE_END_NAMESPACE
+} // namespace glue

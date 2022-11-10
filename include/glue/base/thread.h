@@ -5,9 +5,13 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+#include <atomic>
+#include <mutex>
+#include <thread>
+
+namespace glue {
 
 /// The Runnable interface with the run() method
 /// must be implemented by classes that provide
@@ -223,4 +227,4 @@ private:
     std::shared_ptr<Runnable> m_pRunnableTarget;
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

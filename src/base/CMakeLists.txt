@@ -7,57 +7,57 @@ set(source
   barrier.cc
   countdown_latch.cc
   exception.cc
+  file_mapping.cc
   file.cc
   fps_counter.cc
   log.cc
-  file_mapping.cc
+  object_pool.cc
   performance_counter.cc
   spin_lock.cc
-  thread.cc
   thread_pool.cc
+  thread.cc
   time.cc
   version.cc
   waitable_event.cc
-  system_stats.cc
 )
 
 set(target base)
 
 add_library(${target} SHARED ${source})
 
-target_precompile_headers(${target}
-  PUBLIC
-    <algorithm>
-    <array>
-    <atomic>
-    <cassert>
-    <cmath>
-    <condition_variable>
-    <cstddef>
-    <ctime>
-    <fstream>
-    <functional>
-    <iomanip>
-    <iostream>
-    <limits>
-    <list>
-    <map>
-    <memory>
-    <mutex>
-    <numeric>
-    <queue>
-    <set>
-    <sstream>
-    <stdarg.h>
-    <stdexcept>
-    <string>
-    <thread>
-    <typeindex>
-    <unordered_map>
-    <unordered_set>
-    <utility>
-    <vector>
-)
+# target_precompile_headers(${target}
+#   PUBLIC
+#     <algorithm>
+#     <array>
+#     <atomic>
+#     <cassert>
+#     <cmath>
+#     <condition_variable>
+#     <cstddef>
+#     <ctime>
+#     <fstream>
+#     <functional>
+#     <iomanip>
+#     <iostream>
+#     <limits>
+#     <list>
+#     <map>
+#     <memory>
+#     <mutex>
+#     <numeric>
+#     <queue>
+#     <set>
+#     <sstream>
+#     <stdarg.h>
+#     <stdexcept>
+#     <string>
+#     <thread>
+#     <typeindex>
+#     <unordered_map>
+#     <unordered_set>
+#     <utility>
+#     <vector>
+# )
 
 set_target_properties(${target} PROPERTIES
     VERSION         "${PROJECT_VERSION}"

@@ -12,6 +12,7 @@
 #include <string.h>
 #include <vector>
 
+namespace glue {
 // Miscellaneous support functions.
 
 // Read little endian values from unaligned storage. GCC optimizes this to
@@ -80,3 +81,5 @@ inline void leput16(void* dest, uint16_t value)
     ((uint8_t*) dest)[0] = value & 0xFF;
     ((uint8_t*) dest)[1] = value >> 8;
 }
+
+} // namespace glue

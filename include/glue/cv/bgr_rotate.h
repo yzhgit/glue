@@ -7,8 +7,8 @@
 
 #include <stdint.h>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 void bgr_rotate_hwc(const uint8_t* src, uint8_t* dst, int w_in, int h_in, int angle);
 
-GLUE_END_NAMESPACE
+}

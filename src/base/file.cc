@@ -5,7 +5,9 @@
 
 #include "glue/base/file.h"
 
-GLUE_START_NAMESPACE
+#include <fstream>
+
+namespace glue {
 
 std::list<std::string> File::readLines(const fs::path& path)
 {
@@ -15,4 +17,4 @@ std::list<std::string> File::readLines(const fs::path& path)
     return lines;
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

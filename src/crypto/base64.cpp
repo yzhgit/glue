@@ -9,7 +9,7 @@
 
 #define NEWLINE_INVL 76
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 // Note: To change the charset to a URL encoding, replace the '+' and '/' with
 // '*' and '-'
@@ -139,4 +139,4 @@ size_t base64_decode(const BYTE in[], BYTE out[], size_t len)
     return (idx);
 }
 
-GLUE_END_NAMESPACE
+}

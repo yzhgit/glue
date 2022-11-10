@@ -5,27 +5,29 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+#include <new>
+
+namespace glue {
 
 #if !(DOXYGEN || GLUE_EXCEPTIONS_DISABLED)
 namespace HeapBlockHelper {
-template <bool shouldThrow>
-struct ThrowOnFail
-{
-    static void checkPointer(void*)
-    {}
-};
-
-template <>
-struct ThrowOnFail<true>
-{
-    static void checkPointer(void* data)
+    template <bool shouldThrow>
+    struct ThrowOnFail
     {
-        if (data == nullptr) throw std::bad_alloc();
-    }
-};
+        static void checkPointer(void*)
+        {}
+    };
+
+    template <>
+    struct ThrowOnFail<true>
+    {
+        static void checkPointer(void* data)
+        {
+            if (data == nullptr) throw std::bad_alloc();
+        }
+    };
 } // namespace HeapBlockHelper
 #endif
 
@@ -382,4 +384,4 @@ private:
 #endif
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

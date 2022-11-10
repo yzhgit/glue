@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
 #include <cstring>
 #include <vector>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 /**
  * Allocate a memory buffer by some method. This should only be used for
@@ -282,4 +282,4 @@ std::vector<uint8_t, Alloc>& operator^=(std::vector<uint8_t, Alloc>& out,
     return out;
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue

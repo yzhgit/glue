@@ -5,9 +5,11 @@
 
 #pragma once
 
-#include "glue/base/standard_header.h"
+#include "glue/base/common.h"
 
-GLUE_START_NAMESPACE
+#include <atomic>
+
+namespace glue {
 
 /**
     A simple spin-lock class that can be used as a simple, low-overhead mutex for
@@ -50,4 +52,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(SpinLock)
 };
 
-GLUE_END_NAMESPACE
+} // namespace glue

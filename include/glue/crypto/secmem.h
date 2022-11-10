@@ -7,12 +7,9 @@
 
 #include "glue/crypto/mem_ops.h"
 
-#include <algorithm>
-#include <deque>
-#include <type_traits>
 #include <vector>
 
-GLUE_START_NAMESPACE
+namespace glue {
 
 template <typename T, typename Alloc>
 size_t buffer_insert(std::vector<T, Alloc>& buf, size_t buf_offset, const T input[],
@@ -56,4 +53,4 @@ void zap(std::vector<T, Alloc>& vec)
     vec.shrink_to_fit();
 }
 
-GLUE_END_NAMESPACE
+} // namespace glue
