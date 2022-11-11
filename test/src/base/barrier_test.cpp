@@ -20,18 +20,13 @@ namespace test {
     TEST_CASE("Barrier SanityTest")
     {
         constexpr int kNumThreads = 10;
-        Barrier* barrier = new Barrier(kNumThreads);
+        Barrier barrier(kNumThreads);
 
         Mutex mutex;
         int counter = 0; // Guarded by mutex.
 
         auto thread_func = [&] {
-            if (barrier->block())
-            {
-                // This thread is the last thread to reach the barrier so it is
-                // responsible for deleting it.
-                delete barrier;
-            }
+            barrier.wait();
 
             // Increment the counter.
             ScopedLock<Mutex> lock(mutex);

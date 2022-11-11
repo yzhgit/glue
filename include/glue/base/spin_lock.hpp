@@ -47,7 +47,7 @@ public:
     void unlock() noexcept;
 
 private:
-    mutable std::atomic<bool> m_flag{false};
+    std::atomic<bool> m_flag{false};
 
     GLUE_DECLARE_NON_COPYABLE(SpinLock)
 };
