@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "glue/base/traits/bool_constant.hpp"
+#include <type_traits>
 
 namespace glue {
 
@@ -15,7 +15,7 @@ namespace glue {
 ///
 /// \tparam B the constant
 template <typename B>
-struct negation : bool_constant<!bool(B::value)>
+struct negation : std::bool_constant<!bool(B::value)>
 {
 };
 

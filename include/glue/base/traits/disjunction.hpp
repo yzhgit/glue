@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "glue/base/traits/bool_constant.hpp"
+#include <type_traits>
 
 namespace glue {
 

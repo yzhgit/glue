@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "glue/base/traits/bool_constant.hpp"
 #include "glue/base/traits/conjunction.hpp"
 #include "glue/base/traits/void_t.hpp"
 
+#include <type_traits>
 #include <cstddef>  // std::size_t
 #include <iterator> // std::iterator_traits
 
@@ -274,7 +274,7 @@ namespace detail {
     template <typename T>
     struct is_nothrow_hashable_impl<
         T, void_t<decltype(std::declval<glue::hash_t&>() = hash_value(std::declval<T>()))>>
-        : bool_constant<noexcept(std::declval<glue::hash_t&>() = hash_value(std::declval<T>()))>
+        : std::bool_constant<noexcept(std::declval<glue::hash_t&>() = hash_value(std::declval<T>()))>
     {
     };
 
