@@ -9,7 +9,6 @@
 #include "glue/base/invoke.hpp"   // invoke, invoke_result_t
 #include "glue/base/tribool.hpp"  // tribools
 
-#include "glue/base/traits/bool_constant.hpp"
 #include "glue/base/traits/conjunction.hpp"
 #include "glue/base/traits/empty.hpp"
 #include "glue/base/traits/sfinae.hpp"

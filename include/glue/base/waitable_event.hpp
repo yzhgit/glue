@@ -49,7 +49,7 @@ public:
     void reset();
 
 private:
-    static inline bool hasBeenNotifiedInternal(const std::atomic<bool>* notified_yet)
+    static inline bool hasBeenNotifiedInternal(std::atomic<bool>* notified_yet)
     {
         return notified_yet->load(std::memory_order_acquire);
     }

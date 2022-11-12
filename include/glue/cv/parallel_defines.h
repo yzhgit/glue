@@ -22,7 +22,7 @@
     #define LITE_PARALLEL_END()                                                                    \
         }                                                                                          \
         ;                                                                                          \
-        paddle::lite::ThreadPool::Enqueue(std::move(task));                                        \
+        glue::ThreadPool::Enqueue(std::move(task));                                        \
         }
 
     /* support common for loop
@@ -38,7 +38,7 @@
     #define LITE_PARALLEL_COMMON_END()                                                             \
         }                                                                                          \
         ;                                                                                          \
-        paddle::lite::ThreadPool::Enqueue(std::move(task));                                        \
+        glue::ThreadPool::Enqueue(std::move(task));                                        \
         }
 
 #elif defined(ARM_WITH_OMP)

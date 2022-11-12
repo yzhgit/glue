@@ -12,7 +12,7 @@ namespace glue {
 WaitableEvent::WaitableEvent() : m_notified(false)
 {}
 
-void WaitableEvent::wait() const
+void WaitableEvent::wait()
 {
     if (!hasBeenNotifiedInternal(&m_notified))
     {
@@ -21,7 +21,7 @@ void WaitableEvent::wait() const
     }
 }
 
-bool WaitableEvent::wait(int64 milliseconds) const
+bool WaitableEvent::wait(int64 milliseconds)
 {
     bool notified = hasBeenNotifiedInternal(&m_notified);
     if (!notified)
@@ -47,4 +47,4 @@ void WaitableEvent::reset()
     m_notified = false;
 }
 
-}
+} // namespace glue
