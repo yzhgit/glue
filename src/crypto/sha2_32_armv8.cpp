@@ -4,7 +4,7 @@
 //
 
 #if defined(GL_HAS_SHA2_32_ARMV8)
-    #include "glue/compiler.hpp"
+    #include "glue/base/compiler.h"
     #include <arm_neon.h>
 
 namespace glue {

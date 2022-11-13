@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/expected.hpp"
+#include "glue/base/expected.h"
 
 #include <catch2/catch.hpp>
 

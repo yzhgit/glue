@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "glue/base/common.hpp"
+#include "glue/base/common.h"
 
 #include <cstring>
 #include <vector>

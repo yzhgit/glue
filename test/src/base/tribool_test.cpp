@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/tribool.hpp"
+#include "glue/base/tribool.h"
 
 #include <catch2/catch.hpp>
 

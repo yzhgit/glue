@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/optional.hpp"
+#include "glue/base/optional.h"
 
 #include <catch2/catch.hpp>
 

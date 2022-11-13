@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "glue/base/common.hpp"
+#include "glue/base/common.h"
 
 #define AES_BLOCK_SIZE 16 // AES operates on 16 bytes at a time
 

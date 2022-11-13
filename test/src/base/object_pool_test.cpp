@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/object_pool.hpp"
+#include "glue/base/object_pool.h"
 
 #include <catch2/catch.hpp>
 

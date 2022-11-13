@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/base/barrier.hpp"
+#include "glue/base/barrier.h"
 
 #include <catch2/catch.hpp>
 
@@ -11,8 +11,8 @@
 #include <thread>
 #include <vector>
 
-#include "glue/base/mutex.hpp"
-#include "glue/base/scoped_lock.hpp"
+#include "glue/base/mutex.h"
+#include "glue/base/scoped_lock.h"
 
 namespace glue {
 namespace test {
