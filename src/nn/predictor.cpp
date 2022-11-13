@@ -3,31 +3,17 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include <algorithm>
-#include <array>
-#include <chrono>
-#include <cmath>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <string>
-#include <vector>
-
 #include "glue/nn/predictor.h"
 
-#ifdef INFERENCE_HELPER_ENABLE_TENSORRT
+#ifdef GLUE_USE_TENSORRT
     #include "glue/nn/predictor_tensorrt.h"
 #endif
 
-#ifdef INFERENCE_HELPER_ENABLE_NCNN
+#ifdef GLUE_USE_NCNN
     #include "glue/nn/predictor_ncnn.h"
 #endif
 
-#ifdef INFERENCE_HELPER_ENABLE_MNN
-    #include "glue/nn/inference_helper_mnn.h"
-#endif
-
-#ifdef INFERENCE_HELPER_ENABLE_SNPE
+#ifdef GLUE_USE_SNPE
     #include "glue/nn/predictor_snpe.h"
 #endif
 
@@ -41,26 +27,26 @@ namespace glue {
 Predictor *Predictor::Create(const Predictor::PredictorType type) {
     Predictor *p = nullptr;
     switch (type) {
-#ifdef INFERENCE_HELPER_ENABLE_TENSORRT
+#ifdef GLUE_USE_TENSORRT
     case kTensorrt:
         PRINT("Use TensorRT \n");
         p = new PredictorTensorRt();
         break;
 #endif
-#ifdef INFERENCE_HELPER_ENABLE_NCNN
+#ifdef GLUE_USE_NCNN
     case kNcnn:
     case kNcnnVulkan:
         PRINT("Use NCNN\n");
         p = new PredictorNcnn();
         break;
 #endif
-#ifdef INFERENCE_HELPER_ENABLE_MNN
+#ifdef GLUE_USE_MNN
     case kMnn:
         PRINT("Use MNN\n");
         p = new InferenceHelperMnn();
         break;
 #endif
-#ifdef INFERENCE_HELPER_ENABLE_SNPE
+#ifdef GLUE_USE_SNPE
     case kSnpe:
         PRINT("Use SNPE\n");
         p = new PredictorSnpe();
