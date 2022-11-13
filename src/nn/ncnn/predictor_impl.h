@@ -5,37 +5,30 @@
 
 #pragma once
 
-#include <array>
-#include <cmath>
-#include <cstdint>
-#include <memory>
-#include <string>
-#include <vector>
+#include "glue/nn/predictor.h"
 
 #include "net.h"
 
-#include "glue/nn/predictor.h"
-
 namespace glue {
 
-class PredictorNcnn : public Predictor
+class PredictorImpl : public Predictor
 {
 public:
-    PredictorNcnn();
-    ~PredictorNcnn() override;
-    int32_t SetNumThreads(const int32_t num_threads) override;
-    int32_t Initialize(const std::string& model_filename,
-                       std::vector<InputTensorInfo>& input_tensor_info_list,
-                       std::vector<OutputTensorInfo>& output_tensor_info_list) override;
-    int32_t Finalize(void) override;
-    int32_t PreProcess(const std::vector<InputTensorInfo>& input_tensor_info_list) override;
-    int32_t Process(std::vector<OutputTensorInfo>& output_tensor_info_list) override;
+    PredictorImpl();
+    ~PredictorImpl();
+    int SetNumThreads(int num_threads);
+    int Initialize(const std::string& model_filename,
+                   std::vector<TensorInfo>& input_tensor_info_list,
+                   std::vector<TensorInfo>& output_tensor_info_list);
+    int Finalize(void);
+    int PreProcess(const std::vector<TensorInfo>& input_tensor_info_list);
+    int Process(std::vector<TensorInfo>& output_tensor_info_list);
 
 private:
+    int num_threads_;
     std::unique_ptr<ncnn::Net> net_;
-    std::vector<std::pair<std::string, ncnn::Mat>> in_mat_list_; // <name, mat>
+    std::vector<std::pair<std::string, ncnn::Mat>> in_mat_list_;
     std::vector<ncnn::Mat> out_mat_list_;
-    int32_t num_threads_;
 };
 
 } // namespace glue

@@ -5,14 +5,6 @@
 
 #pragma once
 
-#include <array>
-#include <cmath>
-#include <cstdint>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
-
 #include "glue/nn/predictor.h"
 
 namespace zdl {
@@ -35,7 +27,7 @@ namespace DlSystem {
 
 namespace glue {
 
-class PredictorSnpe : public Predictor
+class PredictorImpl : public Predictor
 {
 private:
     enum
@@ -53,27 +45,27 @@ private:
     };
 
 public:
-    PredictorSnpe();
-    ~PredictorSnpe() override;
-    int32_t SetNumThreads(const int32_t num_threads) override;
-    int32_t Initialize(const std::string& model_filename,
-                       std::vector<InputTensorInfo>& input_tensor_info_list,
-                       std::vector<OutputTensorInfo>& output_tensor_info_list) override;
-    int32_t Finalize(void) override;
-    int32_t PreProcess(const std::vector<InputTensorInfo>& input_tensor_info_list) override;
-    int32_t Process(std::vector<OutputTensorInfo>& output_tensor_info_list) override;
+    PredictorImpl();
+    ~PredictorImpl();
+    int SetNumThreads(int num_threads);
+    int Initialize(const std::string& model_filename,
+                   std::vector<TensorInfo>& input_tensor_info_list,
+                   std::vector<TensorInfo>& output_tensor_info_list);
+    int Finalize(void);
+    int PreProcess(const std::vector<TensorInfo>& input_tensor_info_list);
+    int Process(std::vector<TensorInfo>& output_tensor_info_list);
 
 private:
     std::unique_ptr<zdl::SNPE::SNPE> CreateSnpe(const std::string& model_filename,
                                                 bool use_user_supplied_buffers);
-    int32_t GetTensorInfo(std::unique_ptr<zdl::SNPE::SNPE> const& snpe, const std::string& name,
-                          std::vector<int32_t>& dims);
-    int32_t GetAllTensorInfo(std::unique_ptr<zdl::SNPE::SNPE> const& snpe,
-                             std::vector<InputTensorInfo>& input_tensor_info_list,
-                             std::vector<OutputTensorInfo>& output_tensor_info_list);
+    int GetTensorInfo(std::unique_ptr<zdl::SNPE::SNPE> const& snpe, const std::string& name,
+                      std::vector<int>& dims);
+    int GetAllTensorInfo(std::unique_ptr<zdl::SNPE::SNPE> const& snpe,
+                         std::vector<TensorInfo>& input_tensor_info_list,
+                         std::vector<TensorInfo>& output_tensor_info_list);
 
 private:
-    int32_t num_threads_;
+    int num_threads_;
     std::unique_ptr<zdl::SNPE::SNPE> snpe_;
     std::unique_ptr<zdl::DlSystem::UserBufferMap> input_map_;
     std::unique_ptr<zdl::DlSystem::UserBufferMap> output_map_;

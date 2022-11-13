@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#include "glue/nn/tensor.h"
+
 namespace glue {
 
 class PredictorImpl;
@@ -19,24 +21,13 @@ class Predictor
 public:
     Predictor();
     ~Predictor();
-    int32_t SetNumThreads(const int32_t num_threads);
-    int32_t Initialize(const std::string& model_filename,
-                       std::vector<InputTensorInfo>& input_tensor_info_list,
-                       std::vector<OutputTensorInfo>& output_tensor_info_list);
-    int32_t Finalize(void);
-    int32_t PreProcess(const std::vector<InputTensorInfo>& input_tensor_info_list);
-    int32_t Process(std::vector<OutputTensorInfo>& output_tensor_info_list);
-
-protected:
-    void ConvertNormalizeParameters(InputTensorInfo& tensor_info);
-
-    void PreProcessImage(int32_t num_thread, const InputTensorInfo& input_tensor_info, float* dst);
-    void PreProcessImage(int32_t num_thread, const InputTensorInfo& input_tensor_info,
-                         uint8_t* dst);
-    void PreProcessImage(int32_t num_thread, const InputTensorInfo& input_tensor_info, int8_t* dst);
-
-    template <typename T>
-    void PreProcessBlob(int32_t num_thread, const InputTensorInfo& input_tensor_info, T* dst);
+    int SetNumThreads(int num_threads);
+    int Initialize(const std::string& model_filename,
+                   std::vector<TensorInfo>& input_tensor_info_list,
+                   std::vector<TensorInfo>& output_tensor_info_list);
+    int Finalize(void);
+    int PreProcess(const std::vector<TensorInfo>& input_tensor_info_list);
+    int Process(std::vector<TensorInfo>& output_tensor_info_list);
 
 private:
     std::unique_ptr<PredictorImpl> m_impl;

@@ -20,6 +20,8 @@ add_library(glue::nn ALIAS ${target})
 target_include_directories(${target}
   PUBLIC
     ${PROJECT_SOURCE_DIR}/include
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 set_target_properties(${target} PROPERTIES
