@@ -12,6 +12,20 @@ set(source
   tensor.cpp
 )
 
+if(GLUE_USE_NCNN)
+  set(source ${source}
+    ncnn/predictor_impl.cpp
+  )
+elseif(GLUE_USE_SNPE)
+  set(source ${source}
+    snpe/predictor_impl.cpp
+  )
+elseif(GLUE_USE_TENSORRT)
+  set(source ${source}
+    tensorrt/predictor_impl.cpp
+  )
+endif()
+
 set(target nn)
 
 add_library(${target} SHARED ${source})
@@ -23,6 +37,23 @@ target_include_directories(${target}
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+if(GLUE_USE_NCNN)
+  target_compile_definitions(${target}
+    PRIVATE
+      GLUE_USE_NCNN
+  )
+elseif(GLUE_USE_SNPE)
+  target_compile_definitions(${target}
+    PRIVATE
+    GLUE_USE_SNPE
+  )
+elseif(GLUE_USE_TENSORRT)
+  target_compile_definitions(${target}
+    PRIVATE
+    GLUE_USE_TENSORRT
+  )
+endif()
 
 set_target_properties(${target} PROPERTIES
     VERSION         "${PROJECT_VERSION}"

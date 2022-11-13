@@ -25,7 +25,7 @@ public:
                    std::vector<TensorInfo>& input_tensor_info_list,
                    std::vector<TensorInfo>& output_tensor_info_list);
     int Finalize(void);
-    int PreProcess(std::vector<TensorInfo>& input_tensor_info_list);
+    int PreProcess(const std::vector<TensorInfo>& input_tensor_info_list);
     int Process(std::vector<TensorInfo>& output_tensor_info_list);
     void SetDlaCore(int dla_core)
     {
