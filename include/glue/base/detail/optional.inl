@@ -314,9 +314,7 @@ inline constexpr bool glue::optional<T>::has_value() const noexcept
 template <typename T>
 inline constexpr typename glue::optional<T>::value_type* glue::optional<T>::operator->() noexcept
 {
-    // GLUE_ASSERT(has_value(), "optional must be engaged!");
-
-    GLUE_ASSERT(has_value());
+    GLUE_ASSERT_MSG(has_value(), "optional must be engaged!");
 
     return base_type::val();
 }
@@ -325,8 +323,7 @@ template <typename T>
 inline constexpr const typename glue::optional<T>::value_type*
 glue::optional<T>::operator->() const noexcept
 {
-    // GLUE_ASSERT(has_value(), "optional must be engaged!");
-    GLUE_ASSERT(has_value());
+    GLUE_ASSERT_MSG(has_value(), "optional must be engaged!");
 
     return base_type::val();
 }
@@ -336,8 +333,7 @@ glue::optional<T>::operator->() const noexcept
 template <typename T>
 inline constexpr typename glue::optional<T>::value_type& glue::optional<T>::operator*() & noexcept
 {
-    // GLUE_ASSERT(has_value(), "optional must be engaged!");
-    GLUE_ASSERT(has_value());
+    GLUE_ASSERT_MSG(has_value(), "optional must be engaged!");
 
     return *base_type::val();
 }
@@ -345,8 +341,7 @@ inline constexpr typename glue::optional<T>::value_type& glue::optional<T>::oper
 template <typename T>
 inline constexpr typename glue::optional<T>::value_type&& glue::optional<T>::operator*() && noexcept
 {
-    // GLUE_ASSERT(has_value(), "optional must be engaged!");
-    GLUE_ASSERT(has_value());
+    GLUE_ASSERT_MSG(has_value(), "optional must be engaged!");
 
     return std::move(*base_type::val());
 }
@@ -357,8 +352,7 @@ template <typename T>
 inline constexpr const typename glue::optional<T>::value_type&
 glue::optional<T>::operator*() const& noexcept
 {
-    // GLUE_ASSERT(has_value(), "optional must be engaged!");
-    GLUE_ASSERT(has_value());
+    GLUE_ASSERT_MSG(has_value(), "optional must be engaged!");
 
     return *base_type::val();
 }
@@ -367,8 +361,7 @@ template <typename T>
 inline constexpr const typename glue::optional<T>::value_type&&
 glue::optional<T>::operator*() const&& noexcept
 {
-    // GLUE_ASSERT(has_value(), "optional must be engaged!");
-    GLUE_ASSERT(has_value());
+    GLUE_ASSERT_MSG(has_value(), "optional must be engaged!");
 
     return std::move(*base_type::val());
 }

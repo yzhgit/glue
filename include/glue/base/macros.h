@@ -64,3 +64,10 @@ private:                                                                        
     #define GLUE_ASSERT(expr)                                                                      \
         (GLUE_LIKELY((expr)) ? static_cast<void>(0) : [] { assert(false && #expr); }())
 #endif
+
+#define GLUE_ASSERT_MSG(expr, msg) GLUE_ASSERT(expr)
+
+// Utility function to selectively silence unused variable compiler warnings
+template <typename... Ts>
+inline void IgnoreUnused(Ts&&...)
+{}

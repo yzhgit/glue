@@ -926,7 +926,7 @@ inline constexpr glue::unexpected_type<E>& glue::expected<T, E>::get_unexpected(
 #ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
-    GLUE_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT_MSG(has_error(), "expected must have error");
 #endif
 
     return base_type::get_unexpected();
@@ -938,7 +938,7 @@ inline constexpr glue::unexpected_type<E>&& glue::expected<T, E>::get_unexpected
 #ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
-    GLUE_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT_MSG(has_error(), "expected must have error");
 #endif
 
     return std::move(base_type::get_unexpected());
@@ -950,7 +950,7 @@ inline constexpr const glue::unexpected_type<E>& glue::expected<T, E>::get_unexp
 #ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
-    GLUE_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT_MSG(has_error(), "expected must have error");
 #endif
 
     return base_type::get_unexpected();
@@ -962,7 +962,7 @@ inline constexpr const glue::unexpected_type<E>&& glue::expected<T, E>::get_unex
 #ifndef GLUE_NO_EXCEPTIONS
     if (!has_error()) { throw bad_expected_access<void>(); }
 #else
-    GLUE_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT_MSG(has_error(), "expected must have error");
 #endif
 
     return std::move(base_type::get_unexpected());
@@ -983,7 +983,7 @@ glue::invoke_result_t<Fn, const T&> glue::expected<T, E>::flat_map(Fn&& fn) cons
 #ifndef GLUE_NO_EXCEPTIONS
     throw bad_expected_access<void>{};
 #else
-    GLUE_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT_MSG(has_error(), "expected must have error");
 #endif
 }
 
@@ -998,7 +998,7 @@ glue::expected<glue::invoke_result_t<Fn, const T&>, E> glue::expected<T, E>::map
 #ifndef GLUE_NO_EXCEPTIONS
     throw bad_expected_access<void>{};
 #else
-    GLUE_ASSERT(has_error(), "expected must have error");
+    GLUE_ASSERT_MSG(has_error(), "expected must have error");
 #endif
 }
 

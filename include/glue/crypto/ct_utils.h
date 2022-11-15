@@ -42,7 +42,7 @@ namespace CT {
 #if defined(GLUE_HAS_VALGRIND)
         VALGRIND_MAKE_MEM_UNDEFINED(p, n * sizeof(T));
 #else
-        GLUE_UNUSED_VAR(p, n);
+        IgnoreUnused(p, n);
 #endif
     }
 
@@ -52,7 +52,7 @@ namespace CT {
 #if defined(GLUE_HAS_VALGRIND)
         VALGRIND_MAKE_MEM_DEFINED(p, n * sizeof(T));
 #else
-        GLUE_UNUSED_VAR(p, n);
+        IgnoreUnused(p, n);
 #endif
     }
 
@@ -62,7 +62,7 @@ namespace CT {
 #if defined(GLUE_HAS_VALGRIND)
         VALGRIND_MAKE_MEM_DEFINED(&p, sizeof(T));
 #else
-        GLUE_UNUSED_VAR(p);
+        IgnoreUnused(p);
 #endif
     }
 
