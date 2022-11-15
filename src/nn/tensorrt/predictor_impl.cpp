@@ -3,62 +3,23 @@
 // SPDX-License-Identifier: MIT
 //
 
-/* for TensorRT */
 #include "tensorrt/common.h"
 #include <NvInfer.h>
 #include <NvOnnxParser.h>
 #include <cuda_runtime_api.h>
 
-/* for My modules */
 #include "tensorrt/predictor_impl.h"
 
-/*** Macro ***/
-#define TAG "PredictorImpl"
-#define PRINT(...) INFERENCE_HELPER_LOG_PRINT(TAG, __VA_ARGS__)
-#define PRINT_E(...) INFERENCE_HELPER_LOG_PRINT_E(TAG, __VA_ARGS__)
-
-/* Setting */
 #define USE_FP16
-// #define USE_INT8_WITHOUT_CALIBRATION
-// #define USE_INT8_WITH_CALIBRATION
 
 #define OPT_MAX_WORK_SPACE_SIZE ((size_t) 1 << 30)
-#define OPT_AVG_TIMING_ITERATIONS 1
-#define OPT_MIN_TIMING_ITERATIONS 1
-
-#ifdef USE_INT8_WITH_CALIBRATION
-    /* ★ Modify the following (use the same parameter as the model. Also, ppm
-     * must be the same size but not normalized.) */
-    #define CAL_DIR                                                                                \
-        "../../Predictor/inference_helper/tensorrt/calibration/"                                   \
-        "sample_ppm"
-    #define CAL_LIST_FILE "list.txt"
-    #define CAL_BATCH_SIZE 10
-    #define CAL_NB_BATCHES 2
-    #define CAL_IMAGE_C 3
-    #define CAL_IMAGE_H 224
-    #define CAL_IMAGE_W 224
-    /* 0 ~ 1.0 */
-    // #define CAL_SCALE      (1.0 / 255.0)
-    // #define CAL_BIAS       (0.0)
-    /* -2.25 ~ 2.25 */
-    #define CAL_SCALE (1.0 / (255.0 * 0.225))
-    #define CAL_BIAS (0.45 / 0.225)
-
-    /* include BatchStream.h after defining parameters */
-    #include "tensorrt/BatchStream.h"
-    #include "tensorrt/EntropyCalibrator.h"
-#endif
 
 namespace glue {
 
 PredictorImpl::~PredictorImpl() = default;
 
-PredictorImpl::PredictorImpl()
-{
-    num_threads_ = 1;
-    dla_core_ = -1;
-}
+PredictorImpl::PredictorImpl() : num_threads_(1), dla_core_(-1)
+{}
 
 int PredictorImpl::SetNumThreads(int num_threads)
 {
@@ -70,10 +31,9 @@ int PredictorImpl::Initialize(const std::string& model_filename,
                               std::vector<TensorInfo>& input_tensor_info_list,
                               std::vector<TensorInfo>& output_tensor_info_list)
 {
-    /*** check model format ***/
     bool is_trt_model = false;
     bool is_onnx_model = false;
-    // bool isUffModel = false;	// todo
+
     std::string trt_model_filename = std::string(model_filename);
     if (model_filename.find(".onnx") != std::string::npos)
     {
@@ -90,7 +50,7 @@ int PredictorImpl::Initialize(const std::string& model_filename,
     else if (trt_model_filename.find(".trt") != std::string::npos) { is_trt_model = true; }
     else
     {
-        PRINT_E("unsupoprted file format (%s)\n", model_filename.c_str());
+        printf("unsupoprted file format (%s)\n", model_filename.c_str());
         return kRetErr;
     }
 
@@ -100,7 +60,7 @@ int PredictorImpl::Initialize(const std::string& model_filename,
         nvinfer1::createInferRuntime(sample::gLogger.getTRTLogger()));
     if (!runtime_)
     {
-        PRINT_E("Failed to create runtime (%s)\n", model_filename.c_str());
+        printf("Failed to create runtime (%s)\n", model_filename.c_str());
         return kRetErr;
     }
 
@@ -122,7 +82,7 @@ int PredictorImpl::Initialize(const std::string& model_filename,
         stream.close();
         if (!engine_)
         {
-            PRINT_E("Failed to create engine (%s)\n", trt_model_filename.c_str());
+            printf("Failed to create engine (%s)\n", trt_model_filename.c_str());
             return kRetErr;
         }
     }
@@ -142,36 +102,22 @@ int PredictorImpl::Initialize(const std::string& model_filename,
         if (!parser->parseFromFile(model_filename.c_str(),
                                    (int) nvinfer1::ILogger::Severity::kWARNING))
         {
-            PRINT_E("Failed to parse onnx file (%s)", model_filename.c_str());
+            printf("Failed to parse onnx file (%s)", model_filename.c_str());
             return kRetErr;
         }
 
-        // builder->setMaxBatchSize(1);
         config->setMaxWorkspaceSize(OPT_MAX_WORK_SPACE_SIZE);
-        // config->setAvgTimingIterations(OPT_AVG_TIMING_ITERATIONS);
-        // config->setMinTimingIterations(OPT_MIN_TIMING_ITERATIONS);
 
 #if defined(USE_FP16)
         config->setFlag(nvinfer1::BuilderFlag::kFP16);
-#elif defined(USE_INT8_WITHOUT_CALIBRATION)
+#else
         config->setFlag(nvinfer1::BuilderFlag::kINT8);
         samplesCommon::setAllDynamicRanges(network.get(), 2.5f, 2.5f);
-#elif defined(USE_INT8_WITH_CALIBRATION)
-        config->setFlag(nvinfer1::BuilderFlag::kINT8);
-        std::vector<std::string> data_dirs;
-        data_dirs.push_back(CAL_DIR);
-        nvinfer1::Dims4 image_dims{CAL_BATCH_SIZE, CAL_IMAGE_C, CAL_IMAGE_H, CAL_IMAGE_W};
-        BatchStream calibration_stream(CAL_BATCH_SIZE, CAL_NB_BATCHES, image_dims, CAL_LIST_FILE,
-                                       data_dirs);
-        auto calibrator =
-            std::unique_ptr<nvinfer1::IInt8Calibrator>(new Int8EntropyCalibrator2<BatchStream>(
-                calibration_stream, 0, "_cal.txt", input_tensor_info_list[0].name.c_str()));
-        config->setInt8Calibrator(calibrator.get());
 #endif
 
         if (dla_core_ >= 0)
         {
-            PRINT("Use DLA: %d\n", dla_core_);
+            printf("Use DLA: %d\n", dla_core_);
             samplesCommon::enableDLA(builder.get(), config.get(), dla_core_);
         }
 
@@ -179,7 +125,7 @@ int PredictorImpl::Initialize(const std::string& model_filename,
             builder->buildSerializedNetwork(*network, *config));
         if (!plan)
         {
-            PRINT_E("Failed to create plan (%s)\n", model_filename.c_str());
+            printf("Failed to create plan (%s)\n", model_filename.c_str());
             return kRetErr;
         }
 
@@ -187,7 +133,7 @@ int PredictorImpl::Initialize(const std::string& model_filename,
             runtime_->deserializeCudaEngine(plan->data(), plan->size()));
         if (!engine_)
         {
-            PRINT_E("Failed to create engine (%s)\n", model_filename.c_str());
+            printf("Failed to create engine (%s)\n", model_filename.c_str());
             return kRetErr;
         }
 
@@ -200,7 +146,7 @@ int PredictorImpl::Initialize(const std::string& model_filename,
     context_ = std::unique_ptr<nvinfer1::IExecutionContext>(engine_->createExecutionContext());
     if (!context_)
     {
-        PRINT_E("Failed to create context (%s)\n", model_filename.c_str());
+        printf("Failed to create context (%s)\n", model_filename.c_str());
         return kRetErr;
     }
 
@@ -222,8 +168,8 @@ int PredictorImpl::Initialize(const std::string& model_filename,
     {
         if (input_tensor_info.id == -1)
         {
-            PRINT_E("Input tensor doesn't exist in the model (%s)\n",
-                    input_tensor_info.name.c_str());
+            printf("Input tensor doesn't exist in the model (%s)\n",
+                   input_tensor_info.name.c_str());
             return kRetErr;
         }
     }
@@ -231,8 +177,8 @@ int PredictorImpl::Initialize(const std::string& model_filename,
     {
         if (output_tensor_info.id == -1)
         {
-            PRINT_E("Output tensor doesn't exist in the model (%s)\n",
-                    output_tensor_info.name.c_str());
+            printf("Output tensor doesn't exist in the model (%s)\n",
+                   output_tensor_info.name.c_str());
             return kRetErr;
         }
     }
@@ -284,18 +230,18 @@ int PredictorImpl::PreProcess(const std::vector<TensorInfo>& input_tensor_info_l
             if ((input_tensor_info.image_info.width != input_tensor_info.image_info.crop_width) ||
                 (input_tensor_info.image_info.height != input_tensor_info.image_info.crop_height))
             {
-                PRINT_E("Crop is not supported\n");
+                printf("Crop is not supported\n");
                 return kRetErr;
             }
             if ((input_tensor_info.image_info.crop_width != img_width) ||
                 (input_tensor_info.image_info.crop_height != img_height))
             {
-                PRINT_E("Resize is not supported\n");
+                printf("Resize is not supported\n");
                 return kRetErr;
             }
             if (input_tensor_info.image_info.channel != img_channel)
             {
-                PRINT_E("Color conversion is not supported\n");
+                printf("Color conversion is not supported\n");
                 return kRetErr;
             }
 
@@ -317,7 +263,7 @@ int PredictorImpl::PreProcess(const std::vector<TensorInfo>& input_tensor_info_l
             }
             else
             {
-                PRINT_E("Unsupported tensor_type (%d)\n", input_tensor_info.tensor_type);
+                printf("Unsupported tensor_type (%d)\n", input_tensor_info.tensor_type);
                 return kRetErr;
             }
         }
@@ -342,13 +288,13 @@ int PredictorImpl::PreProcess(const std::vector<TensorInfo>& input_tensor_info_l
             }
             else
             {
-                PRINT_E("Unsupported tensor_type (%d)\n", input_tensor_info.tensor_type);
+                printf("Unsupported tensor_type (%d)\n", input_tensor_info.tensor_type);
                 return kRetErr;
             }
         }
         else
         {
-            PRINT_E("Unsupported data_type (%d)\n", input_tensor_info.data_type);
+            printf("Unsupported data_type (%d)\n", input_tensor_info.data_type);
             return kRetErr;
         }
     }
@@ -391,21 +337,21 @@ int PredictorImpl::AllocateBuffers(std::vector<TensorInfo>& input_tensor_info_li
                                    std::vector<TensorInfo>& output_tensor_info_list)
 {
     int32_t num_of_in_out = engine_->getNbBindings();
-    PRINT("num_of_in_out = %d\n", num_of_in_out);
+    printf("num_of_in_out = %d\n", num_of_in_out);
 
     for (int32_t i = 0; i < num_of_in_out; i++)
     {
-        PRINT("tensor[%d]->name: %s\n", i, engine_->getBindingName(i));
-        PRINT("  is input = %d\n", engine_->bindingIsInput(i));
+        printf("tensor[%d]->name: %s\n", i, engine_->getBindingName(i));
+        printf("  is input = %d\n", engine_->bindingIsInput(i));
         int32_t data_size = 1;
         const auto dims = engine_->getBindingDimensions(i);
         for (int32_t i = 0; i < dims.nbDims; i++)
         {
-            PRINT("  dims.d[%d] = %d\n", i, dims.d[i]);
+            printf("  dims.d[%d] = %d\n", i, dims.d[i]);
             data_size *= dims.d[i];
         }
         const auto data_type = engine_->getBindingDataType(i);
-        PRINT("  data_type = %d\n", static_cast<int32_t>(data_type));
+        printf("  data_type = %d\n", static_cast<int32_t>(data_type));
 
         void* buffer_cpu = nullptr;
         void* buffer_gpu = nullptr;
@@ -428,7 +374,7 @@ int PredictorImpl::AllocateBuffers(std::vector<TensorInfo>& input_tensor_info_li
             buffer_list_gpu_.push_back(buffer_gpu);
             break;
         default:
-            PRINT_E("Unsupported datatype (%d)\n", static_cast<int32_t>(data_type));
+            printf("Unsupported datatype (%d)\n", static_cast<int32_t>(data_type));
             return kRetErr;
         }
 
@@ -455,14 +401,14 @@ int PredictorImpl::AllocateBuffers(std::vector<TensorInfo>& input_tensor_info_li
                         if (static_cast<int32_t>(input_tensor_info.tensor_dims.size()) !=
                             dims.nbDims)
                         {
-                            PRINT_E("Input Tensor dims doesn't match\n");
+                            printf("Input Tensor dims doesn't match\n");
                             return kRetErr;
                         }
                         for (int32_t i = 0; i < dims.nbDims; i++)
                         {
                             if (input_tensor_info.tensor_dims[i] != dims.d[i])
                             {
-                                PRINT_E("Input Tensor size doesn't match\n");
+                                printf("Input Tensor size doesn't match\n");
                                 return kRetErr;
                             }
                         }
@@ -478,7 +424,7 @@ int PredictorImpl::AllocateBuffers(std::vector<TensorInfo>& input_tensor_info_li
                     }
                     else
                     {
-                        PRINT_E("Input Tensor type doesn't match\n");
+                        printf("Input Tensor type doesn't match\n");
                         return kRetErr;
                     }
                 }
@@ -507,14 +453,14 @@ int PredictorImpl::AllocateBuffers(std::vector<TensorInfo>& input_tensor_info_li
                         if (static_cast<int32_t>(output_tensor_info.tensor_dims.size()) !=
                             dims.nbDims)
                         {
-                            PRINT_E("Output Tensor dims doesn't match\n");
+                            printf("Output Tensor dims doesn't match\n");
                             return kRetErr;
                         }
                         for (int32_t i = 0; i < dims.nbDims; i++)
                         {
                             if (output_tensor_info.tensor_dims[i] != dims.d[i])
                             {
-                                PRINT_E("Output Tensor size doesn't match\n");
+                                printf("Output Tensor size doesn't match\n");
                                 return kRetErr;
                             }
                         }
@@ -531,7 +477,7 @@ int PredictorImpl::AllocateBuffers(std::vector<TensorInfo>& input_tensor_info_li
                     }
                     else
                     {
-                        PRINT_E("Output Tensor type doesn't match\n");
+                        printf("Output Tensor type doesn't match\n");
                         return kRetErr;
                     }
                     if (data_type == nvinfer1::DataType::kINT8)
