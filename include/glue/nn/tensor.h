@@ -9,9 +9,6 @@
 
 #include "glue/nn/types.h"
 
-#include <cstdint>
-#include <iostream>
-#include <memory>
 #include <vector>
 
 namespace glue {

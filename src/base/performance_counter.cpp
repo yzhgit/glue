@@ -8,6 +8,7 @@
 #include "glue/base/log.h"
 
 #include <ctime>
+#include <algorithm>
 
 namespace glue {
 
@@ -54,8 +55,8 @@ void PerformanceCounter::Statistics::addResult(double elapsed) noexcept
     }
     else
     {
-        maximumSeconds = max(maximumSeconds, elapsed);
-        minimumSeconds = min(minimumSeconds, elapsed);
+        maximumSeconds = std::max(maximumSeconds, elapsed);
+        minimumSeconds = std::min(minimumSeconds, elapsed);
     }
 
     ++numRuns;

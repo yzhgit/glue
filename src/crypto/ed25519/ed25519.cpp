@@ -6,6 +6,8 @@
 #include "glue/crypto/ed25519/ed25519.h"
 #include "glue/crypto/ed25519/ed25519_internal.h"
 
+#include "glue/crypto/sha512.h"
+
 namespace glue {
 
 void ed25519_gen_keypair(uint8_t* pk, uint8_t* sk, const uint8_t seed[32])

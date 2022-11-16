@@ -8,6 +8,7 @@
 #include "glue/crypto/mem_ops.h"
 
 #include <vector>
+#include <algorithm>
 
 namespace glue {
 

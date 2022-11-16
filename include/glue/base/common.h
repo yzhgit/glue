@@ -25,6 +25,7 @@ GLUE_BEGIN_IGNORE_WARNINGS_MSVC(4514 4245 4100)
 #if defined(GLUE_COMPILER_MSVC)
     #include <intrin.h>
     #include <sys/timeb.h>
+    #define NOMINMAX
     #include <windows.h>
 #endif
 
