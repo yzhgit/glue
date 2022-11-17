@@ -4,6 +4,7 @@
 //
 
 #include "glue/crypto/poly1305.h"
+
 #include "glue/base/exception.h"
 
 #include "ct_utils.h"

@@ -37,17 +37,14 @@ GLUE_BEGIN_IGNORE_WARNINGS_MSVC(4514 4245 4100)
 GLUE_END_IGNORE_WARNINGS_MSVC
 
 #if defined(GLUE_COMPILER_MINGW)
-    #include <cstring>
     #include <sys/types.h>
 #endif
 
 #if defined(GLUE_OS_LINUX)
-    #include <cstring>
     #include <signal.h>
     #include <sys/stat.h>
 #endif
 
 #if defined(GLUE_OS_ANDROID)
     #include <byteswap.h>
-    #include <cstring>
 #endif

@@ -88,7 +88,7 @@ size_t hex_decode(uint8_t output[], const char input[], size_t input_length, siz
                 bad_char = "\\n";
 
             throw InvalidArgumentException(std::string("hex_decode: invalid hex character '") +
-                                        bad_char + "'");
+                                           bad_char + "'");
         }
 
         if (top_nibble)
@@ -132,19 +132,19 @@ size_t hex_decode(uint8_t output[], const std::string& input, bool ignore_ws)
     return hex_decode(output, input.data(), input.length(), ignore_ws);
 }
 
-std::vector<uint8_t> hex_decode(const char input[], size_t input_length, bool ignore_ws)
+std::string hex_decode(const char input[], size_t input_length, bool ignore_ws)
 {
     std::vector<uint8_t> bin(1 + input_length / 2);
 
     size_t written = hex_decode(bin.data(), input, input_length, ignore_ws);
 
     bin.resize(written);
-    return bin;
+    return std::string((const char*) bin.data(), bin.size());
 }
 
-std::vector<uint8_t> hex_decode(const std::string& input, bool ignore_ws)
+std::string hex_decode(const std::string& input, bool ignore_ws)
 {
     return hex_decode(input.data(), input.size(), ignore_ws);
 }
 
-}
+} // namespace glue

@@ -21,17 +21,16 @@
    method is available for incremental computation. You can use any hash for
    HMAC as long as it provides:
     - constant HashMethod::BlockSize (typically 64)
-    - constant HashMethod::HashBytes (length of hash in bytes, e.g. 20 for SHA1)
+    - constant HashMethod::DigestSize (length of hash in bytes, e.g. 20 for SHA1)
     - HashMethod::add(buffer, bufferSize)
     - HashMethod::getHash(unsigned char buffer[HashMethod::BlockSize])
   */
 
-#include <cstring> // memcpy
-#include <string>
+#include "glue/crypto/hex.h"
 
 namespace glue {
 
-/// compute HMAC hash of data and key using MD5, SHA1 or SHA256
+/// compute HMAC hash of data and key using MD5 or SHA256
 template <typename HashMethod>
 std::string hmac(const void* data, size_t numDataBytes, const void* key, size_t numKeyBytes)
 {
@@ -48,29 +47,30 @@ std::string hmac(const void* data, size_t numDataBytes, const void* key, size_t 
     {
         // shorten key: usedKey = hashed(key)
         HashMethod keyHasher;
-        keyHasher.add(key, numKeyBytes);
-        keyHasher.getHash(usedKey);
+        keyHasher.update(key, numKeyBytes);
+        keyHasher.final(usedKey);
     }
 
     // create initial XOR padding
     for (size_t i = 0; i < HashMethod::BlockSize; i++) usedKey[i] ^= 0x36;
 
     // inside = hash((usedKey ^ 0x36) + data)
-    unsigned char inside[HashMethod::HashBytes];
+    unsigned char inside[HashMethod::DigestSize];
     HashMethod insideHasher;
-    insideHasher.add(usedKey, HashMethod::BlockSize);
-    insideHasher.add(data, numDataBytes);
-    insideHasher.getHash(inside);
+    insideHasher.update(usedKey, HashMethod::BlockSize);
+    insideHasher.update(data, numDataBytes);
+    insideHasher.final(inside);
 
     // undo usedKey's previous 0x36 XORing and apply a XOR by 0x5C
     for (size_t i = 0; i < HashMethod::BlockSize; i++) usedKey[i] ^= 0x5C ^ 0x36;
 
     // hash((usedKey ^ 0x5C) + hash((usedKey ^ 0x36) + data))
     HashMethod finalHasher;
-    finalHasher.add(usedKey, HashMethod::BlockSize);
-    finalHasher.add(inside, HashMethod::HashBytes);
+    finalHasher.update(usedKey, HashMethod::BlockSize);
+    finalHasher.update(inside, HashMethod::DigestSize);
+    insideHasher.final(inside);
 
-    return finalHasher.getHash();
+    return hex_encode(inside, HashMethod::DigestSize, false);
 }
 
 /// convenience function for std::string

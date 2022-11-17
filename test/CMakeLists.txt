@@ -28,6 +28,7 @@ set(source_files
 
   # src/crypto/aes_test.cpp
   # src/crypto/base64_test.cpp
+  src/crypto/hex_test.cpp
   # src/crypto/md5_test.cpp
 )
 
@@ -43,6 +44,7 @@ target_include_directories(${PROJECT_NAME}_test
 target_link_libraries(${PROJECT_NAME}_test
   PRIVATE
     glue::base
+    glue::crypto
 )
 
 ##############################################################################

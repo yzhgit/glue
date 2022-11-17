@@ -20,7 +20,7 @@ namespace glue {
  * @param uppercase should output be upper or lower case?
  */
 GLUE_API void hex_encode(char output[], const uint8_t input[], size_t input_length,
-                         bool uppercase = true);
+                         bool uppercase = false);
 
 /**
  * Perform hex encoding
@@ -29,7 +29,7 @@ GLUE_API void hex_encode(char output[], const uint8_t input[], size_t input_leng
  * @param uppercase should output be upper or lower case?
  * @return hexadecimal representation of input
  */
-GLUE_API std::string hex_encode(const uint8_t input[], size_t input_length, bool uppercase = true);
+GLUE_API std::string hex_encode(const uint8_t input[], size_t input_length, bool uppercase = false);
 
 /**
  * Perform hex encoding
@@ -37,10 +37,9 @@ GLUE_API std::string hex_encode(const uint8_t input[], size_t input_length, bool
  * @param uppercase should output be upper or lower case?
  * @return hexadecimal representation of input
  */
-template <typename Alloc>
-std::string hex_encode(const std::vector<uint8_t, Alloc>& input, bool uppercase = true)
+std::string hex_encode(const std::string& input, bool uppercase = false)
 {
-    return hex_encode(input.data(), input.size(), uppercase);
+    return hex_encode((const uint8_t*) input.data(), input.size(), uppercase);
 }
 
 /**
@@ -89,8 +88,7 @@ GLUE_API size_t hex_decode(uint8_t output[], const std::string& input, bool igno
                 exception if whitespace is encountered
 * @return decoded hex output
 */
-GLUE_API std::vector<uint8_t> hex_decode(const char input[], size_t input_length,
-                                         bool ignore_ws = true);
+GLUE_API std::string hex_decode(const char input[], size_t input_length, bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -99,6 +97,6 @@ GLUE_API std::vector<uint8_t> hex_decode(const char input[], size_t input_length
                 exception if whitespace is encountered
 * @return decoded hex output
 */
-GLUE_API std::vector<uint8_t> hex_decode(const std::string& input, bool ignore_ws = true);
+GLUE_API std::string hex_decode(const std::string& input, bool ignore_ws = true);
 
 } // namespace glue

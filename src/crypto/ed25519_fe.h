@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "mem_ops.h"
-
 #include "glue/base/exception.h"
+
+#include "mem_ops.h"
 
 namespace glue {
 
@@ -27,7 +27,8 @@ public:
      */
     FE_25519(int init = 0)
     {
-        if (init != 0 && init != 1) throw InvalidArgumentException("Invalid FE_25519 initial value");
+        if (init != 0 && init != 1)
+            throw InvalidArgumentException("Invalid FE_25519 initial value");
         clear_mem(m_fe, 10);
         m_fe[0] = init;
     }
