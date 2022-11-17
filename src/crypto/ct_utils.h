@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "glue/crypto/bit_ops.h"
-#include "glue/crypto/secmem.h"
+#include "bit_ops.h"
+#include "secmem.h"
 
 #include <type_traits>
 #include <vector>

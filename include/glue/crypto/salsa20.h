@@ -5,18 +5,16 @@
 
 #pragma once
 
-#include "glue/base/common.h"
+#include "glue/crypto/key_spec.h"
 
 #include <vector>
-
-#include "glue/crypto/key_spec.h"
 
 namespace glue {
 
 /**
  * DJB's Salsa20 (and XSalsa20)
  */
-class Salsa20 final
+class GLUE_API Salsa20 final
 {
 public:
     Salsa20() = default;

@@ -5,10 +5,10 @@
 
 #include "glue/crypto/sha256.h"
 
-#include "glue/crypto/loadstor.h"
-#include "glue/crypto/mem_ops.h"
-#include "glue/crypto/rotate.h"
-#include "glue/crypto/secmem.h"
+#include "loadstor.h"
+#include "mem_ops.h"
+#include "rotate.h"
+#include "secmem.h"
 
 #include <algorithm>
 
@@ -218,4 +218,4 @@ void SHA_256::compress_n(const uint8_t input[], size_t blocks)
     SHA_256::compress_digest(m_digest, input, blocks);
 }
 
-}
+} // namespace glue

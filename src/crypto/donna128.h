@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "glue/crypto/mul128.h"
+#include "mul128.h"
 
 namespace glue {
 

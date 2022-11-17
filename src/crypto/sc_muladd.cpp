@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/crypto/ed25519/ed25519_internal.h"
+#include "ed25519_internal.h"
 
 namespace glue {
 

@@ -5,54 +5,54 @@
 
 #include "glue/crypto/md5.h"
 
-#include "glue/crypto/loadstor.h"
-#include "glue/crypto/mem_ops.h"
-#include "glue/crypto/rotate.h"
-#include "glue/crypto/secmem.h"
+#include "loadstor.h"
+#include "mem_ops.h"
+#include "rotate.h"
+#include "secmem.h"
 
 namespace glue {
 
 namespace {
 
-/*
- * MD5 FF Function
- */
-template <size_t S>
-inline void FF(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
-{
-    A += (D ^ (B & (C ^ D))) + M;
-    A = rotl<S>(A) + B;
-}
+    /*
+     * MD5 FF Function
+     */
+    template <size_t S>
+    inline void FF(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
+    {
+        A += (D ^ (B & (C ^ D))) + M;
+        A = rotl<S>(A) + B;
+    }
 
-/*
- * MD5 GG Function
- */
-template <size_t S>
-inline void GG(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
-{
-    A += (C ^ (D & (B ^ C))) + M;
-    A = rotl<S>(A) + B;
-}
+    /*
+     * MD5 GG Function
+     */
+    template <size_t S>
+    inline void GG(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
+    {
+        A += (C ^ (D & (B ^ C))) + M;
+        A = rotl<S>(A) + B;
+    }
 
-/*
- * MD5 HH Function
- */
-template <size_t S>
-inline void HH(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
-{
-    A += (B ^ C ^ D) + M;
-    A = rotl<S>(A) + B;
-}
+    /*
+     * MD5 HH Function
+     */
+    template <size_t S>
+    inline void HH(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
+    {
+        A += (B ^ C ^ D) + M;
+        A = rotl<S>(A) + B;
+    }
 
-/*
- * MD5 II Function
- */
-template <size_t S>
-inline void II(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
-{
-    A += (C ^ (B | ~D)) + M;
-    A = rotl<S>(A) + B;
-}
+    /*
+     * MD5 II Function
+     */
+    template <size_t S>
+    inline void II(uint32_t& A, uint32_t B, uint32_t C, uint32_t D, uint32_t M)
+    {
+        A += (C ^ (B | ~D)) + M;
+        A = rotl<S>(A) + B;
+    }
 
 } // namespace
 
@@ -207,4 +207,4 @@ void MD5::compress_n(const uint8_t input[], size_t blocks)
     }
 }
 
-}
+} // namespace glue

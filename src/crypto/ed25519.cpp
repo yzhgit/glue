@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/crypto/ed25519/ed25519.h"
-#include "glue/crypto/ed25519/ed25519_internal.h"
-
+#include "glue/crypto/ed25519.h"
 #include "glue/crypto/sha512.h"
+
+#include "ed25519_internal.h"
 
 namespace glue {
 
@@ -84,4 +84,4 @@ bool ed25519_verify(const uint8_t* m, size_t mlen, const uint8_t sig[64], const 
     return constant_time_compare(rcheck, sig, 32);
 }
 
-}
+} // namespace glue

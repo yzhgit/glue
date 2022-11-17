@@ -13,11 +13,11 @@ set(source
   salsa20.cpp
   sha256.cpp
   sha512.cpp
-  ed25519/ed25519_fe.cpp
-  ed25519/ed25519.cpp
-  ed25519/ge.cpp
-  ed25519/sc_muladd.cpp
-  ed25519/sc_reduce.cpp
+  ed25519_fe.cpp
+  ed25519.cpp
+  ge.cpp
+  sc_muladd.cpp
+  sc_reduce.cpp
 )
 
 set(target crypto)
@@ -30,6 +30,11 @@ target_include_directories(${target}
     ${PROJECT_SOURCE_DIR}/include
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(${target}
+  PRIVATE
+    glue::base
 )
 
 set_target_properties(${target} PROPERTIES

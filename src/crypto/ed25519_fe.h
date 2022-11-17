@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "glue/crypto/mem_ops.h"
+#include "mem_ops.h"
 
-#include <exception>
+#include "glue/base/exception.h"
 
 namespace glue {
 
@@ -27,14 +27,14 @@ public:
      */
     FE_25519(int init = 0)
     {
-        if (init != 0 && init != 1) throw std::invalid_argument("Invalid FE_25519 initial value");
+        if (init != 0 && init != 1) throw InvalidArgumentException("Invalid FE_25519 initial value");
         clear_mem(m_fe, 10);
         m_fe[0] = init;
     }
 
     FE_25519(std::initializer_list<int32_t> x)
     {
-        if (x.size() != 10) throw std::invalid_argument("Invalid FE_25519 initializer list");
+        if (x.size() != 10) throw InvalidArgumentException("Invalid FE_25519 initializer list");
         copy_mem(m_fe, x.begin(), 10);
     }
 

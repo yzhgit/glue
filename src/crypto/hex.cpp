@@ -5,7 +5,7 @@
 
 #include "glue/crypto/hex.h"
 
-#include <exception>
+#include "glue/base/exception.h"
 
 namespace glue {
 
@@ -87,7 +87,7 @@ size_t hex_decode(uint8_t output[], const char input[], size_t input_length, siz
             else if (bad_char == "\n")
                 bad_char = "\\n";
 
-            throw std::invalid_argument(std::string("hex_decode: invalid hex character '") +
+            throw InvalidArgumentException(std::string("hex_decode: invalid hex character '") +
                                         bad_char + "'");
         }
 
@@ -122,7 +122,7 @@ size_t hex_decode(uint8_t output[], const char input[], size_t input_length, boo
     size_t written = hex_decode(output, input, input_length, consumed, ignore_ws);
 
     if (consumed != input_length)
-        throw std::invalid_argument("hex_decode: input did not have full bytes");
+        throw InvalidArgumentException("hex_decode: input did not have full bytes");
 
     return written;
 }

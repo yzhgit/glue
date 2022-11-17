@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "glue/crypto/bswap.h"
-#include "glue/crypto/mem_ops.h"
+#include "bswap.h"
+#include "mem_ops.h"
 
 #include <vector>
 

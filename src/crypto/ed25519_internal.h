@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "glue/crypto/ed25519/ed25519_fe.h"
-#include "glue/crypto/loadstor.h"
+#include "ed25519_fe.h"
+#include "loadstor.h"
 
 namespace glue {
 

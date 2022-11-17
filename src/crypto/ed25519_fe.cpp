@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 //
 
-#include "glue/crypto/ed25519/ed25519_fe.h"
-#include "glue/crypto/ed25519/ed25519_internal.h"
+#include "ed25519_fe.h"
+#include "ed25519_internal.h"
 
 namespace glue {
 
@@ -751,4 +751,4 @@ void FE_25519::to_bytes(uint8_t s[32]) const
     s[31] = static_cast<uint8_t>(h9 >> 18);
 }
 
-}
+} // namespace glue

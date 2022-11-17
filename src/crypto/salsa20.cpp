@@ -4,11 +4,11 @@
 //
 
 #include "glue/crypto/salsa20.h"
-#include "glue/crypto/loadstor.h"
-#include "glue/crypto/rotate.h"
-#include "glue/crypto/secmem.h"
+#include "glue/base/exception.h"
 
-#include <exception>
+#include "loadstor.h"
+#include "rotate.h"
+#include "secmem.h"
 
 namespace glue {
 
@@ -176,7 +176,7 @@ void Salsa20::initialize_state()
 
 void Salsa20::set_key(const uint8_t key[], size_t length)
 {
-    if (!valid_keylength(length)) throw std::invalid_argument("[Salsa20] Invalid key length");
+    if (!valid_keylength(length)) throw InvalidArgumentException("[Salsa20] Invalid key length");
     key_schedule(key, length);
 }
 /*
@@ -200,7 +200,7 @@ void Salsa20::set_iv(const uint8_t iv[], size_t length)
 {
     verify_key_set(m_state.empty() == false);
 
-    if (!valid_iv_length(length)) throw std::invalid_argument("[Salsa20] Invalid iv length");
+    if (!valid_iv_length(length)) throw InvalidArgumentException("[Salsa20] Invalid iv length");
 
     initialize_state();
 
@@ -292,7 +292,7 @@ void Salsa20::seek(uint64_t offset)
 
 void Salsa20::verify_key_set(bool cond) const
 {
-    if (cond == false) throw std::runtime_error("[Salsa20] Key not set");
+    if (cond == false) throw IllegalStateException("[Salsa20] Key not set");
 }
 
 }
