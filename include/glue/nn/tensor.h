@@ -13,18 +13,18 @@
 
 namespace glue {
 
-using TensorShape = std::vector<uint32>;
+using TensorShape = std::vector<uint32_t>;
 
 class Quantization final
 {
 public:
     Quantization() : m_type(QuantType::NONE)
     {}
-    Quantization(QuantType type, float scale, int32 zero_point)
+    Quantization(QuantType type, float scale, int32_t zero_point)
         : m_type(type), m_scales({scale}), m_zero_points({zero_point})
     {}
-    Quantization(QuantType type, int32 channel_dim, std::vector<float> scales,
-                 std::vector<int32> zero_points)
+    Quantization(QuantType type, int32_t channel_dim, std::vector<float> scales,
+                 std::vector<int32_t> zero_points)
         : m_type(type)
         , m_channel_dim(channel_dim)
         , m_scales(std::move(scales))
@@ -45,15 +45,15 @@ public:
         return *this;
     }
 
-    int32& ChannelDim()
+    int32_t& ChannelDim()
     {
         return m_channel_dim;
     }
-    const int32& ChannelDim() const
+    const int32_t& ChannelDim() const
     {
         return m_channel_dim;
     }
-    Quantization& SetChannelDim(int32 channel_dim)
+    Quantization& SetChannelDim(int32_t channel_dim)
     {
         m_channel_dim = channel_dim;
         return *this;
@@ -73,15 +73,15 @@ public:
         return *this;
     }
 
-    std::vector<int32>& ZeroPoints()
+    std::vector<int32_t>& ZeroPoints()
     {
         return m_zero_points;
     }
-    const std::vector<int32>& ZeroPoints() const
+    const std::vector<int32_t>& ZeroPoints() const
     {
         return m_zero_points;
     }
-    Quantization& SetZeroPoints(std::vector<int32> zero_points)
+    Quantization& SetZeroPoints(std::vector<int32_t> zero_points)
     {
         m_zero_points = zero_points;
         return *this;
@@ -89,9 +89,9 @@ public:
 
 protected:
     QuantType m_type{QuantType::NONE};
-    int32 m_channel_dim{-1};
+    int32_t m_channel_dim{-1};
     std::vector<float> m_scales;
-    std::vector<int32> m_zero_points;
+    std::vector<int32_t> m_zero_points;
 };
 
 class TensorInfo final
@@ -155,11 +155,11 @@ public:
         return *this;
     }
 
-    uint32 GetNumDimensions() const;
+    uint32_t GetNumDimensions() const;
 
-    uint32 GetNumElements() const;
+    uint32_t GetNumElements() const;
 
-    uint32 GetNumBytes() const;
+    uint32_t GetNumBytes() const;
 
 private:
     DataType m_DataType;
@@ -196,17 +196,17 @@ public:
         return m_Info.GetDataType();
     }
 
-    uint32 GetNumDimensions() const
+    uint32_t GetNumDimensions() const
     {
         return m_Info.GetNumDimensions();
     }
 
-    uint32 GetNumElements() const
+    uint32_t GetNumElements() const
     {
         return m_Info.GetNumElements();
     }
 
-    uint32 GetNumBytes() const
+    uint32_t GetNumBytes() const
     {
         return m_Info.GetNumBytes();
     }
@@ -228,7 +228,7 @@ private:
 };
 
 template <typename T>
-inline std::vector<T> Quantize(const std::vector<float>& data, float scale, int32 zero_point)
+inline std::vector<T> Quantize(const std::vector<float>& data, float scale, int32_t zero_point)
 {
     std::vector<T> q;
     for (const auto& f : data)
@@ -242,7 +242,7 @@ inline std::vector<T> Quantize(const std::vector<float>& data, float scale, int3
 }
 
 template <typename T>
-inline std::vector<float> Dequantize(const std::vector<T>& data, float scale, int32 zero_point)
+inline std::vector<float> Dequantize(const std::vector<T>& data, float scale, int32_t zero_point)
 {
     std::vector<float> f;
     f.reserve(data.size());

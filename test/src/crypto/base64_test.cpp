@@ -13,14 +13,14 @@ using namespace glue::crypto;
 
 int base64_test()
 {
-    BYTE text[3][1024] = {{"fo"},
+    uint8_t text[3][1024] = {{"fo"},
                           {"foobar"},
                           {"Man is distinguished, not only by his reason, but by this singular "
                            "passion from other animals, which is a lust of the mind, that by a "
                            "perseverance of delight in the continued and indefatigable "
                            "generation of knowledge, exceeds the short vehemence of any carnal "
                            "pleasure."}};
-    BYTE code[3][1024] = {{"Zm8="},
+    uint8_t code[3][1024] = {{"Zm8="},
                           {"Zm9vYmFy"},
                           {"TWFuIGlzIGRpc3Rpbmd1aXNoZWQsIG5vdCBvbmx5IGJ5IGhpcyByZWFzb24sIGJ1dCBie"
                            "SB0aGlz\nIHNpbmd1bGFyIHBhc3Npb24gZnJvbSBvdGhlciBhbmltYWxzLCB3aGljaCBp"
@@ -28,7 +28,7 @@ int base64_test()
                            "saWdodCBpbiB0aGUgY29udGlu\ndWVkIGFuZCBpbmRlZmF0aWdhYmxlIGdlbmVyYXRpb2"
                            "4gb2Yga25vd2xlZGdlLCBleGNlZWRzIHRo\nZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55I"
                            "GNhcm5hbCBwbGVhc3VyZS4="}};
-    BYTE buf[1024];
+    uint8_t buf[1024];
     size_t buf_len;
     int pass = 1;
     int idx;

@@ -7,7 +7,7 @@
 
 namespace glue {
 
-constexpr uint32 GetDataTypeSize(DataType dataType)
+constexpr uint32_t GetDataTypeSize(DataType dataType)
 {
     switch (dataType)
     {
@@ -34,19 +34,19 @@ constexpr uint32 GetDataTypeSize(DataType dataType)
     }
 }
 
-uint32 TensorInfo::GetNumDimensions() const
+uint32_t TensorInfo::GetNumDimensions() const
 {
     return m_Shape.size();
 }
 
-uint32 TensorInfo::GetNumElements() const
+uint32_t TensorInfo::GetNumElements() const
 {
-    uint32 elementNum = 1;
+    uint32_t elementNum = 1;
     for (const auto& dim : m_Shape) { elementNum *= dim; }
     return elementNum;
 }
 
-uint32 TensorInfo::GetNumBytes() const
+uint32_t TensorInfo::GetNumBytes() const
 {
     return GetNumElements() * GetDataTypeSize(m_DataType);
 }

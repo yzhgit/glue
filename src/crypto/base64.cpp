@@ -13,9 +13,9 @@ namespace glue {
 
 // Note: To change the charset to a URL encoding, replace the '+' and '/' with
 // '*' and '-'
-static const BYTE charset[] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"};
+static const uint8_t charset[] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"};
 
-BYTE revchar(char ch)
+uint8_t revchar(char ch)
 {
     if (ch >= 'A' && ch <= 'Z')
         ch -= 'A';
@@ -31,7 +31,7 @@ BYTE revchar(char ch)
     return (ch);
 }
 
-size_t base64_encode(const BYTE in[], BYTE out[], size_t len, int newline_flag)
+size_t base64_encode(const uint8_t in[], uint8_t out[], size_t len, int newline_flag)
 {
     size_t idx, idx2, blks, blk_ceiling, left_over, newline_count = 0;
 
@@ -88,9 +88,9 @@ size_t base64_encode(const BYTE in[], BYTE out[], size_t len, int newline_flag)
     return (idx2);
 }
 
-size_t base64_decode(const BYTE in[], BYTE out[], size_t len)
+size_t base64_decode(const uint8_t in[], uint8_t out[], size_t len)
 {
-    BYTE ch;
+    uint8_t ch;
     size_t idx, idx2, blks, blk_ceiling, left_over;
 
     if (in[len - 1] == '=') len--;

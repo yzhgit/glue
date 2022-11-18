@@ -25,17 +25,17 @@ public:
     // update more often
     void update();
     double getFps() const;
-    uint64 getNumFrames() const;
+    uint64_t getNumFrames() const;
     void setFilterAlpha(float alpha);
 
 private:
     void update(double now);
 
 private:
-    uint64 m_nFrameCount;
-    int64 m_then;
-    int64 m_lastFrameTime;
-    int64 m_filteredTime;
+    uint64_t m_nFrameCount;
+    int64_t m_then;
+    int64_t m_lastFrameTime;
+    int64_t m_filteredTime;
     double m_fps;
     double m_filterAlpha;
     std::queue<double> m_timestamps;

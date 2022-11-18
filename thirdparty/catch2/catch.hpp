@@ -10144,12 +10144,12 @@ namespace {
         }
 
     private:
-        void setTextAttribute( WORD _textAttribute ) {
+        void setTextAttribute( uint32_t _textAttribute ) {
             SetConsoleTextAttribute( stdoutHandle, _textAttribute | originalBackgroundAttributes );
         }
         HANDLE stdoutHandle;
-        WORD originalForegroundAttributes;
-        WORD originalBackgroundAttributes;
+        uint32_t originalForegroundAttributes;
+        uint32_t originalBackgroundAttributes;
     };
 
     IColourImpl* platformColourInstance() {
