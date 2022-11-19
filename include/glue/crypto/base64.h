@@ -76,7 +76,7 @@ GLUE_API size_t base64_decode(uint8_t output[], const char input[], size_t input
 */
 size_t base64_decode(uint8_t output[], const std::string& input, bool ignore_ws = true)
 {
-    return base64_decode(output, input.data(), input.length(), ignore_ws);
+    return base64_decode(output, input.data(), input.size(), ignore_ws);
 }
 
 /**

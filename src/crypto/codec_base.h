@@ -190,14 +190,12 @@ template <typename Base>
 std::string base_decode_to_string(Base&& base, const char input[], size_t input_length,
                                   bool ignore_ws)
 {
-    std::string bin;
-    bin.reserve(base.decode_max_output(input_length));
+    const size_t output_length = base.decode_max_output(input_length);
+    std::vector<uint8_t> bin(output_length);
 
-    const size_t written = base_decode_full(
-        base, reinterpret_cast<uint8_t*>(const_cast<char*>(bin.data())), input, input_length, ignore_ws);
+    const size_t written = base_decode_full(base, bin.data(), input, input_length, ignore_ws);
 
-    bin.resize(written);
-    return bin;
+    return std::string((char*) bin.data(), written);
 }
 
 } // namespace glue
