@@ -29,7 +29,9 @@ set(source_files
   # src/crypto/aes_test.cpp
   src/crypto/base64_test.cpp
   src/crypto/hex_test.cpp
-  # src/crypto/md5_test.cpp
+  src/crypto/md5_test.cpp
+  src/crypto/sha256_test.cpp
+  src/crypto/sha512_test.cpp
 )
 
 add_executable(${PROJECT_NAME}_test
