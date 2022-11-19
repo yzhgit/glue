@@ -4,139 +4,214 @@
 //
 
 #include "glue/crypto/base64.h"
+#include "glue/base/exception.h"
 
-#include <stdlib.h>
-
-#define NEWLINE_INVL 76
+#include "codec_base.h"
+#include "ct_utils.h"
+#include "rounding.h"
 
 namespace glue {
 
-// Note: To change the charset to a URL encoding, replace the '+' and '/' with
-// '*' and '-'
-static const uint8_t charset[] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"};
+namespace {
 
-uint8_t revchar(char ch)
+    class Base64 final
+    {
+    public:
+        static inline std::string name() noexcept
+        {
+            return "base64";
+        }
+
+        static inline size_t encoding_bytes_in() noexcept
+        {
+            return m_encoding_bytes_in;
+        }
+        static inline size_t encoding_bytes_out() noexcept
+        {
+            return m_encoding_bytes_out;
+        }
+
+        static inline size_t decoding_bytes_in() noexcept
+        {
+            return m_encoding_bytes_out;
+        }
+        static inline size_t decoding_bytes_out() noexcept
+        {
+            return m_encoding_bytes_in;
+        }
+
+        static inline size_t bits_consumed() noexcept
+        {
+            return m_encoding_bits;
+        }
+        static inline size_t remaining_bits_before_padding() noexcept
+        {
+            return m_remaining_bits_before_padding;
+        }
+
+        static inline size_t encode_max_output(size_t input_length)
+        {
+            return (round_up(input_length, m_encoding_bytes_in) / m_encoding_bytes_in) *
+                   m_encoding_bytes_out;
+        }
+        static inline size_t decode_max_output(size_t input_length)
+        {
+            return (round_up(input_length, m_encoding_bytes_out) * m_encoding_bytes_in) /
+                   m_encoding_bytes_out;
+        }
+
+        static void encode(char out[8], const uint8_t in[5]) noexcept;
+
+        static uint8_t lookup_binary_value(char input) noexcept;
+
+        static bool check_bad_char(uint8_t bin, char input, bool ignore_ws);
+
+        static void decode(uint8_t* out_ptr, const uint8_t decode_buf[4])
+        {
+            out_ptr[0] = (decode_buf[0] << 2) | (decode_buf[1] >> 4);
+            out_ptr[1] = (decode_buf[1] << 4) | (decode_buf[2] >> 2);
+            out_ptr[2] = (decode_buf[2] << 6) | decode_buf[3];
+        }
+
+        static inline size_t bytes_to_remove(size_t final_truncate)
+        {
+            return final_truncate;
+        }
+
+    private:
+        static const size_t m_encoding_bits = 6;
+        static const size_t m_remaining_bits_before_padding = 8;
+
+        static const size_t m_encoding_bytes_in = 3;
+        static const size_t m_encoding_bytes_out = 4;
+    };
+
+    char lookup_base64_char(uint8_t x)
+    {
+        GLUE_ASSERT(x < 64);
+
+        const auto in_az = CT::Mask<uint8_t>::is_within_range(x, 26, 51);
+        const auto in_09 = CT::Mask<uint8_t>::is_within_range(x, 52, 61);
+        const auto eq_plus = CT::Mask<uint8_t>::is_equal(x, 62);
+        const auto eq_slash = CT::Mask<uint8_t>::is_equal(x, 63);
+
+        const char c_AZ = 'A' + x;
+        const char c_az = 'a' + (x - 26);
+        const char c_09 = '0' + (x - 2 * 26);
+        const char c_plus = '+';
+        const char c_slash = '/';
+
+        char ret = c_AZ;
+        ret = in_az.select(c_az, ret);
+        ret = in_09.select(c_09, ret);
+        ret = eq_plus.select(c_plus, ret);
+        ret = eq_slash.select(c_slash, ret);
+
+        return ret;
+    }
+
+    // static
+    void Base64::encode(char out[8], const uint8_t in[5]) noexcept
+    {
+        const uint8_t b0 = (in[0] & 0xFC) >> 2;
+        const uint8_t b1 = ((in[0] & 0x03) << 4) | (in[1] >> 4);
+        const uint8_t b2 = ((in[1] & 0x0F) << 2) | (in[2] >> 6);
+        const uint8_t b3 = in[2] & 0x3F;
+        out[0] = lookup_base64_char(b0);
+        out[1] = lookup_base64_char(b1);
+        out[2] = lookup_base64_char(b2);
+        out[3] = lookup_base64_char(b3);
+    }
+
+    // static
+    uint8_t Base64::lookup_binary_value(char input) noexcept
+    {
+        const uint8_t c = static_cast<uint8_t>(input);
+
+        const auto is_alpha_upper =
+            CT::Mask<uint8_t>::is_within_range(c, uint8_t('A'), uint8_t('Z'));
+        const auto is_alpha_lower =
+            CT::Mask<uint8_t>::is_within_range(c, uint8_t('a'), uint8_t('z'));
+        const auto is_decimal = CT::Mask<uint8_t>::is_within_range(c, uint8_t('0'), uint8_t('9'));
+
+        const auto is_plus = CT::Mask<uint8_t>::is_equal(c, uint8_t('+'));
+        const auto is_slash = CT::Mask<uint8_t>::is_equal(c, uint8_t('/'));
+        const auto is_equal = CT::Mask<uint8_t>::is_equal(c, uint8_t('='));
+
+        const auto is_whitespace = CT::Mask<uint8_t>::is_any_of(
+            c, {uint8_t(' '), uint8_t('\t'), uint8_t('\n'), uint8_t('\r')});
+
+        const uint8_t c_upper = c - uint8_t('A');
+        const uint8_t c_lower = c - uint8_t('a') + 26;
+        const uint8_t c_decim = c - uint8_t('0') + 2 * 26;
+
+        uint8_t ret = 0xFF; // default value
+
+        ret = is_alpha_upper.select(c_upper, ret);
+        ret = is_alpha_lower.select(c_lower, ret);
+        ret = is_decimal.select(c_decim, ret);
+        ret = is_plus.select(62, ret);
+        ret = is_slash.select(63, ret);
+        ret = is_equal.select(0x81, ret);
+        ret = is_whitespace.select(0x80, ret);
+
+        return ret;
+    }
+
+    // static
+    bool Base64::check_bad_char(uint8_t bin, char input, bool ignore_ws)
+    {
+        if (bin <= 0x3F) { return true; }
+        else if (!(bin == 0x81 || (bin == 0x80 && ignore_ws)))
+        {
+            std::string bad_char(1, input);
+            if (bad_char == "\t") { bad_char = "\\t"; }
+            else if (bad_char == "\n") { bad_char = "\\n"; }
+            else if (bad_char == "\r") { bad_char = "\\r"; }
+
+            throw InvalidArgumentException(
+                std::string("base64_decode: invalid base64 character '") + bad_char + "'");
+        }
+        return false;
+    }
+
+} // namespace
+
+size_t base64_encode(char out[], const uint8_t in[], size_t input_length, size_t& input_consumed,
+                     bool final_inputs)
 {
-    if (ch >= 'A' && ch <= 'Z')
-        ch -= 'A';
-    else if (ch >= 'a' && ch <= 'z')
-        ch = ch - 'a' + 26;
-    else if (ch >= '0' && ch <= '9')
-        ch = ch - '0' + 52;
-    else if (ch == '+')
-        ch = 62;
-    else if (ch == '/')
-        ch = 63;
-
-    return (ch);
+    return base_encode(Base64(), out, in, input_length, input_consumed, final_inputs);
 }
 
-size_t base64_encode(const uint8_t in[], uint8_t out[], size_t len, int newline_flag)
+std::string base64_encode(const uint8_t input[], size_t input_length)
 {
-    size_t idx, idx2, blks, blk_ceiling, left_over, newline_count = 0;
-
-    blks = (len / 3);
-    left_over = len % 3;
-
-    if (out == NULL)
-    {
-        idx2 = blks * 4;
-        if (left_over) idx2 += 4;
-        if (newline_flag)
-            idx2 += len / 57; // (NEWLINE_INVL / 4) * 3 = 57. One newline per 57
-                              // input bytes.
-    }
-    else
-    {
-        // Since 3 input bytes = 4 output bytes, determine out how many even
-        // sets of 3 bytes the input has.
-        blk_ceiling = blks * 3;
-        for (idx = 0, idx2 = 0; idx < blk_ceiling; idx += 3, idx2 += 4)
-        {
-            out[idx2] = charset[in[idx] >> 2];
-            out[idx2 + 1] = charset[((in[idx] & 0x03) << 4) | (in[idx + 1] >> 4)];
-            out[idx2 + 2] = charset[((in[idx + 1] & 0x0f) << 2) | (in[idx + 2] >> 6)];
-            out[idx2 + 3] = charset[in[idx + 2] & 0x3F];
-            // The offical standard requires a newline every 76 characters.
-            // (Eg, first newline is character 77 of the output.)
-            if (((idx2 - newline_count + 4) % NEWLINE_INVL == 0) && newline_flag)
-            {
-                out[idx2 + 4] = '\n';
-                idx2++;
-                newline_count++;
-            }
-        }
-
-        if (left_over == 1)
-        {
-            out[idx2] = charset[in[idx] >> 2];
-            out[idx2 + 1] = charset[(in[idx] & 0x03) << 4];
-            out[idx2 + 2] = '=';
-            out[idx2 + 3] = '=';
-            idx2 += 4;
-        }
-        else if (left_over == 2)
-        {
-            out[idx2] = charset[in[idx] >> 2];
-            out[idx2 + 1] = charset[((in[idx] & 0x03) << 4) | (in[idx + 1] >> 4)];
-            out[idx2 + 2] = charset[(in[idx + 1] & 0x0F) << 2];
-            out[idx2 + 3] = '=';
-            idx2 += 4;
-        }
-    }
-
-    return (idx2);
+    return base_encode_to_string(Base64(), input, input_length);
 }
 
-size_t base64_decode(const uint8_t in[], uint8_t out[], size_t len)
+size_t base64_decode(uint8_t out[], const char in[], size_t input_length, size_t& input_consumed,
+                     bool final_inputs, bool ignore_ws)
 {
-    uint8_t ch;
-    size_t idx, idx2, blks, blk_ceiling, left_over;
-
-    if (in[len - 1] == '=') len--;
-    if (in[len - 1] == '=') len--;
-
-    blks = len / 4;
-    left_over = len % 4;
-
-    if (out == NULL)
-    {
-        if (len >= 77 && in[NEWLINE_INVL] == '\n') // Verify that newlines where used.
-            len -= len / (NEWLINE_INVL + 1);
-        blks = len / 4;
-        left_over = len % 4;
-
-        idx = blks * 3;
-        if (left_over == 2)
-            idx++;
-        else if (left_over == 3)
-            idx += 2;
-    }
-    else
-    {
-        blk_ceiling = blks * 4;
-        for (idx = 0, idx2 = 0; idx2 < blk_ceiling; idx += 3, idx2 += 4)
-        {
-            if (in[idx2] == '\n') idx2++;
-            out[idx] = (revchar(in[idx2]) << 2) | ((revchar(in[idx2 + 1]) & 0x30) >> 4);
-            out[idx + 1] = (revchar(in[idx2 + 1]) << 4) | (revchar(in[idx2 + 2]) >> 2);
-            out[idx + 2] = (revchar(in[idx2 + 2]) << 6) | revchar(in[idx2 + 3]);
-        }
-
-        if (left_over == 2)
-        {
-            out[idx] = (revchar(in[idx2]) << 2) | ((revchar(in[idx2 + 1]) & 0x30) >> 4);
-            idx++;
-        }
-        else if (left_over == 3)
-        {
-            out[idx] = (revchar(in[idx2]) << 2) | ((revchar(in[idx2 + 1]) & 0x30) >> 4);
-            out[idx + 1] = (revchar(in[idx2 + 1]) << 4) | (revchar(in[idx2 + 2]) >> 2);
-            idx += 2;
-        }
-    }
-
-    return (idx);
+    return base_decode(Base64(), out, in, input_length, input_consumed, final_inputs, ignore_ws);
 }
 
+size_t base64_decode(uint8_t output[], const char input[], size_t input_length, bool ignore_ws)
+{
+    return base_decode_full(Base64(), output, input, input_length, ignore_ws);
 }
+
+std::string base64_decode(const char input[], size_t input_length, bool ignore_ws)
+{
+    return base_decode_to_string(Base64(), input, input_length, ignore_ws);
+}
+
+size_t base64_encode_max_output(size_t input_length)
+{
+    return Base64::encode_max_output(input_length);
+}
+
+size_t base64_decode_max_output(size_t input_length)
+{
+    return Base64::decode_max_output(input_length);
+}
+
+} // namespace glue

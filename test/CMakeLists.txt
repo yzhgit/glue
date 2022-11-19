@@ -27,7 +27,7 @@ set(source_files
   src/base/object_pool_test.cpp
 
   # src/crypto/aes_test.cpp
-  # src/crypto/base64_test.cpp
+  src/crypto/base64_test.cpp
   src/crypto/hex_test.cpp
   # src/crypto/md5_test.cpp
 )

@@ -11,60 +11,9 @@
 #include <type_traits>
 #include <vector>
 
-#if defined(GLUE_HAS_VALGRIND)
-    #include <valgrind/memcheck.h>
-#endif
-
 namespace glue {
 
 namespace CT {
-
-    /**
-     * Use valgrind to mark the contents of memory as being undefined.
-     * Valgrind will accept operations which manipulate undefined values,
-     * but will warn if an undefined value is used to decided a conditional
-     * jump or a load/store address. So if we poison all of our inputs we
-     * can confirm that the operations in question are truly const time
-     * when compiled by whatever compiler is in use.
-     *
-     * Even better, the VALGRIND_MAKE_MEM_* macros work even when the
-     * program is not run under valgrind (though with a few cycles of
-     * overhead, which is unfortunate in final binaries as these
-     * annotations tend to be used in fairly important loops).
-     *
-     * This approach was first used in ctgrind (https://github.com/agl/ctgrind)
-     * but calling the valgrind mecheck API directly works just as well and
-     * doesn't require a custom patched valgrind.
-     */
-    template <typename T>
-    inline void poison(const T* p, size_t n)
-    {
-#if defined(GLUE_HAS_VALGRIND)
-        VALGRIND_MAKE_MEM_UNDEFINED(p, n * sizeof(T));
-#else
-        IgnoreUnused(p, n);
-#endif
-    }
-
-    template <typename T>
-    inline void unpoison(const T* p, size_t n)
-    {
-#if defined(GLUE_HAS_VALGRIND)
-        VALGRIND_MAKE_MEM_DEFINED(p, n * sizeof(T));
-#else
-        IgnoreUnused(p, n);
-#endif
-    }
-
-    template <typename T>
-    inline void unpoison(T& p)
-    {
-#if defined(GLUE_HAS_VALGRIND)
-        VALGRIND_MAKE_MEM_DEFINED(&p, sizeof(T));
-#else
-        IgnoreUnused(p);
-#endif
-    }
 
     /**
      * A Mask type used for constant-time operations. A Mask<T> always has value
@@ -174,6 +123,28 @@ namespace CT {
             return ~Mask<T>::is_lt(x, y);
         }
 
+        static Mask<T> is_within_range(T v, T l, T u)
+        {
+            const T v_lt_l = v ^ ((v ^ l) | ((v - l) ^ v));
+            const T v_gt_u = u ^ ((u ^ v) | ((u - v) ^ u));
+            const T either = v_lt_l | v_gt_u;
+            return ~Mask<T>(expand_top_bit(either));
+        }
+
+        static Mask<T> is_any_of(T v, std::initializer_list<T> accepted)
+        {
+            T accept = 0;
+
+            for (auto a : accepted)
+            {
+                const T diff = a ^ v;
+                const T eq_zero = ~diff & (diff - 1);
+                accept |= eq_zero;
+            }
+
+            return Mask<T>(expand_top_bit(accept));
+        }
+
         /**
          * AND-combine two masks
          */
@@ -254,14 +225,12 @@ namespace CT {
          */
         T select(T x, T y) const
         {
-            // (x & value()) | (y & ~value())
             return static_cast<T>(y ^ (value() & (x ^ y)));
         }
 
         T select_and_unpoison(T x, T y) const
         {
             T r = this->select(x, y);
-            CT::unpoison(r);
             return r;
         }
 
@@ -296,7 +265,6 @@ namespace CT {
         T unpoisoned_value() const
         {
             T r = value();
-            CT::unpoison(r);
             return r;
         }
 
@@ -322,37 +290,6 @@ namespace CT {
 
         T m_mask;
     };
-
-    template <typename T>
-    inline Mask<T> conditional_copy_mem(T cnd, T* to, const T* from0, const T* from1, size_t elems)
-    {
-        const auto mask = CT::Mask<T>::expand(cnd);
-        mask.select_n(to, from0, from1, elems);
-        return mask;
-    }
-
-    template <typename T>
-    inline void conditional_swap(bool cnd, T& x, T& y)
-    {
-        const auto swap = CT::Mask<T>::expand(cnd);
-
-        T t0 = swap.select(y, x);
-        T t1 = swap.select(x, y);
-        x = t0;
-        y = t1;
-    }
-
-    template <typename T>
-    inline void conditional_swap_ptr(bool cnd, T& x, T& y)
-    {
-        uintptr_t xp = reinterpret_cast<uintptr_t>(x);
-        uintptr_t yp = reinterpret_cast<uintptr_t>(y);
-
-        conditional_swap<uintptr_t>(cnd, xp, yp);
-
-        x = reinterpret_cast<T>(xp);
-        y = reinterpret_cast<T>(yp);
-    }
 
 } // namespace CT
 

@@ -5,56 +5,32 @@
 
 #include "glue/crypto/base64.h"
 
-#include <memory.h>
-#include <stdio.h>
-#include <string.h>
+#include <catch2/catch.hpp>
 
-using namespace glue::crypto;
+namespace glue {
+namespace test {
 
-int base64_test()
-{
-    uint8_t text[3][1024] = {{"fo"},
-                          {"foobar"},
-                          {"Man is distinguished, not only by his reason, but by this singular "
-                           "passion from other animals, which is a lust of the mind, that by a "
-                           "perseverance of delight in the continued and indefatigable "
-                           "generation of knowledge, exceeds the short vehemence of any carnal "
-                           "pleasure."}};
-    uint8_t code[3][1024] = {{"Zm8="},
-                          {"Zm9vYmFy"},
-                          {"TWFuIGlzIGRpc3Rpbmd1aXNoZWQsIG5vdCBvbmx5IGJ5IGhpcyByZWFzb24sIGJ1dCBie"
-                           "SB0aGlz\nIHNpbmd1bGFyIHBhc3Npb24gZnJvbSBvdGhlciBhbmltYWxzLCB3aGljaCBp"
-                           "cyBhIGx1c3Qgb2Yg\ndGhlIG1pbmQsIHRoYXQgYnkgYSBwZXJzZXZlcmFuY2Ugb2YgZGV"
-                           "saWdodCBpbiB0aGUgY29udGlu\ndWVkIGFuZCBpbmRlZmF0aWdhYmxlIGdlbmVyYXRpb2"
-                           "4gb2Yga25vd2xlZGdlLCBleGNlZWRzIHRo\nZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55I"
-                           "GNhcm5hbCBwbGVhc3VyZS4="}};
-    uint8_t buf[1024];
-    size_t buf_len;
-    int pass = 1;
-    int idx;
-
-    for (idx = 0; idx < 3; idx++)
+    TEST_CASE("base64_encode")
     {
-        size_t text_len = strlen((const char*) text[idx]);
-        size_t code_len = strlen((const char*) code[idx]);
+        auto str1 = base64_encode((const uint8_t*) "fo", 2);
+        CHECK(str1 == "Zm8=");
 
-        buf_len = base64_encode(text[idx], buf, text_len, 1);
-        pass = pass &&
-               ((buf_len == code_len) && (buf_len == base64_encode(text[idx], NULL, text_len, 1)));
-        pass = pass && !memcmp(code[idx], buf, buf_len);
+        auto str2 = base64_encode((const uint8_t*) "foobar", 6);
+        CHECK(str2 == "Zm9vYmFy");
 
-        buf_len = base64_decode(code[idx], buf, code_len);
-        pass = pass &&
-               ((buf_len == text_len) && (buf_len == base64_decode(code[idx], NULL, code_len)));
-        pass = pass && !memcmp(text[idx], buf, buf_len);
+        auto str3 = base64_encode(
+            (const uint8_t*) "Man is distinguished, not only by his reason, but by this singular "
+                             "passion from other animals, which is a lust of the mind, that by a "
+                             "perseverance of delight in the continued and indefatigable "
+                             "generation "
+                             "of knowledge, exceeds the short vehemence of any carnal pleasure.",
+            269);
+        CHECK(str3 == "TWFuIGlzIGRpc3Rpbmd1aXNoZWQsIG5vdCBvbmx5IGJ5IGhpcyByZWFzb24sIGJ1dCBieSB0aGlz"
+                      "IHNpbmd1bGFyIHBhc3Npb24gZnJvbSBvdGhlciBhbmltYWxzLCB3aGljaCBpcyBhIGx1c3Qgb2Yg"
+                      "dGhlIG1pbmQsIHRoYXQgYnkgYSBwZXJzZXZlcmFuY2Ugb2YgZGVsaWdodCBpbiB0aGUgY29udGlu"
+                      "dWVkIGFuZCBpbmRlZmF0aWdhYmxlIGdlbmVyYXRpb24gb2Yga25vd2xlZGdlLCBleGNlZWRzIHRo"
+                      "ZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4=");
     }
 
-    return (pass);
-}
-
-int main()
-{
-    printf("Base64 tests: %s\n", base64_test() ? "PASSED" : "FAILED");
-
-    return 0;
-}
+} // namespace test
+} // namespace glue
