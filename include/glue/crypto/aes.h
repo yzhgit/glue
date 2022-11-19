@@ -12,7 +12,7 @@
 namespace glue {
 
 ///////////////////
-// AES
+// AES - ECB
 ///////////////////
 // Key setup must be done before any AES en/de-cryption functions can be used.
 GLUE_API void aes_key_setup(const uint8_t key[], // The key, must be 128, 192, or 256 bits
