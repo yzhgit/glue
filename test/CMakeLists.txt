@@ -30,6 +30,7 @@ set(source_files
   src/crypto/base64_test.cpp
   src/crypto/hex_test.cpp
   src/crypto/md5_test.cpp
+  src/crypto/salsa20_test.cpp
   src/crypto/sha256_test.cpp
   src/crypto/sha512_test.cpp
 )

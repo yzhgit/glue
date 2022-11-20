@@ -64,7 +64,7 @@ namespace {
 // static
 void Salsa20::salsa_core(uint8_t output[64], const uint32_t input[16], size_t rounds)
 {
-    // OCL_ASSERT_NOMSG(rounds % 2 == 0);
+    GLUE_ASSERT(rounds % 2 == 0);
 
     uint32_t x00 = input[0], x01 = input[1], x02 = input[2], x03 = input[3], x04 = input[4],
              x05 = input[5], x06 = input[6], x07 = input[7], x08 = input[8], x09 = input[9],

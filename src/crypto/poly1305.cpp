@@ -172,7 +172,7 @@ void Poly1305::clear()
 
 void Poly1305::set_key(const uint8_t key[], size_t length)
 {
-    if (!valid_keylength(length)) throw InvalidArgumentException("[Salsa20] Invalid key length");
+    if (!valid_keylength(length)) throw InvalidArgumentException("[Poly1305] Invalid key length");
     key_schedule(key, length);
 }
 

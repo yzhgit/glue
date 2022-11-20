@@ -25,6 +25,7 @@ namespace test {
         uint8_t key[1][32] = {{0x60, 0x3d, 0xeb, 0x10, 0x15, 0xca, 0x71, 0xbe, 0x2b, 0x73, 0xae,
                                0xf0, 0x85, 0x7d, 0x77, 0x81, 0x1f, 0x35, 0x2c, 0x07, 0x3b, 0x61,
                                0x08, 0xd7, 0x2d, 0x98, 0x10, 0xa3, 0x09, 0x14, 0xdf, 0xf4}};
+
         aes_key_setup(key[0], key_schedule, 256);
 
         for (idx = 0; idx < 2; idx++)
@@ -56,8 +57,10 @@ namespace test {
                                0x08, 0xd7, 0x2d, 0x98, 0x10, 0xa3, 0x09, 0x14, 0xdf, 0xf4}};
 
         aes_key_setup(key[0], key_schedule, 256);
+
         aes_encrypt_cbc(plaintext[0], 32, enc_buf, key_schedule, 256, iv[0]);
         CHECK(!memcmp(enc_buf, ciphertext[0], 32));
+
         aes_decrypt_cbc(ciphertext[0], 32, enc_buf, key_schedule, 256, iv[0]);
         CHECK(!memcmp(enc_buf, plaintext[0], 32));
     }
@@ -83,8 +86,10 @@ namespace test {
                                0x08, 0xd7, 0x2d, 0x98, 0x10, 0xa3, 0x09, 0x14, 0xdf, 0xf4}};
 
         aes_key_setup(key[0], key_schedule, 256);
+
         aes_encrypt_ctr(plaintext[0], 32, enc_buf, key_schedule, 256, iv[0]);
         CHECK(!memcmp(enc_buf, ciphertext[0], 32));
+
         aes_decrypt_ctr(ciphertext[0], 32, enc_buf, key_schedule, 256, iv[0]);
         CHECK(!memcmp(enc_buf, plaintext[0], 32));
     }
@@ -121,7 +126,6 @@ namespace test {
 
         aes_encrypt_ccm(plaintext[0], 4, assoc[0], 8, iv[0], 7, enc_buf, &enc_buf_len, 4, key[0],
                         128);
-
         CHECK(!memcmp(enc_buf, ciphertext[0], enc_buf_len));
 
         aes_decrypt_ccm(ciphertext[0], 8, assoc[0], 8, iv[0], 7, enc_buf, &enc_buf_len, 4,
@@ -132,7 +136,6 @@ namespace test {
 
         aes_encrypt_ccm(plaintext[1], 16, assoc[1], 16, iv[1], 8, enc_buf, &enc_buf_len, 6, key[0],
                         128);
-
         CHECK(!memcmp(enc_buf, ciphertext[1], enc_buf_len));
 
         aes_decrypt_ccm(ciphertext[1], 22, assoc[1], 16, iv[1], 8, enc_buf, &enc_buf_len, 6,
@@ -143,7 +146,6 @@ namespace test {
 
         aes_encrypt_ccm(plaintext[2], 24, assoc[2], 20, iv[2], 12, enc_buf, &enc_buf_len, 8, key[0],
                         128);
-
         CHECK(!memcmp(enc_buf, ciphertext[2], enc_buf_len));
 
         aes_decrypt_ccm(ciphertext[2], 32, assoc[2], 20, iv[2], 12, enc_buf, &enc_buf_len, 8,
