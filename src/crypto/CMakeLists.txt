@@ -18,6 +18,7 @@ set(source
   ge.cpp
   sc_muladd.cpp
   sc_reduce.cpp
+  sodium.cpp
 )
 
 set(target crypto)
