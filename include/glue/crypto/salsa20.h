@@ -32,11 +32,7 @@ public:
      * @param out the byte array to hold the keystream
      * @param len the length of out in bytes
      */
-    void write_keystream(uint8_t out[], size_t len)
-    {
-        clear_mem(out, len);
-        cipher(out, out, len);
-    }
+    void write_keystream(uint8_t out[], size_t len);
 
     void seek(uint64_t offset);
 

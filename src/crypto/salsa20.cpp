@@ -133,6 +133,12 @@ void Salsa20::cipher(const uint8_t in[], uint8_t out[], size_t length)
     m_position += length;
 }
 
+void Salsa20::write_keystream(uint8_t out[], size_t len)
+{
+    clear_mem(out, len);
+    cipher(out, out, len);
+}
+
 void Salsa20::initialize_state()
 {
     static const uint32_t TAU[] = {0x61707865, 0x3120646e, 0x79622d36, 0x6b206574};
