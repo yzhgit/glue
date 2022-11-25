@@ -5,47 +5,12 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <stdio.h>
-#include <vector>
-
-#include "glue/nn/tensor.h"
+#include "glue/base/common.h"
+#include "glue/cv/types.h"
 
 namespace glue {
 
-// color enum
-enum ImageFormat {
-    RGBA = 0,
-    BGRA,
-    RGB,
-    BGR,
-    GRAY,
-    NV21 = 11,
-    NV12,
-    YUV420SP,
-    YUV420P,
-    YUV422,
-    YUV444
-};
-
-// flip enum
-enum FlipParam {
-    XY = -1,  // flip along the XY axis
-    X = 0,    // flip along the X axis
-    Y         // flip along the Y axis
-};
-
-// transform param
-typedef struct {
-    int ih;                // input height
-    int iw;                // input width
-    int oh;                // outpu theight
-    int ow;                // output width
-    FlipParam flip_param;  // flip, support x, y, xy
-    float rotate_param;    // rotate, support 90, 180, 270
-} TransParam;
-
-class ImagePreprocess {
+class GLUE_API ImagePreprocess {
    public:
     /*
      * init
@@ -187,36 +152,6 @@ class ImagePreprocess {
                     int srcw,
                     int srch,
                     FlipParam flip_param);
-
-    /*
-     * change image data to tensor data
-     * support image format is GRAY, BGR(RGB) and BGRA(RGBA), Data layout is
-     * NHWC and NCHW param src: input image data param dstTensor: output tensor
-     * data param layout: output tensor layout，support NHWC and NCHW param
-     * means: means of image param scales: scales of image
-     */
-    void image_to_tensor(
-        const uint8_t* src, Tensor* dstTensor, LayoutType layout, float* means, float* scales);
-
-    /*
-     * change image data to tensor data
-     * support image format is GRAY, BGR(RGB) and BGRA(RGBA), Data layout is
-     * NHWC and NCHW param src: input image data param dstTensor: output tensor
-     * data param srcFormat: input image format, support BGR(RGB) and BGRA(RGBA)
-     * param srcw: input image width
-     * param srch: input image height
-     * param layout: output tensor layout，support NHWC and NCHW
-     * param means: means of image
-     * param scales: scales of image
-     */
-    void image_to_tensor(const uint8_t* src,
-                         Tensor* dstTensor,
-                         ImageFormat srcFormat,
-                         int srcw,
-                         int srch,
-                         LayoutType layout,
-                         float* means,
-                         float* scales);
 
     /*
      * image crop process

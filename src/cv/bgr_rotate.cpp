@@ -8,7 +8,6 @@
 #include <arm_neon.h>
 #include <math.h>
 #include <string.h>
-
 #include <algorithm>
 
 namespace glue {

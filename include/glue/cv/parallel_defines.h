@@ -53,12 +53,12 @@
 #define LITE_PARALLEL_COMMON_END() }
 
 #else
-#define LITE_PARALLEL_BEGIN(index, tid, work_size)      \
-    for (int index = 0; index < (work_size); ++index) { \
-#define LITE_PARALLEL_END()                     \
-    }
+#define LITE_PARALLEL_BEGIN(index, tid, work_size) \
+    for (int index = 0; index < (work_size); ++index) {
+#define LITE_PARALLEL_END() }
 
 #define LITE_PARALLEL_COMMON_BEGIN(index, tid, end, start, step) \
     for (int index = (start); index < (end); index += (step)) {
 #define LITE_PARALLEL_COMMON_END() }
+
 #endif

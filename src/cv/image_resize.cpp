@@ -10,7 +10,6 @@
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
-
 #include <algorithm>
 
 namespace glue {

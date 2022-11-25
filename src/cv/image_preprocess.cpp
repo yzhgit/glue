@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <climits>
 
-#include "glue/cv/image2tensor.h"
 #include "glue/cv/image_convert.h"
 #include "glue/cv/image_flip.h"
 #include "glue/cv/image_resize.h"
@@ -25,51 +24,48 @@ namespace glue {
 #define ScalarNearlyZero (1.0f / (1 << 12))
 
 // init
-__attribute__((visibility("default")))
 ImagePreprocess::ImagePreprocess(ImageFormat srcFormat, ImageFormat dstFormat, TransParam param) {
     this->srcFormat_ = srcFormat;
     this->dstFormat_ = dstFormat;
     this->transParam_ = param;
 }
 
-__attribute__((visibility("default"))) void ImagePreprocess::image_convert(const uint8_t* src,
-                                                                           uint8_t* dst) {
+void ImagePreprocess::image_convert(const uint8_t* src, uint8_t* dst) {
     ImageConvert img_convert;
     img_convert.choose(
         src, dst, this->srcFormat_, this->dstFormat_, this->transParam_.iw, this->transParam_.ih);
 }
 
-__attribute__((visibility("default"))) void ImagePreprocess::image_convert(const uint8_t* src,
-                                                                           uint8_t* dst,
-                                                                           ImageFormat srcFormat,
-                                                                           ImageFormat dstFormat) {
+void ImagePreprocess::image_convert(const uint8_t* src,
+                                    uint8_t* dst,
+                                    ImageFormat srcFormat,
+                                    ImageFormat dstFormat) {
     ImageConvert img_convert;
     img_convert.choose(src, dst, srcFormat, dstFormat, this->transParam_.iw, this->transParam_.ih);
 }
 
-__attribute__((visibility("default"))) void ImagePreprocess::image_convert(const uint8_t* src,
-                                                                           uint8_t* dst,
-                                                                           ImageFormat srcFormat,
-                                                                           ImageFormat dstFormat,
-                                                                           int srcw,
-                                                                           int srch) {
+void ImagePreprocess::image_convert(const uint8_t* src,
+                                    uint8_t* dst,
+                                    ImageFormat srcFormat,
+                                    ImageFormat dstFormat,
+                                    int srcw,
+                                    int srch) {
     ImageConvert img_convert;
     img_convert.choose(src, dst, srcFormat, dstFormat, srcw, srch);
 }
 
-__attribute__((visibility("default"))) void ImagePreprocess::image_resize(const uint8_t* src,
-                                                                          uint8_t* dst,
-                                                                          ImageFormat srcFormat,
-                                                                          int srcw,
-                                                                          int srch,
-                                                                          int dstw,
-                                                                          int dsth) {
+void ImagePreprocess::image_resize(const uint8_t* src,
+                                   uint8_t* dst,
+                                   ImageFormat srcFormat,
+                                   int srcw,
+                                   int srch,
+                                   int dstw,
+                                   int dsth) {
     ImageResize img_resize;
     img_resize.choose(src, dst, srcFormat, srcw, srch, dstw, dsth);
 }
 
-__attribute__((visibility("default"))) void ImagePreprocess::image_resize(const uint8_t* src,
-                                                                          uint8_t* dst) {
+void ImagePreprocess::image_resize(const uint8_t* src, uint8_t* dst) {
     int srcw = this->transParam_.iw;
     int srch = this->transParam_.ih;
     int dstw = this->transParam_.ow;
@@ -79,14 +75,13 @@ __attribute__((visibility("default"))) void ImagePreprocess::image_resize(const 
     img_resize.choose(src, dst, srcFormat, srcw, srch, dstw, dsth);
 }
 
-__attribute__((visibility("default"))) void ImagePreprocess::image_rotate(
+void ImagePreprocess::image_rotate(
     const uint8_t* src, uint8_t* dst, ImageFormat srcFormat, int srcw, int srch, float degree) {
     ImageRotate img_rotate;
     img_rotate.choose(src, dst, srcFormat, srcw, srch, degree);
 }
 
-__attribute__((visibility("default"))) void ImagePreprocess::image_rotate(const uint8_t* src,
-                                                                          uint8_t* dst) {
+void ImagePreprocess::image_rotate(const uint8_t* src, uint8_t* dst) {
     auto srcw = this->transParam_.ow;
     auto srch = this->transParam_.oh;
     auto srcFormat = this->dstFormat_;
@@ -95,18 +90,17 @@ __attribute__((visibility("default"))) void ImagePreprocess::image_rotate(const 
     img_rotate.choose(src, dst, srcFormat, srcw, srch, degree);
 }
 
-__attribute__((visibility("default"))) void ImagePreprocess::image_flip(const uint8_t* src,
-                                                                        uint8_t* dst,
-                                                                        ImageFormat srcFormat,
-                                                                        int srcw,
-                                                                        int srch,
-                                                                        FlipParam flip_param) {
+void ImagePreprocess::image_flip(const uint8_t* src,
+                                 uint8_t* dst,
+                                 ImageFormat srcFormat,
+                                 int srcw,
+                                 int srch,
+                                 FlipParam flip_param) {
     ImageFlip img_flip;
     img_flip.choose(src, dst, srcFormat, srcw, srch, flip_param);
 }
 
-__attribute__((visibility("default"))) void ImagePreprocess::image_flip(const uint8_t* src,
-                                                                        uint8_t* dst) {
+void ImagePreprocess::image_flip(const uint8_t* src, uint8_t* dst) {
     auto srcw = this->transParam_.ow;
     auto srch = this->transParam_.oh;
     auto srcFormat = this->dstFormat_;
@@ -115,79 +109,15 @@ __attribute__((visibility("default"))) void ImagePreprocess::image_flip(const ui
     img_flip.choose(src, dst, srcFormat, srcw, srch, flip_param);
 }
 
-__attribute__((visibility("default"))) void ImagePreprocess::image_to_tensor(const uint8_t* src,
-                                                                             Tensor* dstTensor,
-                                                                             ImageFormat srcFormat,
-                                                                             int srcw,
-                                                                             int srch,
-                                                                             LayoutType layout,
-                                                                             float* means,
-                                                                             float* scales) {
-#ifdef LITE_WITH_FPGA
-    if (this->transParam_.ih > 1080) {
-        printf("input image height(%d > 1080) is not supported! \n", this->transParam_.ih);
-        return;
-    }
-    Image2TensorFpga img2tensor;
-    img2tensor.choose(src,
-                      dstTensor,
-                      this->srcFormat_,
-                      this->dstFormat_,
-                      layout,
-                      this->transParam_.iw,
-                      this->transParam_.ih,
-                      this->transParam_.ow,
-                      this->transParam_.oh,
-                      means,
-                      scales);
-#else
-    Image2Tensor img2tensor;
-    img2tensor.choose(src, dstTensor, srcFormat, layout, srcw, srch, means, scales);
-#endif
-}
-
-__attribute__((visibility("default"))) void ImagePreprocess::image_to_tensor(
-    const uint8_t* src, Tensor* dstTensor, LayoutType layout, float* means, float* scales) {
-#ifdef LITE_WITH_FPGA
-    if (this->transParam_.ih > 1080) {
-        printf("input image height(%d > 1080) is not supported! \n", this->transParam_.ih);
-        return;
-    }
-
-    Image2TensorFpga img2tensor;
-    img2tensor.choose(src,
-                      dstTensor,
-                      this->srcFormat_,
-                      this->dstFormat_,
-                      layout,
-                      this->transParam_.iw,
-                      this->transParam_.ih,
-                      this->transParam_.ow,
-                      this->transParam_.oh,
-                      means,
-                      scales);
-#else
-    Image2Tensor img2tensor;
-    img2tensor.choose(src,
-                      dstTensor,
-                      this->dstFormat_,
-                      layout,
-                      this->transParam_.ow,
-                      this->transParam_.oh,
-                      means,
-                      scales);
-#endif
-}
-
-__attribute__((visibility("default"))) void ImagePreprocess::image_crop(const uint8_t* src,
-                                                                        uint8_t* dst,
-                                                                        ImageFormat srcFormat,
-                                                                        int srcw,
-                                                                        int srch,
-                                                                        int left_x,
-                                                                        int left_y,
-                                                                        int dstw,
-                                                                        int dsth) {
+void ImagePreprocess::image_crop(const uint8_t* src,
+                                 uint8_t* dst,
+                                 ImageFormat srcFormat,
+                                 int srcw,
+                                 int srch,
+                                 int left_x,
+                                 int left_y,
+                                 int dstw,
+                                 int dsth) {
     if (dsth > srch || dstw > srcw) {
         printf(
             "output size(%d, %d) must be less than input size(%d, %d) \n", dsth, dstw, srch, srcw);

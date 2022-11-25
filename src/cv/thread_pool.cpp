@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-#include "lite/utils/log/logging.h"
+#include "glue/base/log.h"
 
 namespace glue {
 
@@ -68,7 +68,7 @@ void ThreadPool::AcquireThreadPool() {
     if (nullptr == gInstance) {
         return;
     }
-    LOG(INFO) << "ThreadPool::AcquireThreadPool()\n";
+    LogInfo() << "ThreadPool::AcquireThreadPool()";
     std::unique_lock<std::mutex> _l(gInstance->mutex_);
     while (!gInstance->ready_) gInstance->cv_.wait(_l);
     gInstance->ready_ = false;
@@ -79,7 +79,7 @@ void ThreadPool::ReleaseThreadPool() {
     if (nullptr == gInstance) {
         return;
     }
-    LOG(INFO) << "ThreadPool::ReleaseThreadPool()\n";
+    LogInfo() << "ThreadPool::ReleaseThreadPool()";
     std::unique_lock<std::mutex> _l(gInstance->mutex_);
     gInstance->ready_ = true;
     gInstance->cv_.notify_all();

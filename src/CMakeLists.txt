@@ -6,6 +6,6 @@
 add_subdirectory(base)
 # add_subdirectory(auth)
 add_subdirectory(crypto)
-# add_subdirectory(cv)
+add_subdirectory(cv)
 # add_subdirectory(nn)
 # add_subdirectory(opengl)

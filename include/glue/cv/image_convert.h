@@ -5,10 +5,7 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <stdio.h>
-
-#include "glue/cv/image_preprocess.h"
+#include "glue/cv/types.h"
 
 namespace glue {
 
