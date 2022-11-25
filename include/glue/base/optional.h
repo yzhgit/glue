@@ -5,19 +5,17 @@
 
 #pragma once
 
+#include <initializer_list>  // std::initializer_list
+#include <stdexcept>         // std::logic_error
+
 #include "glue/base/common.h"
-
-#include "glue/base/hash.h"     // hash_t
-#include "glue/base/in_place.h" // in_place_t
-#include "glue/base/invoke.h"   // invoke_result_t, invoke
-
+#include "glue/base/hash.h"      // hash_t
+#include "glue/base/in_place.h"  // in_place_t
+#include "glue/base/invoke.h"    // invoke_result_t, invoke
 #include "glue/base/traits/conjunction.hpp"
 #include "glue/base/traits/disjunction.hpp"
 #include "glue/base/traits/negation.hpp"
 #include "glue/base/traits/sfinae.hpp"
-
-#include <initializer_list> // std::initializer_list
-#include <stdexcept>        // std::logic_error
 
 namespace glue {
 
@@ -29,14 +27,10 @@ class optional;
 //=========================================================================
 
 template <typename T>
-struct is_optional : std::false_type
-{
-};
+struct is_optional : std::false_type {};
 
 template <typename T>
-struct is_optional<optional<T>> : std::true_type
-{
-};
+struct is_optional<optional<T>> : std::true_type {};
 
 template <typename T>
 constexpr bool is_optional_v = is_optional<T>::value;
@@ -47,51 +41,55 @@ constexpr bool is_optional_v = is_optional<T>::value;
 
 namespace detail {
 
-    template <typename T, typename U>
-    using optional_is_convertible = conjunction<
-        std::is_constructible<T, optional<U>&>, std::is_constructible<T, const optional<U>&>,
-        std::is_constructible<T, optional<U>&&>, std::is_constructible<T, const optional<U>&&>,
-        std::is_convertible<optional<U>&, T>, std::is_convertible<const optional<U>&, T>,
-        std::is_convertible<optional<U>&&, T>, std::is_convertible<const optional<U>&&, T>>;
+template <typename T, typename U>
+using optional_is_convertible = conjunction<std::is_constructible<T, optional<U>&>,
+                                            std::is_constructible<T, const optional<U>&>,
+                                            std::is_constructible<T, optional<U>&&>,
+                                            std::is_constructible<T, const optional<U>&&>,
+                                            std::is_convertible<optional<U>&, T>,
+                                            std::is_convertible<const optional<U>&, T>,
+                                            std::is_convertible<optional<U>&&, T>,
+                                            std::is_convertible<const optional<U>&&, T>>;
 
-    template <typename T, typename U>
-    using optional_is_copy_convertible =
-        conjunction<optional_is_convertible<T, U>, std::is_constructible<T, const U&>>;
+template <typename T, typename U>
+using optional_is_copy_convertible =
+    conjunction<optional_is_convertible<T, U>, std::is_constructible<T, const U&>>;
 
-    template <typename T, typename U>
-    using optional_is_move_convertible =
-        conjunction<optional_is_convertible<T, U>, std::is_constructible<T, U&&>>;
+template <typename T, typename U>
+using optional_is_move_convertible =
+    conjunction<optional_is_convertible<T, U>, std::is_constructible<T, U&&>>;
 
-    template <typename T, typename U>
-    using optional_is_value_convertible =
-        conjunction<std::is_constructible<T, U&&>,
-                    negation<std::is_same<std::decay_t<U>, in_place_t>>,
-                    negation<std::is_same<std::decay_t<U>, optional<T>>>>;
+template <typename T, typename U>
+using optional_is_value_convertible =
+    conjunction<std::is_constructible<T, U&&>,
+                negation<std::is_same<std::decay_t<U>, in_place_t>>,
+                negation<std::is_same<std::decay_t<U>, optional<T>>>>;
 
-    template <typename T, typename U>
-    using optional_is_convert_assignable =
-        conjunction<optional_is_convertible<T, U>, std::is_assignable<T&, optional<U>&>,
-                    std::is_assignable<T&, const optional<U>&>,
-                    std::is_assignable<T&, optional<U>&&>,
-                    std::is_assignable<T&, const optional<U>&&>>;
+template <typename T, typename U>
+using optional_is_convert_assignable = conjunction<optional_is_convertible<T, U>,
+                                                   std::is_assignable<T&, optional<U>&>,
+                                                   std::is_assignable<T&, const optional<U>&>,
+                                                   std::is_assignable<T&, optional<U>&&>,
+                                                   std::is_assignable<T&, const optional<U>&&>>;
 
-    template <typename T, typename U>
-    using optional_is_copy_convert_assignable =
-        conjunction<optional_is_convert_assignable<T, U>, std::is_constructible<T, const U&>,
-                    std::is_assignable<T&, const U&>>;
+template <typename T, typename U>
+using optional_is_copy_convert_assignable = conjunction<optional_is_convert_assignable<T, U>,
+                                                        std::is_constructible<T, const U&>,
+                                                        std::is_assignable<T&, const U&>>;
 
-    template <typename T, typename U>
-    using optional_is_move_convert_assignable =
-        conjunction<optional_is_convert_assignable<T, U>, std::is_constructible<T, U&&>,
-                    std::is_assignable<T&, U&&>>;
+template <typename T, typename U>
+using optional_is_move_convert_assignable = conjunction<optional_is_convert_assignable<T, U>,
+                                                        std::is_constructible<T, U&&>,
+                                                        std::is_assignable<T&, U&&>>;
 
-    template <typename T, typename U>
-    using optional_is_value_assignable = conjunction<
-        negation<std::is_same<std::decay_t<U>, optional<T>>>, std::is_constructible<T, U>,
-        std::is_assignable<T, U>,
-        disjunction<negation<std::is_same<std::decay_t<U>, T>>, negation<std::is_scalar<T>>>>;
+template <typename T, typename U>
+using optional_is_value_assignable = conjunction<
+    negation<std::is_same<std::decay_t<U>, optional<T>>>,
+    std::is_constructible<T, U>,
+    std::is_assignable<T, U>,
+    disjunction<negation<std::is_same<std::decay_t<U>, T>>, negation<std::is_scalar<T>>>>;
 
-} // namespace detail
+}  // namespace detail
 
 //=========================================================================
 // class : bad_optional_access
@@ -101,11 +99,9 @@ namespace detail {
 /// \brief An exception thrown when an optional is attempted to be accessed
 ///        while not containing a value
 ///////////////////////////////////////////////////////////////////////////
-class bad_optional_access : public std::logic_error
-{
-public:
-    bad_optional_access() : std::logic_error("bad_optional_access")
-    {}
+class bad_optional_access : public std::logic_error {
+   public:
+    bad_optional_access() : std::logic_error("bad_optional_access") {}
 };
 
 //=========================================================================
@@ -113,11 +109,9 @@ public:
 //=========================================================================
 
 /// \brief This type represents null optional value
-struct nullopt_t
-{
+struct nullopt_t {
     nullopt_t() = delete;
-    constexpr explicit nullopt_t(int) noexcept
-    {}
+    constexpr explicit nullopt_t(int) noexcept {}
 };
 
 //-------------------------------------------------------------------------
@@ -131,146 +125,133 @@ constexpr nullopt_t nullopt = nullopt_t{0};
 
 namespace detail {
 
-    template <typename T, bool IsTrivial>
-    class optional_base;
+template <typename T, bool IsTrivial>
+class optional_base;
 
-    template <typename T>
-    class optional_base<T, true>
-    {
-        //---------------------------------------------------------------------
-        // Constructors / Assignment
-        //---------------------------------------------------------------------
-    public:
-        constexpr optional_base(nullopt_t) noexcept;
+template <typename T>
+class optional_base<T, true> {
+    //---------------------------------------------------------------------
+    // Constructors / Assignment
+    //---------------------------------------------------------------------
+   public:
+    constexpr optional_base(nullopt_t) noexcept;
+
+    template <typename... Args>
+    constexpr optional_base(in_place_t, Args&&... args) noexcept(
+        std::is_nothrow_constructible<T, Args...>::value);
+
+    optional_base(optional_base&& other) = default;
+    optional_base(const optional_base& other) = default;
+
+    //---------------------------------------------------------------------
+
+    optional_base& operator=(optional_base&& other) = default;
+    optional_base& operator=(const optional_base& other) = default;
+
+    //---------------------------------------------------------------------
+    // Protected Modifiers
+    //---------------------------------------------------------------------
+   protected:
+    constexpr T* val() noexcept;
+    constexpr const T* val() const noexcept;
+
+    constexpr bool contains_value() const noexcept;
+
+    //---------------------------------------------------------------------
+    // Protected Observers
+    //---------------------------------------------------------------------
+   protected:
+    template <typename... Args>
+    void construct(Args&&... args);
+
+    void destruct();
+
+    //---------------------------------------------------------------------
+    // Private Member Types
+    //---------------------------------------------------------------------
+   private:
+    struct empty {};
+    union storage_type {
+        empty nothing;
+        T something;
 
         template <typename... Args>
-        constexpr optional_base(in_place_t, Args&&... args) noexcept(
-            std::is_nothrow_constructible<T, Args...>::value);
-
-        optional_base(optional_base&& other) = default;
-        optional_base(const optional_base& other) = default;
-
-        //---------------------------------------------------------------------
-
-        optional_base& operator=(optional_base&& other) = default;
-        optional_base& operator=(const optional_base& other) = default;
-
-        //---------------------------------------------------------------------
-        // Protected Modifiers
-        //---------------------------------------------------------------------
-    protected:
-        constexpr T* val() noexcept;
-        constexpr const T* val() const noexcept;
-
-        constexpr bool contains_value() const noexcept;
-
-        //---------------------------------------------------------------------
-        // Protected Observers
-        //---------------------------------------------------------------------
-    protected:
-        template <typename... Args>
-        void construct(Args&&... args);
-
-        void destruct();
-
-        //---------------------------------------------------------------------
-        // Private Member Types
-        //---------------------------------------------------------------------
-    private:
-        struct empty
-        {
-        };
-        union storage_type
-        {
-            empty nothing;
-            T something;
-
-            template <typename... Args>
-            constexpr storage_type(in_place_t, Args&&... args)
-                : something(std::forward<Args>(args)...)
-            {}
-            constexpr storage_type() : nothing()
-            {}
-        };
-
-        //---------------------------------------------------------------------
-        // Private Members
-        //---------------------------------------------------------------------
-    private:
-        storage_type m_storage;
-        bool m_engaged;
+        constexpr storage_type(in_place_t, Args&&... args)
+            : something(std::forward<Args>(args)...) {}
+        constexpr storage_type() : nothing() {}
     };
 
-    template <typename T>
-    class optional_base<T, false>
-    {
-        //---------------------------------------------------------------------
-        // Protected Constructors / Destructor / Assignment
-        //---------------------------------------------------------------------
-    protected:
-        optional_base(nullopt_t) noexcept;
+    //---------------------------------------------------------------------
+    // Private Members
+    //---------------------------------------------------------------------
+   private:
+    storage_type m_storage;
+    bool m_engaged;
+};
+
+template <typename T>
+class optional_base<T, false> {
+    //---------------------------------------------------------------------
+    // Protected Constructors / Destructor / Assignment
+    //---------------------------------------------------------------------
+   protected:
+    optional_base(nullopt_t) noexcept;
+
+    template <typename... Args>
+    optional_base(in_place_t,
+                  Args&&... args) noexcept(std::is_nothrow_constructible<T, Args...>::value);
+
+    optional_base(optional_base&& other) = default;
+    optional_base(const optional_base& other) = default;
+
+    //---------------------------------------------------------------------
+
+    ~optional_base() noexcept(std::is_nothrow_destructible<T>::value);
+
+    //---------------------------------------------------------------------
+
+    optional_base& operator=(optional_base&& other) = default;
+    optional_base& operator=(const optional_base& other) = default;
+
+    //---------------------------------------------------------------------
+    // Protected Observers
+    //---------------------------------------------------------------------
+   protected:
+    T* val() noexcept;
+    const T* val() const noexcept;
+    bool contains_value() const noexcept;
+
+    //---------------------------------------------------------------------
+    // Protected Modifiers
+    //---------------------------------------------------------------------
+   protected:
+    template <typename... Args>
+    void construct(Args&&... args);
+    void destruct();
+
+    //---------------------------------------------------------------------
+    // Private Member Types
+    //---------------------------------------------------------------------
+   private:
+    struct empty {};
+    union storage_type {
+        empty nothing;
+        T something;
 
         template <typename... Args>
-        optional_base(in_place_t,
-                      Args&&... args) noexcept(std::is_nothrow_constructible<T, Args...>::value);
-
-        optional_base(optional_base&& other) = default;
-        optional_base(const optional_base& other) = default;
-
-        //---------------------------------------------------------------------
-
-        ~optional_base() noexcept(std::is_nothrow_destructible<T>::value);
-
-        //---------------------------------------------------------------------
-
-        optional_base& operator=(optional_base&& other) = default;
-        optional_base& operator=(const optional_base& other) = default;
-
-        //---------------------------------------------------------------------
-        // Protected Observers
-        //---------------------------------------------------------------------
-    protected:
-        T* val() noexcept;
-        const T* val() const noexcept;
-        bool contains_value() const noexcept;
-
-        //---------------------------------------------------------------------
-        // Protected Modifiers
-        //---------------------------------------------------------------------
-    protected:
-        template <typename... Args>
-        void construct(Args&&... args);
-        void destruct();
-
-        //---------------------------------------------------------------------
-        // Private Member Types
-        //---------------------------------------------------------------------
-    private:
-        struct empty
-        {
-        };
-        union storage_type
-        {
-            empty nothing;
-            T something;
-
-            template <typename... Args>
-            storage_type(in_place_t, Args&&... args) : something(std::forward<Args>(args)...)
-            {}
-            storage_type() : nothing()
-            {}
-            ~storage_type()
-            {}
-        };
-
-        //---------------------------------------------------------------------
-        // Private Members
-        //---------------------------------------------------------------------
-    private:
-        storage_type m_storage;
-        bool m_engaged;
+        storage_type(in_place_t, Args&&... args) : something(std::forward<Args>(args)...) {}
+        storage_type() : nothing() {}
+        ~storage_type() {}
     };
-} // namespace detail
+
+    //---------------------------------------------------------------------
+    // Private Members
+    //---------------------------------------------------------------------
+   private:
+    storage_type m_storage;
+    bool m_engaged;
+};
+}  // namespace detail
 
 ///////////////////////////////////////////////////////////////////////////
 /// \brief The class template optional manages an optional contained value,
@@ -307,8 +288,7 @@ namespace detail {
 /// \tparam T the underlying type
 ///////////////////////////////////////////////////////////////////////////
 template <typename T>
-class optional : detail::optional_base<T, std::is_trivially_destructible<T>::value>
-{
+class optional : detail::optional_base<T, std::is_trivially_destructible<T>::value> {
     static_assert(!std::is_void<T>::value, "optional<void> is ill-formed");
     static_assert(!std::is_reference<T>::value, "optional<T> is ill-formed");
     static_assert(!std::is_abstract<T>::value, "optional of an abstract-type is ill-formed");
@@ -318,13 +298,13 @@ class optional : detail::optional_base<T, std::is_trivially_destructible<T>::val
     //-----------------------------------------------------------------------
     // Public Member Types
     //-----------------------------------------------------------------------
-public:
-    using value_type = T; ///< The underlying type of this Optional
+   public:
+    using value_type = T;  ///< The underlying type of this Optional
 
     //-----------------------------------------------------------------------
     // Constructor / Destructor / Assignment
     //-----------------------------------------------------------------------
-public:
+   public:
     /// \{
     /// \brief Constructs an optional that does not contain a value
     constexpr optional() noexcept;
@@ -340,7 +320,8 @@ public:
     /// If other does not contain a value, constructs an object that does
     /// not contain a value.
     ///
-    /// \note This constructor is defined as deleted if std::is_copy_constructible_v<T> is false
+    /// \note This constructor is defined as deleted if
+    /// std::is_copy_constructible_v<T> is false
     ///
     /// \param other the optional to copy
     optional(enable_overload_if_t<std::is_copy_constructible<T>::value, const optional&> other);
@@ -358,7 +339,8 @@ public:
     /// If other does not contain a value, constructs an object that does
     /// not contain a value.
     ///
-    /// \note This constructor is defined as deleted if std::is_move_constructible_v<T> is false
+    /// \note This constructor is defined as deleted if
+    /// std::is_move_constructible_v<T> is false
     ///
     /// \param other the optional to move
     optional(enable_overload_if_t<std::is_move_constructible<T>::value, optional&&> other);
@@ -393,11 +375,13 @@ public:
     ///       std::is_convertible_v<const U&, T> is false
     ///
     /// \param other the other type to convert
-    template <typename U, std::enable_if_t<detail::optional_is_copy_convertible<T, U>::value &&
-                                           std::is_convertible<const U&, T>::value>* = nullptr>
+    template <typename U,
+              std::enable_if_t<detail::optional_is_copy_convertible<T, U>::value &&
+                               std::is_convertible<const U&, T>::value>* = nullptr>
     optional(const optional<U>& other);
-    template <typename U, std::enable_if_t<detail::optional_is_copy_convertible<T, U>::value &&
-                                           !std::is_convertible<const U&, T>::value>* = nullptr>
+    template <typename U,
+              std::enable_if_t<detail::optional_is_copy_convertible<T, U>::value &&
+                               !std::is_convertible<const U&, T>::value>* = nullptr>
     explicit optional(const optional<U>& other);
     /// \}
 
@@ -429,11 +413,13 @@ public:
     ///       std::is_convertible_v<U&&, T> is false
     ///
     /// \param other
-    template <typename U, std::enable_if_t<detail::optional_is_move_convertible<T, U>::value &&
-                                           std::is_convertible<U&&, T>::value>* = nullptr>
+    template <typename U,
+              std::enable_if_t<detail::optional_is_move_convertible<T, U>::value &&
+                               std::is_convertible<U&&, T>::value>* = nullptr>
     optional(optional<U>&& other);
-    template <typename U, std::enable_if_t<detail::optional_is_move_convertible<T, U>::value &&
-                                           !std::is_convertible<U&&, T>::value>* = nullptr>
+    template <typename U,
+              std::enable_if_t<detail::optional_is_move_convertible<T, U>::value &&
+                               !std::is_convertible<U&&, T>::value>* = nullptr>
     explicit optional(optional<U>&& other);
     /// \}
 
@@ -453,12 +439,14 @@ public:
     ///
     /// The value is initialized as if direct-initializing (but not
     /// direct-list-initializing) an object of type T from the arguments
-    /// std::forward<std::initializer_list<U>>(ilist), std::forward<Args>(args)...
+    /// std::forward<std::initializer_list<U>>(ilist),
+    /// std::forward<Args>(args)...
     ///
     /// \param tag     The in_place tag
     /// \param ilist   An initializer list of entries to forward
     /// \param args... the arguments to pass to T's constructor
-    template <typename U, typename... Args,
+    template <typename U,
+              typename... Args,
               typename = std::enable_if_t<
                   std::is_constructible<T, std::initializer_list<U>&, Args...>::value>>
     constexpr explicit optional(in_place_t, std::initializer_list<U> ilist, Args&&... args);
@@ -482,11 +470,13 @@ public:
     ///       std::is_convertible_v<U&&, T> is false
     ///
     /// \param value the value to copy
-    template <typename U = T, std::enable_if_t<detail::optional_is_value_convertible<T, U>::value &&
-                                               std::is_convertible<U&&, T>::value>* = nullptr>
+    template <typename U = T,
+              std::enable_if_t<detail::optional_is_value_convertible<T, U>::value &&
+                               std::is_convertible<U&&, T>::value>* = nullptr>
     constexpr optional(U&& value);
-    template <typename U = T, std::enable_if_t<detail::optional_is_value_convertible<T, U>::value &&
-                                               !std::is_convertible<U&&, T>::value>* = nullptr>
+    template <typename U = T,
+              std::enable_if_t<detail::optional_is_value_convertible<T, U>::value &&
+                               !std::is_convertible<U&&, T>::value>* = nullptr>
     explicit constexpr optional(U&& value);
     /// \}
 
@@ -503,12 +493,10 @@ public:
     /// \param other the other optional to copy
     optional& operator=(enable_overload_if_t<std::is_copy_constructible<T>::value &&
                                                  std::is_copy_assignable<T>::value,
-                                             const optional&>
-                            other);
+                                             const optional&> other);
     optional& operator=(disable_overload_if_t<std::is_copy_constructible<T>::value &&
                                                   std::is_copy_assignable<T>::value,
-                                              const optional&>
-                            other) = delete;
+                                              const optional&> other) = delete;
 
     /// \brief Move assigns the optional stored in \p other
     ///
@@ -519,14 +507,12 @@ public:
     ///         unless U is
     ///
     /// \param other the other optional to move
-    optional&
-    operator=(enable_overload_if_t<
-              std::is_move_constructible<T>::value && std::is_move_assignable<T>::value, optional&&>
-                  other);
-    optional&
-    operator=(disable_overload_if_t<
-              std::is_move_constructible<T>::value && std::is_move_assignable<T>::value, optional&&>
-                  other) = delete;
+    optional& operator=(enable_overload_if_t<std::is_move_constructible<T>::value &&
+                                                 std::is_move_assignable<T>::value,
+                                             optional&&> other);
+    optional& operator=(disable_overload_if_t<std::is_move_constructible<T>::value &&
+                                                  std::is_move_assignable<T>::value,
+                                              optional&&> other) = delete;
 
     /// \brief Perfect-forwarded assignment
     ///
@@ -550,22 +536,26 @@ public:
 
     /// \brief Assigns the state of \p other
     ///
-    /// If both *this and other do not contain a value, the function has no effect.
+    /// If both *this and other do not contain a value, the function has no
+    /// effect.
     ///
     /// If *this contains a value, but other does not, then the contained
     /// value is destroyed by calling its destructor. *this does not
     /// contain a value after the call.
     ///
-    /// If other contains a value, then depending on whether *this contains a value,
-    /// the contained value is either direct-initialized or assigned from *other.
+    /// If other contains a value, then depending on whether *this contains a
+    /// value, the contained value is either direct-initialized or assigned from
+    /// *other.
     ///
     /// \note A moved-from optional still contains a value.
     ///
-    /// \note This overload does not participate in overload resolution unless the
+    /// \note This overload does not participate in overload resolution unless
+    /// the
     ///       following conditions are met:
     ///       - std::is_constructible_v<T, const U&> and
     ///         std::is_assignable_v<T&, const U&> are both true.
-    ///       - T is not constructible, convertible, or assignable from any expression
+    ///       - T is not constructible, convertible, or assignable from any
+    ///       expression
     ///         of type (possibly const) :optional<U>, i.e.,
     ///         the following 12 type traits are all false:
     ///         - std::is_constructible_v<T, std::optional<U>&>
@@ -585,28 +575,30 @@ public:
     /// \return reference to (*this)
     template <typename U>
     optional& operator=(std::enable_if_t<detail::optional_is_copy_convert_assignable<T, U>::value,
-                                         const optional<U>&>
-                            other);
+                                         const optional<U>&> other);
 
     /// \brief Assigns the state of \p other
     ///
-    /// If both *this and other do not contain a value, the function has no effect.
+    /// If both *this and other do not contain a value, the function has no
+    /// effect.
     ///
     /// If *this contains a value, but other does not, then the contained
     /// value is destroyed by calling its destructor. *this does not
     /// contain a value after the call.
     ///
-    /// If other contains a value, then depending on whether *this contains a value,
-    /// the contained value is either direct-initialized or assigned from
+    /// If other contains a value, then depending on whether *this contains a
+    /// value, the contained value is either direct-initialized or assigned from
     /// std::move(*other).
     ///
     /// \note A moved-from optional still contains a value.
     ///
-    /// \note This overload does not participate in overload resolution unless the
+    /// \note This overload does not participate in overload resolution unless
+    /// the
     ///       following conditions are met:
     ///       - std::is_constructible_v<T, U&&> and
     ///         std::is_assignable_v<T&, U&&> are both true.
-    ///       - T is not constructible, convertible, or assignable from any expression
+    ///       - T is not constructible, convertible, or assignable from any
+    ///       expression
     ///         of type (possibly const) :optional<U>, i.e.,
     ///         the following 12 type traits are all false:
     ///         - std::is_constructible_v<T, std::optional<U>&>
@@ -625,9 +617,8 @@ public:
     /// \param other another optional object whose contained value to assign
     /// \return reference to (*this)
     template <typename U>
-    optional& operator=(
-        std::enable_if_t<detail::optional_is_move_convert_assignable<T, U>::value, optional<U>&&>
-            other);
+    optional& operator=(std::enable_if_t<detail::optional_is_move_convert_assignable<T, U>::value,
+                                         optional<U>&&> other);
 
     //-----------------------------------------------------------------------
     // Observers
@@ -716,15 +707,16 @@ public:
     //------------------------------------------------------------------------
     // Monadic Functionality
     //------------------------------------------------------------------------
-public:
+   public:
     /// \brief Invokes the function \p fn with this optional as the argument
     ///
     /// If this optional is nullopt, this function returns nullopt
     /// \param fn the function to invoke with this
     /// \return The result of the function being called
-    template <typename Fn,
-              typename = std::enable_if_t<conjunction<
-                  is_invocable<Fn, const T&>, is_optional<invoke_result_t<Fn, const T&>>>::value>>
+    template <
+        typename Fn,
+        typename = std::enable_if_t<conjunction<is_invocable<Fn, const T&>,
+                                                is_optional<invoke_result_t<Fn, const T&>>>::value>>
     invoke_result_t<Fn, const T&> flat_map(Fn&& fn) const;
 
     /// \brief Invokes this function \p fn with this optional as the argument
@@ -911,6 +903,6 @@ void swap(optional<T>& lhs, optional<T>& rhs);
 template <typename T>
 constexpr hash_t hash_value(const optional<T>& s) noexcept;
 
-} // namespace glue
+}  // namespace glue
 
 #include "glue/base/detail/optional.inl"

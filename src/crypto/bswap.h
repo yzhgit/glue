@@ -12,8 +12,7 @@ namespace glue {
 /**
  * Swap a 16 bit integer
  */
-inline uint16_t reverse_bytes(uint16_t val)
-{
+inline uint16_t reverse_bytes(uint16_t val) {
 #if defined(GLUE_COMPILER_GCC) || defined(GLUE_COMPILER_CLANG)
     return __builtin_bswap16(val);
 #else
@@ -24,8 +23,7 @@ inline uint16_t reverse_bytes(uint16_t val)
 /**
  * Swap a 32 bit integer
  */
-inline uint32_t reverse_bytes(uint32_t val)
-{
+inline uint32_t reverse_bytes(uint32_t val) {
 #if defined(GLUE_COMPILER_GCC) || defined(GLUE_COMPILER_CLANG)
     return __builtin_bswap32(val);
 
@@ -53,8 +51,7 @@ inline uint32_t reverse_bytes(uint32_t val)
 /**
  * Swap a 64 bit integer
  */
-inline uint64_t reverse_bytes(uint64_t val)
-{
+inline uint64_t reverse_bytes(uint64_t val) {
 #if defined(GLUE_COMPILER_GCC) || defined(GLUE_COMPILER_CLANG)
     return __builtin_bswap64(val);
 
@@ -85,12 +82,11 @@ inline uint64_t reverse_bytes(uint64_t val)
  * Swap 4 Ts in an array
  */
 template <typename T>
-inline void bswap_4(T x[4])
-{
+inline void bswap_4(T x[4]) {
     x[0] = reverse_bytes(x[0]);
     x[1] = reverse_bytes(x[1]);
     x[2] = reverse_bytes(x[2]);
     x[3] = reverse_bytes(x[3]);
 }
 
-} // namespace glue
+}  // namespace glue

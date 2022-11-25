@@ -9,26 +9,23 @@
 
 namespace glue {
 
-void hex_encode(char output[], const uint8_t input[], size_t input_length, bool uppercase)
-{
-    static const uint8_t BIN_TO_HEX_UPPER[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
-                                                 '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+void hex_encode(char output[], const uint8_t input[], size_t input_length, bool uppercase) {
+    static const uint8_t BIN_TO_HEX_UPPER[16] = {
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-    static const uint8_t BIN_TO_HEX_LOWER[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
-                                                 '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+    static const uint8_t BIN_TO_HEX_LOWER[16] = {
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
     const uint8_t* tbl = uppercase ? BIN_TO_HEX_UPPER : BIN_TO_HEX_LOWER;
 
-    for (size_t i = 0; i != input_length; ++i)
-    {
+    for (size_t i = 0; i != input_length; ++i) {
         uint8_t x = input[i];
         output[2 * i] = tbl[(x >> 4) & 0x0F];
-        output[2 * i + 1] = tbl[(x) &0x0F];
+        output[2 * i + 1] = tbl[(x)&0x0F];
     }
 }
 
-std::string hex_encode(const uint8_t input[], size_t input_length, bool uppercase)
-{
+std::string hex_encode(const uint8_t input[], size_t input_length, bool uppercase) {
     std::string output(2 * input_length, 0);
 
     if (input_length) hex_encode(&output.front(), input, input_length, uppercase);
@@ -36,9 +33,11 @@ std::string hex_encode(const uint8_t input[], size_t input_length, bool uppercas
     return output;
 }
 
-size_t hex_decode(uint8_t output[], const char input[], size_t input_length, size_t& input_consumed,
-                  bool ignore_ws)
-{
+size_t hex_decode(uint8_t output[],
+                  const char input[],
+                  size_t input_length,
+                  size_t& input_consumed,
+                  bool ignore_ws) {
     /*
      * Mapping of hex characters to either their binary equivalent
      * or to an error code.
@@ -48,6 +47,7 @@ size_t hex_decode(uint8_t output[], const char input[], size_t input_length, siz
      * Warning: this table assumes ASCII character encodings
      */
 
+    // clang-format off
     static const uint8_t HEX_TO_BIN[256] = {
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x80, 0x80, 0xFF, 0xFF, 0xFF, 0xFF,
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -67,18 +67,17 @@ size_t hex_decode(uint8_t output[], const char input[], size_t input_length, siz
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         0xFF};
+    // clang-format on
 
     uint8_t* out_ptr = output;
     bool top_nibble = true;
 
     memset(output, 0, input_length / 2);
 
-    for (size_t i = 0; i != input_length; ++i)
-    {
+    for (size_t i = 0; i != input_length; ++i) {
         const uint8_t bin = HEX_TO_BIN[static_cast<uint8_t>(input[i])];
 
-        if (bin >= 0x10)
-        {
+        if (bin >= 0x10) {
             if (bin == 0x80 && ignore_ws) continue;
 
             std::string bad_char(1, input[i]);
@@ -107,8 +106,7 @@ size_t hex_decode(uint8_t output[], const char input[], size_t input_length, siz
      * We only got half of a uint8_t at the end; zap the half-written
      * output and mark it as unread
      */
-    if (!top_nibble)
-    {
+    if (!top_nibble) {
         *out_ptr = 0;
         input_consumed -= 1;
     }
@@ -116,8 +114,7 @@ size_t hex_decode(uint8_t output[], const char input[], size_t input_length, siz
     return written;
 }
 
-size_t hex_decode(uint8_t output[], const char input[], size_t input_length, bool ignore_ws)
-{
+size_t hex_decode(uint8_t output[], const char input[], size_t input_length, bool ignore_ws) {
     size_t consumed = 0;
     size_t written = hex_decode(output, input, input_length, consumed, ignore_ws);
 
@@ -127,24 +124,21 @@ size_t hex_decode(uint8_t output[], const char input[], size_t input_length, boo
     return written;
 }
 
-size_t hex_decode(uint8_t output[], const std::string& input, bool ignore_ws)
-{
+size_t hex_decode(uint8_t output[], const std::string& input, bool ignore_ws) {
     return hex_decode(output, input.data(), input.length(), ignore_ws);
 }
 
-std::string hex_decode(const char input[], size_t input_length, bool ignore_ws)
-{
+std::string hex_decode(const char input[], size_t input_length, bool ignore_ws) {
     std::vector<uint8_t> bin(1 + input_length / 2);
 
     size_t written = hex_decode(bin.data(), input, input_length, ignore_ws);
 
     bin.resize(written);
-    return std::string((const char*) bin.data(), bin.size());
+    return std::string((const char*)bin.data(), bin.size());
 }
 
-std::string hex_decode(const std::string& input, bool ignore_ws)
-{
+std::string hex_decode(const std::string& input, bool ignore_ws) {
     return hex_decode(input.data(), input.size(), ignore_ws);
 }
 
-} // namespace glue
+}  // namespace glue

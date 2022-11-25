@@ -5,20 +5,19 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <atomic>
 #include <mutex>
 #include <thread>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
 /// The Runnable interface with the run() method
 /// must be implemented by classes that provide
 /// an entry point for a thread.
-class GLUE_API Runnable
-{
-public:
+class GLUE_API Runnable {
+   public:
     virtual ~Runnable() = default;
 
     /// Do whatever the thread needs to do. Must
@@ -29,9 +28,8 @@ public:
 /// \class Thread
 /// \brief A threaded base class with a built in mutex for convenience.
 ///
-class GLUE_API Thread final
-{
-public:
+class GLUE_API Thread final {
+   public:
     /// \brief Create an Thread.
     Thread();
 
@@ -115,7 +113,8 @@ public:
     ///		    // start
     ///		    while(isRunning())
     ///         {
-    ///             // bReadyToProcess can be set from outside the threadedFuntion.
+    ///             // bReadyToProcess can be set from outside the
+    ///             threadedFuntion.
     ///             // perhaps by another thread that downloads data, or loads
     ///             // some media, etc.
     ///
@@ -202,19 +201,18 @@ public:
     /// \returns A reference to the backing GLUE thread.
     const std::thread& getNativeThread() const;
 
-    enum
-    {
+    enum {
         INFINITE_JOIN_TIMEOUT = -1
         ///< \brief A sentinal value for an infinite join timeout.
         ///<
         ///< Primarily used with the waitForThread() method.
     };
 
-protected:
+   protected:
     std::thread m_thread;
     mutable std::mutex m_mutex;
 
-private:
+   private:
     void threadEntry();
 
     ///< \brief Is the thread running?
@@ -227,4 +225,4 @@ private:
     std::shared_ptr<Runnable> m_pRunnableTarget;
 };
 
-} // namespace glue
+}  // namespace glue

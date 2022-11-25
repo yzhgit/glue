@@ -10,8 +10,6 @@ namespace glue {
 /// \brief Utility metafunction that always expands into an empty struct
 ///        with no members or type members
 template <typename T = void>
-struct empty
-{
-};
+struct empty {};
 
-} // namespace glue
+}  // namespace glue

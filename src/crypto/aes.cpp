@@ -24,18 +24,29 @@
 namespace glue {
 
 /*********************** FUNCTION DECLARATIONS **********************/
-void ccm_prepare_first_ctr_blk(uint8_t counter[], const uint8_t nonce[], int nonce_len,
+void ccm_prepare_first_ctr_blk(uint8_t counter[],
+                               const uint8_t nonce[],
+                               int nonce_len,
                                int payload_len_store_size);
-void ccm_prepare_first_format_blk(uint8_t buf[], int assoc_len, int payload_len,
-                                  int payload_len_store_size, int mac_len, const uint8_t nonce[],
+void ccm_prepare_first_format_blk(uint8_t buf[],
+                                  int assoc_len,
+                                  int payload_len,
+                                  int payload_len_store_size,
+                                  int mac_len,
+                                  const uint8_t nonce[],
                                   int nonce_len);
 void ccm_format_assoc_data(uint8_t buf[], int* end_of_buf, const uint8_t assoc[], int assoc_len);
-void ccm_format_payload_data(uint8_t buf[], int* end_of_buf, const uint8_t payload[], int payload_len);
+void ccm_format_payload_data(uint8_t buf[],
+                             int* end_of_buf,
+                             const uint8_t payload[],
+                             int payload_len);
 
 /**************************** VARIABLES *****************************/
 // This is the specified AES SBox. To look up a substitution value, put the
 // first nibble in the first index (row) and the second nibble in the second
 // index (column).
+
+// clang-format off
 static const uint8_t aes_sbox[16][16] = {{0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01,
                                        0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76},
                                       {0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4,
@@ -239,21 +250,23 @@ static const uint8_t gf_mul[256][6] = {
     {0xe3, 0x1f, 0x5d, 0xbe, 0x80, 0x9f}, {0xe1, 0x1c, 0x54, 0xb5, 0x8d, 0x91},
     {0xe7, 0x19, 0x4f, 0xa8, 0x9a, 0x83}, {0xe5, 0x1a, 0x46, 0xa3, 0x97, 0x8d}};
 
+// clang-format on
+
 /*********************** FUNCTION DEFINITIONS ***********************/
 // XORs the in and out buffers, storing the result in out. Length is in bytes.
-void xor_buf(const uint8_t in[], uint8_t out[], size_t len)
-{
-    size_t idx;
-
-    for (idx = 0; idx < len; idx++) out[idx] ^= in[idx];
+void xor_buf(const uint8_t in[], uint8_t out[], size_t len) {
+    for (size_t idx = 0; idx < len; idx++) out[idx] ^= in[idx];
 }
 
 /*******************
  * AES - CBC
  *******************/
-int aes_encrypt_cbc(const uint8_t in[], size_t in_len, uint8_t out[], const uint32_t key[], int keysize,
-                    const uint8_t iv[])
-{
+int aes_encrypt_cbc(const uint8_t in[],
+                    size_t in_len,
+                    uint8_t out[],
+                    const uint32_t key[],
+                    int keysize,
+                    const uint8_t iv[]) {
     uint8_t buf_in[AES_BLOCK_SIZE], buf_out[AES_BLOCK_SIZE], iv_buf[AES_BLOCK_SIZE];
     int blocks, idx;
 
@@ -263,8 +276,7 @@ int aes_encrypt_cbc(const uint8_t in[], size_t in_len, uint8_t out[], const uint
 
     memcpy(iv_buf, iv, AES_BLOCK_SIZE);
 
-    for (idx = 0; idx < blocks; idx++)
-    {
+    for (idx = 0; idx < blocks; idx++) {
         memcpy(buf_in, &in[idx * AES_BLOCK_SIZE], AES_BLOCK_SIZE);
         xor_buf(iv_buf, buf_in, AES_BLOCK_SIZE);
         aes_encrypt(buf_in, buf_out, key, keysize);
@@ -275,9 +287,12 @@ int aes_encrypt_cbc(const uint8_t in[], size_t in_len, uint8_t out[], const uint
     return (TRUE);
 }
 
-int aes_encrypt_cbc_mac(const uint8_t in[], size_t in_len, uint8_t out[], const uint32_t key[], int keysize,
-                        const uint8_t iv[])
-{
+int aes_encrypt_cbc_mac(const uint8_t in[],
+                        size_t in_len,
+                        uint8_t out[],
+                        const uint32_t key[],
+                        int keysize,
+                        const uint8_t iv[]) {
     uint8_t buf_in[AES_BLOCK_SIZE], buf_out[AES_BLOCK_SIZE], iv_buf[AES_BLOCK_SIZE];
     int blocks, idx;
 
@@ -287,8 +302,7 @@ int aes_encrypt_cbc_mac(const uint8_t in[], size_t in_len, uint8_t out[], const 
 
     memcpy(iv_buf, iv, AES_BLOCK_SIZE);
 
-    for (idx = 0; idx < blocks; idx++)
-    {
+    for (idx = 0; idx < blocks; idx++) {
         memcpy(buf_in, &in[idx * AES_BLOCK_SIZE], AES_BLOCK_SIZE);
         xor_buf(iv_buf, buf_in, AES_BLOCK_SIZE);
         aes_encrypt(buf_in, buf_out, key, keysize);
@@ -296,14 +310,17 @@ int aes_encrypt_cbc_mac(const uint8_t in[], size_t in_len, uint8_t out[], const 
         // Do not output all encrypted blocks.
     }
 
-    memcpy(out, buf_out, AES_BLOCK_SIZE); // Only output the last block.
+    memcpy(out, buf_out, AES_BLOCK_SIZE);  // Only output the last block.
 
     return (TRUE);
 }
 
-int aes_decrypt_cbc(const uint8_t in[], size_t in_len, uint8_t out[], const uint32_t key[], int keysize,
-                    const uint8_t iv[])
-{
+int aes_decrypt_cbc(const uint8_t in[],
+                    size_t in_len,
+                    uint8_t out[],
+                    const uint32_t key[],
+                    int keysize,
+                    const uint8_t iv[]) {
     uint8_t buf_in[AES_BLOCK_SIZE], buf_out[AES_BLOCK_SIZE], iv_buf[AES_BLOCK_SIZE];
     int blocks, idx;
 
@@ -313,8 +330,7 @@ int aes_decrypt_cbc(const uint8_t in[], size_t in_len, uint8_t out[], const uint
 
     memcpy(iv_buf, iv, AES_BLOCK_SIZE);
 
-    for (idx = 0; idx < blocks; idx++)
-    {
+    for (idx = 0; idx < blocks; idx++) {
         memcpy(buf_in, &in[idx * AES_BLOCK_SIZE], AES_BLOCK_SIZE);
         aes_decrypt(buf_in, buf_out, key, keysize);
         xor_buf(iv_buf, buf_out, AES_BLOCK_SIZE);
@@ -328,14 +344,12 @@ int aes_decrypt_cbc(const uint8_t in[], size_t in_len, uint8_t out[], const uint
 /*******************
  * AES - CTR
  *******************/
-void increment_iv(uint8_t iv[], int counter_size)
-{
+void increment_iv(uint8_t iv[], int counter_size) {
     int idx;
 
     // Use counter_size bytes at the end of the IV as the big-endian integer to
     // increment.
-    for (idx = AES_BLOCK_SIZE - 1; idx >= AES_BLOCK_SIZE - counter_size; idx--)
-    {
+    for (idx = AES_BLOCK_SIZE - 1; idx >= AES_BLOCK_SIZE - counter_size; idx--) {
         iv[idx]++;
         if (iv[idx] != 0 || idx == AES_BLOCK_SIZE - counter_size) break;
     }
@@ -343,9 +357,12 @@ void increment_iv(uint8_t iv[], int counter_size)
 
 // Performs the encryption in-place, the input and output buffers may be the
 // same. Input may be an arbitrary length (in bytes).
-void aes_encrypt_ctr(const uint8_t in[], size_t in_len, uint8_t out[], const uint32_t key[], int keysize,
-                     const uint8_t iv[])
-{
+void aes_encrypt_ctr(const uint8_t in[],
+                     size_t in_len,
+                     uint8_t out[],
+                     const uint32_t key[],
+                     int keysize,
+                     const uint8_t iv[]) {
     size_t idx = 0, last_block_length;
     uint8_t iv_buf[AES_BLOCK_SIZE], out_buf[AES_BLOCK_SIZE];
 
@@ -354,10 +371,8 @@ void aes_encrypt_ctr(const uint8_t in[], size_t in_len, uint8_t out[], const uin
     memcpy(iv_buf, iv, AES_BLOCK_SIZE);
     last_block_length = in_len - AES_BLOCK_SIZE;
 
-    if (in_len > AES_BLOCK_SIZE)
-    {
-        for (idx = 0; idx < last_block_length; idx += AES_BLOCK_SIZE)
-        {
+    if (in_len > AES_BLOCK_SIZE) {
+        for (idx = 0; idx < last_block_length; idx += AES_BLOCK_SIZE) {
             aes_encrypt(iv_buf, out_buf, key, keysize);
             xor_buf(out_buf, &out[idx], AES_BLOCK_SIZE);
             increment_iv(iv_buf, AES_BLOCK_SIZE);
@@ -366,12 +381,15 @@ void aes_encrypt_ctr(const uint8_t in[], size_t in_len, uint8_t out[], const uin
 
     aes_encrypt(iv_buf, out_buf, key, keysize);
     xor_buf(out_buf, &out[idx],
-            in_len - idx); // Use the Most Significant bytes.
+            in_len - idx);  // Use the Most Significant bytes.
 }
 
-void aes_decrypt_ctr(const uint8_t in[], size_t in_len, uint8_t out[], const uint32_t key[], int keysize,
-                     const uint8_t iv[])
-{
+void aes_decrypt_ctr(const uint8_t in[],
+                     size_t in_len,
+                     uint8_t out[],
+                     const uint32_t key[],
+                     int keysize,
+                     const uint8_t iv[]) {
     // CTR encryption is its own inverse function.
     aes_encrypt_ctr(in, in_len, out, key, keysize, iv);
 }
@@ -380,10 +398,17 @@ void aes_decrypt_ctr(const uint8_t in[], size_t in_len, uint8_t out[], const uin
  * AES - CCM
  *******************/
 // out_len = payload_len + assoc_len
-int aes_encrypt_ccm(const uint8_t payload[], uint32_t payload_len, const uint8_t assoc[],
-                    unsigned short assoc_len, const uint8_t nonce[], unsigned short nonce_len,
-                    uint8_t out[], uint32_t* out_len, uint32_t mac_len, const uint8_t key_str[], int keysize)
-{
+int aes_encrypt_ccm(const uint8_t payload[],
+                    uint32_t payload_len,
+                    const uint8_t assoc[],
+                    unsigned short assoc_len,
+                    const uint8_t nonce[],
+                    unsigned short nonce_len,
+                    uint8_t out[],
+                    uint32_t* out_len,
+                    uint32_t mac_len,
+                    const uint8_t key_str[],
+                    int keysize) {
     uint8_t temp_iv[AES_BLOCK_SIZE], counter[AES_BLOCK_SIZE], mac[16], *buf;
     int end_of_buf, payload_len_store_size;
     uint32_t key[60];
@@ -396,7 +421,7 @@ int aes_encrypt_ccm(const uint8_t payload[], uint32_t payload_len, const uint8_t
 
     if (assoc_len > 32768 /* = 2^15 */) return (FALSE);
 
-    buf = (uint8_t*) malloc(
+    buf = (uint8_t*)malloc(
         payload_len + assoc_len +
         48 /*Round both payload and associated data up a block size and add an extra block.*/);
     if (!buf) return (FALSE);
@@ -406,8 +431,8 @@ int aes_encrypt_ccm(const uint8_t payload[], uint32_t payload_len, const uint8_t
 
     // Format the first block of the formatted data.
     payload_len_store_size = AES_BLOCK_SIZE - 1 - nonce_len;
-    ccm_prepare_first_format_blk(buf, assoc_len, payload_len, payload_len_store_size, mac_len,
-                                 nonce, nonce_len);
+    ccm_prepare_first_format_blk(
+        buf, assoc_len, payload_len, payload_len_store_size, mac_len, nonce, nonce_len);
     end_of_buf = AES_BLOCK_SIZE;
 
     // Format the Associated Data, aka, assoc[].
@@ -431,8 +456,8 @@ int aes_encrypt_ccm(const uint8_t payload[], uint32_t payload_len, const uint8_t
     // Encrypt the Payload with CTR mode with a counter starting at 1.
     memcpy(temp_iv, counter, AES_BLOCK_SIZE);
     increment_iv(temp_iv,
-                 AES_BLOCK_SIZE - 1 - mac_len); // Last argument is the byte size of the counting
-                                                // portion of the counter block. /*BUG?*/
+                 AES_BLOCK_SIZE - 1 - mac_len);  // Last argument is the byte size of the counting
+                                                 // portion of the counter block. /*BUG?*/
     aes_encrypt_ctr(out, payload_len, out, key, keysize, temp_iv);
 
     // Encrypt the MAC with CTR mode with a counter starting at 0.
@@ -446,19 +471,26 @@ int aes_encrypt_ccm(const uint8_t payload[], uint32_t payload_len, const uint8_t
 
 // plaintext_len = ciphertext_len - mac_len
 // Needs a flag for whether the MAC matches.
-int aes_decrypt_ccm(const uint8_t ciphertext[], uint32_t ciphertext_len, const uint8_t assoc[],
-                    unsigned short assoc_len, const uint8_t nonce[], unsigned short nonce_len,
-                    uint8_t plaintext[], uint32_t* plaintext_len, uint32_t mac_len, int* mac_auth,
-                    const uint8_t key_str[], int keysize)
-{
+int aes_decrypt_ccm(const uint8_t ciphertext[],
+                    uint32_t ciphertext_len,
+                    const uint8_t assoc[],
+                    unsigned short assoc_len,
+                    const uint8_t nonce[],
+                    unsigned short nonce_len,
+                    uint8_t plaintext[],
+                    uint32_t* plaintext_len,
+                    uint32_t mac_len,
+                    int* mac_auth,
+                    const uint8_t key_str[],
+                    int keysize) {
     uint8_t temp_iv[AES_BLOCK_SIZE], counter[AES_BLOCK_SIZE], mac[16], mac_buf[16], *buf;
     int end_of_buf, plaintext_len_store_size;
     uint32_t key[60];
 
     if (ciphertext_len <= mac_len) return (FALSE);
 
-    buf = (uint8_t*) malloc(assoc_len + ciphertext_len /*ciphertext_len = plaintext_len + mac_len*/ +
-                         48);
+    buf = (uint8_t*)malloc(assoc_len + ciphertext_len /*ciphertext_len = plaintext_len + mac_len*/ +
+                           48);
     if (!buf) return (FALSE);
 
     // Prepare the key for usage.
@@ -476,20 +508,19 @@ int aes_decrypt_ccm(const uint8_t ciphertext[], uint32_t ciphertext_len, const u
     // Decrypt the Payload with CTR mode with a counter starting at 1.
     memcpy(temp_iv, counter, AES_BLOCK_SIZE);
     increment_iv(temp_iv,
-                 AES_BLOCK_SIZE - 1 - mac_len); // (AES_BLOCK_SIZE - 1 - mac_len) is the byte size
-                                                // of the counting portion of the counter block.
+                 AES_BLOCK_SIZE - 1 - mac_len);  // (AES_BLOCK_SIZE - 1 - mac_len) is the byte size
+                                                 // of the counting portion of the counter block.
     aes_decrypt_ctr(plaintext, *plaintext_len, plaintext, key, keysize, temp_iv);
 
     // Setting mac_auth to NULL disables the authentication check.
-    if (mac_auth != NULL)
-    {
+    if (mac_auth != NULL) {
         // Decrypt the MAC with CTR mode with a counter starting at 0.
         aes_decrypt_ctr(mac, mac_len, mac, key, keysize, counter);
 
         // Format the first block of the formatted data.
         plaintext_len_store_size = AES_BLOCK_SIZE - 1 - nonce_len;
-        ccm_prepare_first_format_blk(buf, assoc_len, *plaintext_len, plaintext_len_store_size,
-                                     mac_len, nonce, nonce_len);
+        ccm_prepare_first_format_blk(
+            buf, assoc_len, *plaintext_len, plaintext_len_store_size, mac_len, nonce, nonce_len);
         end_of_buf = AES_BLOCK_SIZE;
 
         // Format the Associated Data into the authentication buffer.
@@ -505,9 +536,9 @@ int aes_decrypt_ccm(const uint8_t ciphertext[], uint32_t ciphertext_len, const u
 
         // Compare the calculated MAC against the MAC embedded in the ciphertext
         // to see if they are the same.
-        if (!memcmp(mac, mac_buf, mac_len)) { *mac_auth = TRUE; }
-        else
-        {
+        if (!memcmp(mac, mac_buf, mac_len)) {
+            *mac_auth = TRUE;
+        } else {
             *mac_auth = FALSE;
             memset(plaintext, 0, *plaintext_len);
         }
@@ -520,18 +551,22 @@ int aes_decrypt_ccm(const uint8_t ciphertext[], uint32_t ciphertext_len, const u
 
 // Creates the first counter block. First byte is flags, then the nonce, then
 // the incremented part.
-void ccm_prepare_first_ctr_blk(uint8_t counter[], const uint8_t nonce[], int nonce_len,
-                               int payload_len_store_size)
-{
+void ccm_prepare_first_ctr_blk(uint8_t counter[],
+                               const uint8_t nonce[],
+                               int nonce_len,
+                               int payload_len_store_size) {
     memset(counter, 0, AES_BLOCK_SIZE);
     counter[0] = (payload_len_store_size - 1) & 0x07;
     memcpy(&counter[1], nonce, nonce_len);
 }
 
-void ccm_prepare_first_format_blk(uint8_t buf[], int assoc_len, int payload_len,
-                                  int payload_len_store_size, int mac_len, const uint8_t nonce[],
-                                  int nonce_len)
-{
+void ccm_prepare_first_format_blk(uint8_t buf[],
+                                  int assoc_len,
+                                  int payload_len,
+                                  int payload_len_store_size,
+                                  int mac_len,
+                                  const uint8_t nonce[],
+                                  int nonce_len) {
     // Set the flags for the first byte of the first block.
     buf[0] = ((((mac_len - 2) / 2) & 0x07) << 3) | ((payload_len_store_size - 1) & 0x07);
     if (assoc_len > 0) buf[0] += 0x40;
@@ -543,8 +578,7 @@ void ccm_prepare_first_format_blk(uint8_t buf[], int assoc_len, int payload_len,
     buf[14] = (payload_len >> 8) & 0x000000FF;
 }
 
-void ccm_format_assoc_data(uint8_t buf[], int* end_of_buf, const uint8_t assoc[], int assoc_len)
-{
+void ccm_format_assoc_data(uint8_t buf[], int* end_of_buf, const uint8_t assoc[], int assoc_len) {
     int pad;
 
     buf[*end_of_buf + 1] = assoc_len & 0x00FF;
@@ -557,8 +591,10 @@ void ccm_format_assoc_data(uint8_t buf[], int* end_of_buf, const uint8_t assoc[]
     *end_of_buf += pad;
 }
 
-void ccm_format_payload_data(uint8_t buf[], int* end_of_buf, const uint8_t payload[], int payload_len)
-{
+void ccm_format_payload_data(uint8_t buf[],
+                             int* end_of_buf,
+                             const uint8_t payload[],
+                             int payload_len) {
     int pad;
 
     memcpy(&buf[*end_of_buf], payload, payload_len);
@@ -577,53 +613,60 @@ void ccm_format_payload_data(uint8_t buf[], int* end_of_buf, const uint8_t paylo
 /////////////////
 
 // Substitutes a word using the AES S-Box.
-uint32_t SubWord(uint32_t word)
-{
+uint32_t SubWord(uint32_t word) {
     unsigned int result;
 
-    result = (int) aes_sbox[(word >> 4) & 0x0000000F][word & 0x0000000F];
-    result += (int) aes_sbox[(word >> 12) & 0x0000000F][(word >> 8) & 0x0000000F] << 8;
-    result += (int) aes_sbox[(word >> 20) & 0x0000000F][(word >> 16) & 0x0000000F] << 16;
-    result += (int) aes_sbox[(word >> 28) & 0x0000000F][(word >> 24) & 0x0000000F] << 24;
+    result = (int)aes_sbox[(word >> 4) & 0x0000000F][word & 0x0000000F];
+    result += (int)aes_sbox[(word >> 12) & 0x0000000F][(word >> 8) & 0x0000000F] << 8;
+    result += (int)aes_sbox[(word >> 20) & 0x0000000F][(word >> 16) & 0x0000000F] << 16;
+    result += (int)aes_sbox[(word >> 28) & 0x0000000F][(word >> 24) & 0x0000000F] << 24;
     return (result);
 }
 
 // Performs the action of generating the keys that will be used in every round
 // of encryption. "key" is the user-supplied input key, "w" is the output key
 // schedule, "keysize" is the length in bits of "key", must be 128, 192, or 256.
-void aes_key_setup(const uint8_t key[], uint32_t w[], int keysize)
-{
+void aes_key_setup(const uint8_t key[], uint32_t w[], int keysize) {
     int Nb = 4, Nr, Nk, idx;
-    uint32_t temp, Rcon[] = {0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
-                         0x20000000, 0x40000000, 0x80000000, 0x1b000000, 0x36000000,
-                         0x6c000000, 0xd8000000, 0xab000000, 0x4d000000, 0x9a000000};
+    uint32_t temp, Rcon[] = {0x01000000,
+                             0x02000000,
+                             0x04000000,
+                             0x08000000,
+                             0x10000000,
+                             0x20000000,
+                             0x40000000,
+                             0x80000000,
+                             0x1b000000,
+                             0x36000000,
+                             0x6c000000,
+                             0xd8000000,
+                             0xab000000,
+                             0x4d000000,
+                             0x9a000000};
 
-    switch (keysize)
-    {
-    case 128:
-        Nr = 10;
-        Nk = 4;
-        break;
-    case 192:
-        Nr = 12;
-        Nk = 6;
-        break;
-    case 256:
-        Nr = 14;
-        Nk = 8;
-        break;
-    default:
-        return;
+    switch (keysize) {
+        case 128:
+            Nr = 10;
+            Nk = 4;
+            break;
+        case 192:
+            Nr = 12;
+            Nk = 6;
+            break;
+        case 256:
+            Nr = 14;
+            Nk = 8;
+            break;
+        default:
+            return;
     }
 
-    for (idx = 0; idx < Nk; ++idx)
-    {
+    for (idx = 0; idx < Nk; ++idx) {
         w[idx] = ((key[4 * idx]) << 24) | ((key[4 * idx + 1]) << 16) | ((key[4 * idx + 2]) << 8) |
                  ((key[4 * idx + 3]));
     }
 
-    for (idx = Nk; idx < Nb * (Nr + 1); ++idx)
-    {
+    for (idx = Nk; idx < Nb * (Nr + 1); ++idx) {
         temp = w[idx - 1];
         if ((idx % Nk) == 0)
             temp = SubWord(KE_ROTWORD(temp)) ^ Rcon[(idx - 1) / Nk];
@@ -641,8 +684,7 @@ void aes_key_setup(const uint8_t key[], uint32_t w[], int keysize)
 // key in the form of 4 integers (the "w" array). Each integer is XOR'd by one
 // column of the state. Also performs the job of InvAddRoundKey(); since the
 // function is a simple XOR process, it is its own inverse.
-void AddRoundKey(uint8_t state[][4], const uint32_t w[])
-{
+void AddRoundKey(uint8_t state[][4], const uint32_t w[]) {
     uint8_t subkey[4];
 
     // memcpy(subkey,&w[idx],4); // Not accurate for big endian machines
@@ -690,8 +732,7 @@ void AddRoundKey(uint8_t state[][4], const uint32_t w[])
 
 // Performs the SubBytes step. All bytes in the state are substituted with a
 // pre-calculated value from a lookup table.
-void SubBytes(uint8_t state[][4])
-{
+void SubBytes(uint8_t state[][4]) {
     state[0][0] = aes_sbox[state[0][0] >> 4][state[0][0] & 0x0F];
     state[0][1] = aes_sbox[state[0][1] >> 4][state[0][1] & 0x0F];
     state[0][2] = aes_sbox[state[0][2] >> 4][state[0][2] & 0x0F];
@@ -710,8 +751,7 @@ void SubBytes(uint8_t state[][4])
     state[3][3] = aes_sbox[state[3][3] >> 4][state[3][3] & 0x0F];
 }
 
-void InvSubBytes(uint8_t state[][4])
-{
+void InvSubBytes(uint8_t state[][4]) {
     state[0][0] = aes_invsbox[state[0][0] >> 4][state[0][0] & 0x0F];
     state[0][1] = aes_invsbox[state[0][1] >> 4][state[0][1] & 0x0F];
     state[0][2] = aes_invsbox[state[0][2] >> 4][state[0][2] & 0x0F];
@@ -735,8 +775,7 @@ void InvSubBytes(uint8_t state[][4])
 /////////////////
 
 // Performs the ShiftRows step. All rows are shifted cylindrically to the left.
-void ShiftRows(uint8_t state[][4])
-{
+void ShiftRows(uint8_t state[][4]) {
     int t;
 
     // Shift left by 1
@@ -761,8 +800,7 @@ void ShiftRows(uint8_t state[][4])
 }
 
 // All rows are shifted cylindrically to the right.
-void InvShiftRows(uint8_t state[][4])
-{
+void InvShiftRows(uint8_t state[][4]) {
     int t;
 
     // Shift right by 1
@@ -794,8 +832,7 @@ void InvShiftRows(uint8_t state[][4])
 // multiplication in a Galios Field 2^8. All multiplication is pre-computed in a
 // table. Addition is equivilent to XOR. (Must always make a copy of the column
 // as the original values will be destoyed.)
-void MixColumns(uint8_t state[][4])
-{
+void MixColumns(uint8_t state[][4]) {
     uint8_t col[4];
 
     // Column 1
@@ -884,8 +921,7 @@ void MixColumns(uint8_t state[][4])
     state[3][3] ^= gf_mul[col[3]][0];
 }
 
-void InvMixColumns(uint8_t state[][4])
-{
+void InvMixColumns(uint8_t state[][4]) {
     uint8_t col[4];
 
     // Column 1
@@ -978,8 +1014,7 @@ void InvMixColumns(uint8_t state[][4])
 // (En/De)Crypt
 /////////////////
 
-void aes_encrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int keysize)
-{
+void aes_encrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int keysize) {
     uint8_t state[4][4];
 
     // Copy input array (should be 16 bytes long) to a matrix (sequential bytes
@@ -1044,8 +1079,7 @@ void aes_encrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int ke
     ShiftRows(state);
     MixColumns(state);
     AddRoundKey(state, &key[36]);
-    if (keysize != 128)
-    {
+    if (keysize != 128) {
         SubBytes(state);
         ShiftRows(state);
         MixColumns(state);
@@ -1054,8 +1088,7 @@ void aes_encrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int ke
         ShiftRows(state);
         MixColumns(state);
         AddRoundKey(state, &key[44]);
-        if (keysize != 192)
-        {
+        if (keysize != 192) {
             SubBytes(state);
             ShiftRows(state);
             MixColumns(state);
@@ -1067,16 +1100,12 @@ void aes_encrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int ke
             SubBytes(state);
             ShiftRows(state);
             AddRoundKey(state, &key[56]);
-        }
-        else
-        {
+        } else {
             SubBytes(state);
             ShiftRows(state);
             AddRoundKey(state, &key[48]);
         }
-    }
-    else
-    {
+    } else {
         SubBytes(state);
         ShiftRows(state);
         AddRoundKey(state, &key[40]);
@@ -1101,8 +1130,7 @@ void aes_encrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int ke
     out[15] = state[3][3];
 }
 
-void aes_decrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int keysize)
-{
+void aes_decrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int keysize) {
     uint8_t state[4][4];
 
     // Copy the input to the state.
@@ -1125,10 +1153,8 @@ void aes_decrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int ke
 
     // Perform the necessary number of rounds. The round key is added first.
     // The last round does not perform the MixColumns step.
-    if (keysize > 128)
-    {
-        if (keysize > 192)
-        {
+    if (keysize > 128) {
+        if (keysize > 192) {
             AddRoundKey(state, &key[56]);
             InvShiftRows(state);
             InvSubBytes(state);
@@ -1138,9 +1164,7 @@ void aes_decrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int ke
             InvSubBytes(state);
             AddRoundKey(state, &key[48]);
             InvMixColumns(state);
-        }
-        else
-        {
+        } else {
             AddRoundKey(state, &key[48]);
         }
         InvShiftRows(state);
@@ -1151,9 +1175,7 @@ void aes_decrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int ke
         InvSubBytes(state);
         AddRoundKey(state, &key[40]);
         InvMixColumns(state);
-    }
-    else
-    {
+    } else {
         AddRoundKey(state, &key[40]);
     }
     InvShiftRows(state);
@@ -1215,4 +1237,4 @@ void aes_decrypt(const uint8_t in[], uint8_t out[], const uint32_t key[], int ke
     out[15] = state[3][3];
 }
 
-}
+}  // namespace glue

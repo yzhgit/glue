@@ -21,7 +21,8 @@
    method is available for incremental computation. You can use any hash for
    HMAC as long as it provides:
     - constant HashMethod::BlockSize (typically 64)
-    - constant HashMethod::DigestSize (length of hash in bytes, e.g. 20 for SHA1)
+    - constant HashMethod::DigestSize (length of hash in bytes, e.g. 20 for
+   SHA1)
     - HashMethod::add(buffer, bufferSize)
     - HashMethod::getHash(unsigned char buffer[HashMethod::BlockSize])
   */
@@ -32,19 +33,15 @@ namespace glue {
 
 /// compute HMAC hash of data and key using MD5 or SHA256
 template <typename HashMethod>
-std::string hmac(const void* data, size_t numDataBytes, const void* key, size_t numKeyBytes)
-{
+std::string hmac(const void* data, size_t numDataBytes, const void* key, size_t numKeyBytes) {
     // initialize key with zeros
     unsigned char usedKey[HashMethod::BlockSize] = {0};
 
     // adjust length of key: must contain exactly blockSize bytes
-    if (numKeyBytes <= HashMethod::BlockSize)
-    {
+    if (numKeyBytes <= HashMethod::BlockSize) {
         // copy key
         memcpy(usedKey, key, numKeyBytes);
-    }
-    else
-    {
+    } else {
         // shorten key: usedKey = hashed(key)
         HashMethod keyHasher;
         keyHasher.update(key, numKeyBytes);
@@ -75,9 +72,8 @@ std::string hmac(const void* data, size_t numDataBytes, const void* key, size_t 
 
 /// convenience function for std::string
 template <typename HashMethod>
-std::string hmac(const std::string& data, const std::string& key)
-{
+std::string hmac(const std::string& data, const std::string& key) {
     return hmac<HashMethod>(data.c_str(), data.size(), key.c_str(), key.size());
 }
 
-} // namespace glue
+}  // namespace glue

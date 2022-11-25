@@ -5,24 +5,17 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <vector>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
-class GLUE_API SHA_256
-{
-public:
+class GLUE_API SHA_256 {
+   public:
     /// split into 128 byte blocks (=> 1024 bits), hash is 64 bytes long
-    enum
-    {
-        BlockSize = 64
-    };
-    enum
-    {
-        DigestSize = 32
-    };
+    enum { BlockSize = 64 };
+    enum { DigestSize = 32 };
 
     SHA_256();
 
@@ -31,27 +24,30 @@ public:
     // output is DigestSize long
     void final(uint8_t output[]);
 
-private:
+   private:
     void compress_n(const uint8_t input[], size_t blocks);
 
     /*
      * Perform a SHA-256 compression. For internal use
      */
-    static void compress_digest(std::vector<uint32_t>& digest, const uint8_t input[],
+    static void compress_digest(std::vector<uint32_t>& digest,
+                                const uint8_t input[],
                                 size_t blocks);
 
-private:
+   private:
 #if defined(GL_HAS_SHA2_32_ARMV8)
-    static void compress_digest_armv8(secure_vector<uint32_t>& digest, const uint8_t input[],
+    static void compress_digest_armv8(secure_vector<uint32_t>& digest,
+                                      const uint8_t input[],
                                       size_t blocks);
 #endif
 
 #if defined(GL_HAS_SHA2_32_X86)
-    static void compress_digest_x86(secure_vector<uint32_t>& digest, const uint8_t input[],
+    static void compress_digest_x86(secure_vector<uint32_t>& digest,
+                                    const uint8_t input[],
                                     size_t blocks);
 #endif
 
-private:
+   private:
     /// size of processed data in bytes
     uint64_t m_count;
     /// valid bytes in m_buffer
@@ -62,4 +58,4 @@ private:
     std::vector<uint32_t> m_digest;
 };
 
-} // namespace glue
+}  // namespace glue

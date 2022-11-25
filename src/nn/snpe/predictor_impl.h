@@ -9,42 +9,30 @@
 
 namespace zdl {
 namespace SNPE {
-    class SNPE;
+class SNPE;
 }
-} // namespace zdl
+}  // namespace zdl
 
 namespace zdl {
 namespace DlSystem {
-    class IUserBuffer;
+class IUserBuffer;
 }
-} // namespace zdl
+}  // namespace zdl
 
 namespace zdl {
 namespace DlSystem {
-    class UserBufferMap;
+class UserBufferMap;
 }
-} // namespace zdl
+}  // namespace zdl
 
 namespace glue {
 
-class PredictorImpl : public Predictor
-{
-private:
-    enum
-    {
-        UNKNOWN,
-        USERBUFFER_FLOAT,
-        USERBUFFER_TF8,
-        ITENSOR,
-        USERBUFFER_TF16
-    };
-    enum
-    {
-        CPUBUFFER,
-        GLBUFFER
-    };
+class PredictorImpl : public Predictor {
+   private:
+    enum { UNKNOWN, USERBUFFER_FLOAT, USERBUFFER_TF8, ITENSOR, USERBUFFER_TF16 };
+    enum { CPUBUFFER, GLBUFFER };
 
-public:
+   public:
     PredictorImpl();
     ~PredictorImpl();
     int SetNumThreads(int num_threads);
@@ -55,16 +43,17 @@ public:
     int PreProcess(const std::vector<TensorInfo>& input_tensor_info_list);
     int Process(std::vector<TensorInfo>& output_tensor_info_list);
 
-private:
+   private:
     std::unique_ptr<zdl::SNPE::SNPE> CreateSnpe(const std::string& model_filename,
                                                 bool use_user_supplied_buffers);
-    int GetTensorInfo(std::unique_ptr<zdl::SNPE::SNPE> const& snpe, const std::string& name,
+    int GetTensorInfo(std::unique_ptr<zdl::SNPE::SNPE> const& snpe,
+                      const std::string& name,
                       std::vector<int>& dims);
     int GetAllTensorInfo(std::unique_ptr<zdl::SNPE::SNPE> const& snpe,
                          std::vector<TensorInfo>& input_tensor_info_list,
                          std::vector<TensorInfo>& output_tensor_info_list);
 
-private:
+   private:
     int num_threads_;
     std::unique_ptr<zdl::SNPE::SNPE> snpe_;
     std::unique_ptr<zdl::DlSystem::UserBufferMap> input_map_;
@@ -75,4 +64,4 @@ private:
     std::unordered_map<std::string, std::vector<uint8_t>> application_output_buffers_;
 };
 
-} // namespace glue
+}  // namespace glue

@@ -5,13 +5,12 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-#include "glue/base/exception.h"
-
-#include "secmem.h"
-
 #include <string>
 #include <vector>
+
+#include "glue/base/common.h"
+#include "glue/base/exception.h"
+#include "secmem.h"
 
 namespace glue {
 
@@ -30,9 +29,12 @@ namespace glue {
 * @return number of bytes written to output
 */
 template <class Base>
-size_t base_encode(Base&& base, char output[], const uint8_t input[], size_t input_length,
-                   size_t& input_consumed, bool final_inputs)
-{
+size_t base_encode(Base&& base,
+                   char output[],
+                   const uint8_t input[],
+                   size_t input_length,
+                   size_t& input_consumed,
+                   bool final_inputs) {
     input_consumed = 0;
 
     const size_t encoding_bytes_in = base.encoding_bytes_in();
@@ -41,8 +43,7 @@ size_t base_encode(Base&& base, char output[], const uint8_t input[], size_t inp
     size_t input_remaining = input_length;
     size_t output_produced = 0;
 
-    while (input_remaining >= encoding_bytes_in)
-    {
+    while (input_remaining >= encoding_bytes_in) {
         base.encode(output + output_produced, input + input_consumed);
 
         input_consumed += encoding_bytes_in;
@@ -50,10 +51,11 @@ size_t base_encode(Base&& base, char output[], const uint8_t input[], size_t inp
         input_remaining -= encoding_bytes_in;
     }
 
-    if (final_inputs && input_remaining)
-    {
+    if (final_inputs && input_remaining) {
         std::vector<uint8_t> remainder(encoding_bytes_in, 0);
-        for (size_t i = 0; i != input_remaining; ++i) { remainder[i] = input[input_consumed + i]; }
+        for (size_t i = 0; i != input_remaining; ++i) {
+            remainder[i] = input[input_consumed + i];
+        }
 
         base.encode(output + output_produced, remainder.data());
 
@@ -62,8 +64,7 @@ size_t base_encode(Base&& base, char output[], const uint8_t input[], size_t inp
 
         size_t empty_bits = 8 * (encoding_bytes_in - input_remaining);
         size_t index = output_produced + encoding_bytes_out - 1;
-        while (empty_bits >= remaining_bits_before_padding)
-        {
+        while (empty_bits >= remaining_bits_before_padding) {
             output[index--] = '=';
             empty_bits -= bits_consumed;
         }
@@ -76,16 +77,14 @@ size_t base_encode(Base&& base, char output[], const uint8_t input[], size_t inp
 }
 
 template <typename Base>
-std::string base_encode_to_string(Base&& base, const uint8_t input[], size_t input_length)
-{
+std::string base_encode_to_string(Base&& base, const uint8_t input[], size_t input_length) {
     const size_t output_length = base.encode_max_output(input_length);
     std::string output(output_length, 0);
 
     size_t consumed = 0;
     size_t produced = 0;
 
-    if (output_length > 0)
-    {
+    if (output_length > 0) {
         produced = base_encode(base, &output.front(), input, input_length, consumed, true);
     }
 
@@ -112,9 +111,13 @@ std::string base_encode_to_string(Base&& base, const uint8_t input[], size_t inp
 * @return number of bytes written to output
 */
 template <typename Base>
-size_t base_decode(Base&& base, uint8_t output[], const char input[], size_t input_length,
-                   size_t& input_consumed, bool final_inputs, bool ignore_ws = true)
-{
+size_t base_decode(Base&& base,
+                   uint8_t output[],
+                   const char input[],
+                   size_t input_length,
+                   size_t& input_consumed,
+                   bool final_inputs,
+                   bool ignore_ws = true) {
     const size_t decoding_bytes_in = base.decoding_bytes_in();
     const size_t decoding_bytes_out = base.decoding_bytes_out();
 
@@ -125,11 +128,10 @@ size_t base_decode(Base&& base, uint8_t output[], const char input[], size_t inp
 
     clear_mem(output, base.decode_max_output(input_length));
 
-    for (size_t i = 0; i != input_length; ++i)
-    {
+    for (size_t i = 0; i != input_length; ++i) {
         const uint8_t bin = base.lookup_binary_value(input[i]);
 
-        if (base.check_bad_char(bin, input[i], ignore_ws)) // May throw Invalid_Argument
+        if (base.check_bad_char(bin, input[i], ignore_ws))  // May throw Invalid_Argument
         {
             decode_buf[decode_buf_pos] = bin;
             ++decode_buf_pos;
@@ -138,19 +140,18 @@ size_t base_decode(Base&& base, uint8_t output[], const char input[], size_t inp
         /*
          * If we're at the end of the input, pad with 0s and truncate
          */
-        if (final_inputs && (i == input_length - 1))
-        {
-            if (decode_buf_pos)
-            {
-                for (size_t j = decode_buf_pos; j < decoding_bytes_in; ++j) { decode_buf[j] = 0; }
+        if (final_inputs && (i == input_length - 1)) {
+            if (decode_buf_pos) {
+                for (size_t j = decode_buf_pos; j < decoding_bytes_in; ++j) {
+                    decode_buf[j] = 0;
+                }
 
                 final_truncate = decoding_bytes_in - decode_buf_pos;
                 decode_buf_pos = decoding_bytes_in;
             }
         }
 
-        if (decode_buf_pos == decoding_bytes_in)
-        {
+        if (decode_buf_pos == decoding_bytes_in) {
             base.decode(out_ptr, decode_buf.data());
 
             out_ptr += decoding_bytes_out;
@@ -159,8 +160,8 @@ size_t base_decode(Base&& base, uint8_t output[], const char input[], size_t inp
         }
     }
 
-    while (input_consumed < input_length && base.lookup_binary_value(input[input_consumed]) == 0x80)
-    {
+    while (input_consumed < input_length &&
+           base.lookup_binary_value(input[input_consumed]) == 0x80) {
         ++input_consumed;
     }
 
@@ -170,15 +171,13 @@ size_t base_decode(Base&& base, uint8_t output[], const char input[], size_t inp
 }
 
 template <typename Base>
-size_t base_decode_full(Base&& base, uint8_t output[], const char input[], size_t input_length,
-                        bool ignore_ws)
-{
+size_t base_decode_full(
+    Base&& base, uint8_t output[], const char input[], size_t input_length, bool ignore_ws) {
     size_t consumed = 0;
     const size_t written =
         base_decode(base, output, input, input_length, consumed, true, ignore_ws);
 
-    if (consumed != input_length)
-    {
+    if (consumed != input_length) {
         throw InvalidArgumentException(base.name() +
                                        " decoding failed, input did not have full bytes");
     }
@@ -187,15 +186,16 @@ size_t base_decode_full(Base&& base, uint8_t output[], const char input[], size_
 }
 
 template <typename Base>
-std::string base_decode_to_string(Base&& base, const char input[], size_t input_length,
-                                  bool ignore_ws)
-{
+std::string base_decode_to_string(Base&& base,
+                                  const char input[],
+                                  size_t input_length,
+                                  bool ignore_ws) {
     const size_t output_length = base.decode_max_output(input_length);
     std::vector<uint8_t> bin(output_length);
 
     const size_t written = base_decode_full(base, bin.data(), input, input_length, ignore_ws);
 
-    return std::string((char*) bin.data(), written);
+    return std::string((char*)bin.data(), written);
 }
 
-} // namespace glue
+}  // namespace glue

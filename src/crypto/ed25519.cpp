@@ -4,14 +4,13 @@
 //
 
 #include "glue/crypto/ed25519.h"
-#include "glue/crypto/sha512.h"
 
 #include "ed25519_internal.h"
+#include "glue/crypto/sha512.h"
 
 namespace glue {
 
-void ed25519_gen_keypair(uint8_t* pk, uint8_t* sk, const uint8_t seed[32])
-{
+void ed25519_gen_keypair(uint8_t* pk, uint8_t* sk, const uint8_t seed[32]) {
     uint8_t az[64];
 
     SHA_512 sha;
@@ -28,9 +27,12 @@ void ed25519_gen_keypair(uint8_t* pk, uint8_t* sk, const uint8_t seed[32])
     copy_mem(sk + 32, pk, 32);
 }
 
-void ed25519_sign(uint8_t sig[64], const uint8_t m[], size_t mlen, const uint8_t sk[64],
-                  const uint8_t domain_sep[], size_t domain_sep_len)
-{
+void ed25519_sign(uint8_t sig[64],
+                  const uint8_t m[],
+                  size_t mlen,
+                  const uint8_t sk[64],
+                  const uint8_t domain_sep[],
+                  size_t domain_sep_len) {
     uint8_t az[64];
     uint8_t nonce[64];
     uint8_t hram[64];
@@ -61,16 +63,23 @@ void ed25519_sign(uint8_t sig[64], const uint8_t m[], size_t mlen, const uint8_t
     sc_muladd(sig + 32, hram, az, nonce);
 }
 
-bool ed25519_verify(const uint8_t* m, size_t mlen, const uint8_t sig[64], const uint8_t* pk,
-                    const uint8_t domain_sep[], size_t domain_sep_len)
-{
+bool ed25519_verify(const uint8_t* m,
+                    size_t mlen,
+                    const uint8_t sig[64],
+                    const uint8_t* pk,
+                    const uint8_t domain_sep[],
+                    size_t domain_sep_len) {
     uint8_t h[64];
     uint8_t rcheck[32];
     ge_p3 A;
     SHA_512 sha;
 
-    if (sig[63] & 224) { return false; }
-    if (ge_frombytes_negate_vartime(&A, pk) != 0) { return false; }
+    if (sig[63] & 224) {
+        return false;
+    }
+    if (ge_frombytes_negate_vartime(&A, pk) != 0) {
+        return false;
+    }
 
     sha.update(domain_sep, domain_sep_len);
     sha.update(sig, 32);
@@ -84,4 +93,4 @@ bool ed25519_verify(const uint8_t* m, size_t mlen, const uint8_t sig[64], const 
     return constant_time_compare(rcheck, sig, 32);
 }
 
-} // namespace glue
+}  // namespace glue

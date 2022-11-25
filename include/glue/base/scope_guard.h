@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <exception>
 #include <type_traits>
 #include <utility>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
@@ -20,18 +20,16 @@ namespace glue {
 /// This is guaranteed to run the action, even if an exception is thrown
 ///////////////////////////////////////////////////////////////////////////
 template <typename Fn>
-class ScopeGuard
-{
-public:
-    enum class scope : char
-    {
-        cancelled = 0x0,     ///< Don't execute
-        on_clean_exit = 0x1, ///< Execute on clean
-        on_error_exit = 0x2, ///< Execute on error
-        on_exit = 0x4,       ///< Execute on either clean or error
+class ScopeGuard {
+   public:
+    enum class scope : char {
+        cancelled = 0x0,      ///< Don't execute
+        on_clean_exit = 0x1,  ///< Execute on clean
+        on_error_exit = 0x2,  ///< Execute on error
+        on_exit = 0x4,        ///< Execute on either clean or error
     };
 
-public:
+   public:
     /// \brief Constructs an action to perform on end-of-scope
     ///
     /// \param scope the time to execute the ScopeGuard
@@ -59,32 +57,29 @@ public:
     // Disallow copy-assignment
     ScopeGuard& operator=(const ScopeGuard&) = delete;
 
-public:
+   public:
     /// \brief Cancels the final act from occurring
     void cancel() noexcept;
 
-private:
-    Fn m_action;   ///< The action to perform
-    scope m_scope; ///< When to invoke the scope guard
+   private:
+    Fn m_action;    ///< The action to perform
+    scope m_scope;  ///< When to invoke the scope guard
 };
 
 template <typename Fn>
 inline constexpr bit::core::ScopeGuard<Fn>::ScopeGuard(scope scope, Fn function) noexcept(
     std::is_nothrow_move_constructible<Fn>::value)
-    : m_action(std::move(function)), m_scope(scope)
-{}
+    : m_action(std::move(function)), m_scope(scope) {}
 
 template <typename Fn>
 inline constexpr bit::core::ScopeGuard<Fn>::ScopeGuard(ScopeGuard&& other) noexcept(
     std::is_nothrow_move_constructible<Fn>::value)
-    : m_action(std::move(other.m_action)), m_scope(other.m_scope)
-{
+    : m_action(std::move(other.m_action)), m_scope(other.m_scope) {
     other.m_scope = scope::cancelled;
 }
 
 template <typename Fn>
-inline bit::core::ScopeGuard<Fn>::~ScopeGuard()
-{
+inline bit::core::ScopeGuard<Fn>::~ScopeGuard() {
     if (m_scope == scope::cancelled) return;
 #if __cplusplus >= 201703L
     auto has_exceptions = (std::uncaught_exceptions() > 0);
@@ -92,16 +87,14 @@ inline bit::core::ScopeGuard<Fn>::~ScopeGuard()
     auto has_exceptions = std::uncaught_exception();
 #endif
     if ((m_scope == scope::on_exit) || ((m_scope == scope::on_clean_exit) && !has_exceptions) ||
-        ((m_scope == scope::on_error_exit) && has_exceptions))
-    {
+        ((m_scope == scope::on_error_exit) && has_exceptions)) {
         m_action();
     }
 }
 
 template <typename Fn>
 inline bit::core::ScopeGuard<Fn>& bit::core::ScopeGuard<Fn>::operator=(ScopeGuard&& other) noexcept(
-    std::is_nothrow_move_assignable<Fn>::value)
-{
+    std::is_nothrow_move_assignable<Fn>::value) {
     m_action = std::move(other.m_action);
     m_scope = other.m_scope;
 
@@ -109,8 +102,7 @@ inline bit::core::ScopeGuard<Fn>& bit::core::ScopeGuard<Fn>::operator=(ScopeGuar
 }
 
 template <typename Fn>
-inline void bit::core::ScopeGuard<Fn>::cancel() noexcept
-{
+inline void bit::core::ScopeGuard<Fn>::cancel() noexcept {
     m_scope = scope::cancelled;
 }
 
@@ -122,8 +114,7 @@ inline void bit::core::ScopeGuard<Fn>::cancel() noexcept
 ///
 /// \param fn the function to execute when a scope is exited
 template <typename Fn>
-inline constexpr ScopeGuard<std::decay_t<Fn>> on_scope_exit(Fn&& fn)
-{
+inline constexpr ScopeGuard<std::decay_t<Fn>> on_scope_exit(Fn&& fn) {
     using scope = typename ScopeGuard<std::decay_t<Fn>>::scope;
     return {scope::on_exit, std::forward<Fn>(fn)};
 }
@@ -133,8 +124,7 @@ inline constexpr ScopeGuard<std::decay_t<Fn>> on_scope_exit(Fn&& fn)
 ///
 /// \param fn the function to execute when a scope is exited by error
 template <typename Fn>
-inline constexpr ScopeGuard<std::decay_t<Fn>> on_scope_error_exit(Fn&& fn)
-{
+inline constexpr ScopeGuard<std::decay_t<Fn>> on_scope_error_exit(Fn&& fn) {
     using scope = typename ScopeGuard<std::decay_t<Fn>>::scope;
     return {scope::on_error_exit, std::forward<Fn>(fn)};
 }
@@ -144,10 +134,9 @@ inline constexpr ScopeGuard<std::decay_t<Fn>> on_scope_error_exit(Fn&& fn)
 ///
 /// \param fn the function to execute when a scope is without error
 template <typename Fn>
-inline constexpr ScopeGuard<std::decay_t<Fn>> on_scope_clean_exit(Fn&& fn)
-{
+inline constexpr ScopeGuard<std::decay_t<Fn>> on_scope_clean_exit(Fn&& fn) {
     using scope = typename ScopeGuard<std::decay_t<Fn>>::scope;
     return {scope::on_clean_exit, std::forward<Fn>(fn)};
 }
 
-} // namespace glue
+}  // namespace glue

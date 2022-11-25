@@ -15,8 +15,6 @@ namespace glue {
 ///
 /// \tparam B the constant
 template <typename B>
-struct negation : std::bool_constant<!bool(B::value)>
-{
-};
+struct negation : std::bool_constant<!bool(B::value)> {};
 
-} // namespace glue
+}  // namespace glue

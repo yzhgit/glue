@@ -5,18 +5,17 @@
 
 #include "glue/base/thread_pool.h"
 
+#include <ctime>
+
 #include "glue/base/exception.h"
 #include "glue/base/log.h"
 #include "glue/base/thread.h"
 #include "glue/base/waitable_event.h"
 
-#include <ctime>
-
 namespace glue {
 
-class PooledThread : public Runnable
-{
-public:
+class PooledThread : public Runnable {
+   public:
     PooledThread(const std::string& name);
     ~PooledThread();
 
@@ -30,7 +29,7 @@ public:
     void release();
     void run();
 
-private:
+   private:
     volatile bool m_idle;
     volatile std::time_t m_idleTime;
     Runnable* m_pTarget;
@@ -43,22 +42,18 @@ private:
 };
 
 PooledThread::PooledThread(const std::string& name)
-    : m_idle(true), m_idleTime(0), m_pTarget(0), m_name(name), m_thread(name)
-{
+    : m_idle(true), m_idleTime(0), m_pTarget(0), m_name(name), m_thread(name) {
     m_idleTime = std::time(NULL);
 }
 
-PooledThread::~PooledThread()
-{}
+PooledThread::~PooledThread() {}
 
-void PooledThread::start()
-{
+void PooledThread::start() {
     m_thread.start(*this);
     m_started.wait();
 }
 
-void PooledThread::start(Runnable& target)
-{
+void PooledThread::start(Runnable& target) {
     ScopedLock<Mutex> lock(m_mutex);
 
     GLUE_ASSERT(m_pTarget == 0);
@@ -67,14 +62,13 @@ void PooledThread::start(Runnable& target)
     m_targetReady.set();
 }
 
-void PooledThread::start(Runnable& target, const std::string& name)
-{
+void PooledThread::start(Runnable& target, const std::string& name) {
     ScopedLock<Mutex> lock(m_mutex);
 
     std::string fullName(name);
-    if (name.empty()) { fullName = m_name; }
-    else
-    {
+    if (name.empty()) {
+        fullName = m_name;
+    } else {
         fullName.append(" (");
         fullName.append(m_name);
         fullName.append(")");
@@ -87,29 +81,25 @@ void PooledThread::start(Runnable& target, const std::string& name)
     m_targetReady.set();
 }
 
-inline bool PooledThread::idle()
-{
+inline bool PooledThread::idle() {
     ScopedLock<Mutex> lock(m_mutex);
     return m_idle;
 }
 
-int PooledThread::idleTime()
-{
+int PooledThread::idleTime() {
     ScopedLock<Mutex> lock(m_mutex);
 
-    return (int) (time(NULL) - m_idleTime);
+    return (int)(time(NULL) - m_idleTime);
 }
 
-void PooledThread::join()
-{
+void PooledThread::join() {
     m_mutex.lock();
     Runnable* pTarget = m_pTarget;
     m_mutex.unlock();
     if (pTarget) m_targetCompleted.wait();
 }
 
-void PooledThread::activate()
-{
+void PooledThread::activate() {
     ScopedLock<Mutex> lock(m_mutex);
 
     GLUE_ASSERT(m_idle);
@@ -117,8 +107,7 @@ void PooledThread::activate()
     m_targetCompleted.reset();
 }
 
-void PooledThread::release()
-{
+void PooledThread::release() {
     const long JOIN_TIMEOUT = 10000;
 
     m_mutex.lock();
@@ -133,25 +122,20 @@ void PooledThread::release()
     // delete this;
 }
 
-void PooledThread::run()
-{
+void PooledThread::run() {
     m_started.set();
-    for (;;)
-    {
+    for (;;) {
         m_targetReady.wait();
         m_mutex.lock();
-        if (m_pTarget) // a NULL target means kill yourself
+        if (m_pTarget)  // a NULL target means kill yourself
         {
             Runnable* pTarget = m_pTarget;
             m_mutex.unlock();
-            try
-            {
+            try {
                 pTarget->run();
-            } catch (std::exception& exc)
-            {
+            } catch (std::exception& exc) {
                 // ErrorHandler::handle(exc);
-            } catch (...)
-            {
+            } catch (...) {
                 // ErrorHandler::handle();
             }
             ScopedLock<Mutex> lock(m_mutex);
@@ -161,9 +145,7 @@ void PooledThread::run()
             m_idle = true;
             m_targetCompleted.set();
             m_thread.setName(m_name);
-        }
-        else
-        {
+        } else {
             m_mutex.unlock();
             break;
         }
@@ -171,16 +153,14 @@ void PooledThread::run()
 }
 
 ThreadPool::ThreadPool(int minCapacity, int maxCapacity, int idleTime)
-    : m_minCapacity(minCapacity)
-    , m_maxCapacity(maxCapacity)
-    , m_idleTime(idleTime)
-    , m_serial(0)
-    , m_age(0)
-{
+    : m_minCapacity(minCapacity),
+      m_maxCapacity(maxCapacity),
+      m_idleTime(idleTime),
+      m_serial(0),
+      m_age(0) {
     GLUE_ASSERT(minCapacity >= 1 && maxCapacity >= minCapacity && idleTime > 0);
 
-    for (int i = 0; i < m_minCapacity; i++)
-    {
+    for (int i = 0; i < m_minCapacity; i++) {
         PooledThread* pThread = createThread();
         m_threads.push_back(pThread);
         pThread->start();
@@ -188,36 +168,30 @@ ThreadPool::ThreadPool(int minCapacity, int maxCapacity, int idleTime)
 }
 
 ThreadPool::ThreadPool(const std::string& name, int minCapacity, int maxCapacity, int idleTime)
-    : m_name(name)
-    , m_minCapacity(minCapacity)
-    , m_maxCapacity(maxCapacity)
-    , m_idleTime(idleTime)
-    , m_serial(0)
-    , m_age(0)
-{
+    : m_name(name),
+      m_minCapacity(minCapacity),
+      m_maxCapacity(maxCapacity),
+      m_idleTime(idleTime),
+      m_serial(0),
+      m_age(0) {
     GLUE_ASSERT(minCapacity >= 1 && maxCapacity >= minCapacity && idleTime > 0);
 
-    for (int i = 0; i < m_minCapacity; i++)
-    {
+    for (int i = 0; i < m_minCapacity; i++) {
         PooledThread* pThread = createThread();
         m_threads.push_back(pThread);
         pThread->start();
     }
 }
 
-ThreadPool::~ThreadPool()
-{
-    try
-    {
+ThreadPool::~ThreadPool() {
+    try {
         stopAll();
-    } catch (...)
-    {
+    } catch (...) {
         LogWarn() << "~ThreadPool exception";
     }
 }
 
-void ThreadPool::addCapacity(int n)
-{
+void ThreadPool::addCapacity(int n) {
     ScopedLock<Mutex> lock(m_mutex);
 
     GLUE_ASSERT(m_maxCapacity + n >= m_minCapacity);
@@ -225,77 +199,67 @@ void ThreadPool::addCapacity(int n)
     housekeep();
 }
 
-int ThreadPool::capacity() const
-{
+int ThreadPool::capacity() const {
     ScopedLock<Mutex> lock(m_mutex);
     return m_maxCapacity;
 }
 
-int ThreadPool::available() const
-{
+int ThreadPool::available() const {
     ScopedLock<Mutex> lock(m_mutex);
 
     int count = 0;
-    for (auto pThread : m_threads)
-    {
+    for (auto pThread : m_threads) {
         if (pThread->idle()) ++count;
     }
-    return (int) (count + m_maxCapacity - m_threads.size());
+    return (int)(count + m_maxCapacity - m_threads.size());
 }
 
-int ThreadPool::used() const
-{
+int ThreadPool::used() const {
     ScopedLock<Mutex> lock(m_mutex);
 
     int count = 0;
-    for (auto pThread : m_threads)
-    {
+    for (auto pThread : m_threads) {
         if (!pThread->idle()) ++count;
     }
     return count;
 }
 
-int ThreadPool::allocated() const
-{
+int ThreadPool::allocated() const {
     ScopedLock<Mutex> lock(m_mutex);
 
     return int(m_threads.size());
 }
 
-void ThreadPool::start(Runnable& target)
-{
-    getThread()->start(target);
-}
+void ThreadPool::start(Runnable& target) { getThread()->start(target); }
 
-void ThreadPool::start(Runnable& target, const std::string& name)
-{
+void ThreadPool::start(Runnable& target, const std::string& name) {
     getThread()->start(target, name);
 }
 
-void ThreadPool::stopAll()
-{
+void ThreadPool::stopAll() {
     ScopedLock<Mutex> lock(m_mutex);
 
-    for (auto pThread : m_threads) { pThread->release(); }
+    for (auto pThread : m_threads) {
+        pThread->release();
+    }
     m_threads.clear();
 }
 
-void ThreadPool::joinAll()
-{
+void ThreadPool::joinAll() {
     ScopedLock<Mutex> lock(m_mutex);
 
-    for (auto pThread : m_threads) { pThread->join(); }
+    for (auto pThread : m_threads) {
+        pThread->join();
+    }
     housekeep();
 }
 
-void ThreadPool::collect()
-{
+void ThreadPool::collect() {
     ScopedLock<Mutex> lock(m_mutex);
     housekeep();
 }
 
-void ThreadPool::housekeep()
-{
+void ThreadPool::housekeep() {
     m_age = 0;
     if (m_threads.size() <= m_minCapacity) return;
 
@@ -305,107 +269,84 @@ void ThreadPool::housekeep()
     idleThreads.reserve(m_threads.size());
     activeThreads.reserve(m_threads.size());
 
-    for (auto pThread : m_threads)
-    {
-        if (pThread->idle())
-        {
+    for (auto pThread : m_threads) {
+        if (pThread->idle()) {
             if (pThread->idleTime() < m_idleTime)
                 idleThreads.push_back(pThread);
             else
                 expiredThreads.push_back(pThread);
-        }
-        else
+        } else
             activeThreads.push_back(pThread);
     }
-    int n = (int) activeThreads.size();
-    int limit = (int) idleThreads.size() + n;
+    int n = (int)activeThreads.size();
+    int limit = (int)idleThreads.size() + n;
     if (limit < m_minCapacity) limit = m_minCapacity;
     idleThreads.insert(idleThreads.end(), expiredThreads.begin(), expiredThreads.end());
     m_threads.clear();
-    for (auto pIdle : idleThreads)
-    {
-        if (n < limit)
-        {
+    for (auto pIdle : idleThreads) {
+        if (n < limit) {
             m_threads.push_back(pIdle);
             ++n;
-        }
-        else
+        } else
             pIdle->release();
     }
     m_threads.insert(m_threads.end(), activeThreads.begin(), activeThreads.end());
 }
 
-PooledThread* ThreadPool::getThread()
-{
+PooledThread* ThreadPool::getThread() {
     ScopedLock<Mutex> lock(m_mutex);
 
     if (++m_age == 32) housekeep();
 
     PooledThread* pThread = 0;
-    for (ThreadVec::iterator it = m_threads.begin(); !pThread && it != m_threads.end(); ++it)
-    {
+    for (ThreadVec::iterator it = m_threads.begin(); !pThread && it != m_threads.end(); ++it) {
         if ((*it)->idle()) pThread = *it;
     }
-    if (!pThread)
-    {
-        if (m_threads.size() < m_maxCapacity)
-        {
+    if (!pThread) {
+        if (m_threads.size() < m_maxCapacity) {
             pThread = createThread();
-            try
-            {
+            try {
                 pThread->start();
                 m_threads.push_back(pThread);
-            } catch (...)
-            {
+            } catch (...) {
                 delete pThread;
                 throw;
             }
-        }
-        else
+        } else
             throw NoThreadAvailableException();
     }
     pThread->activate();
     return pThread;
 }
 
-PooledThread* ThreadPool::createThread()
-{
+PooledThread* ThreadPool::createThread() {
     std::ostringstream name;
     name << m_name << "[#" << ++m_serial << "]";
     return new PooledThread(name.str());
 }
 
-class ThreadPoolSingletonHolder
-{
-public:
-    ThreadPoolSingletonHolder()
-    {
-        m_pool = 0;
-    }
-    ~ThreadPoolSingletonHolder()
-    {
-        delete m_pool;
-    }
-    ThreadPool* pool()
-    {
+class ThreadPoolSingletonHolder {
+   public:
+    ThreadPoolSingletonHolder() { m_pool = 0; }
+    ~ThreadPoolSingletonHolder() { delete m_pool; }
+    ThreadPool* pool() {
         ScopedLock<Mutex> lock(m_mutex);
 
-        if (!m_pool) { m_pool = new ThreadPool("default"); }
+        if (!m_pool) {
+            m_pool = new ThreadPool("default");
+        }
         return m_pool;
     }
 
-private:
+   private:
     ThreadPool* m_pool;
     Mutex m_mutex;
 };
 
 namespace {
-    static ThreadPoolSingletonHolder sh;
+static ThreadPoolSingletonHolder sh;
 }
 
-ThreadPool& ThreadPool::defaultPool()
-{
-    return *sh.pool();
-}
+ThreadPool& ThreadPool::defaultPool() { return *sh.pool(); }
 
-} // namespace glue
+}  // namespace glue

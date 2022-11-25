@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <exception>
 #include <string>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
@@ -16,7 +16,7 @@ class GLUE_API Exception : public std::exception
 /// This is the base class for all exceptions defined
 /// in the GLUE class library.
 {
-public:
+   public:
     Exception(const std::string& msg, int code = 0);
     /// Creates an exception.
 
@@ -74,7 +74,7 @@ public:
     /// copy of an exception (see clone()), then
     /// throwing it again.
 
-protected:
+   protected:
     Exception(int code = 0);
     /// Standard constructor.
 
@@ -84,7 +84,7 @@ protected:
     void extendedMessage(const std::string& arg);
     /// Sets the extended message for the exception.
 
-private:
+   private:
     std::string m_msg;
     Exception* m_pNested;
     int m_code;
@@ -93,25 +93,13 @@ private:
 //
 // inlines
 //
-inline const Exception* Exception::nested() const
-{
-    return m_pNested;
-}
+inline const Exception* Exception::nested() const { return m_pNested; }
 
-inline const std::string& Exception::message() const
-{
-    return m_msg;
-}
+inline const std::string& Exception::message() const { return m_msg; }
 
-inline void Exception::message(const std::string& msg)
-{
-    m_msg = msg;
-}
+inline void Exception::message(const std::string& msg) { m_msg = msg; }
 
-inline int Exception::code() const
-{
-    return m_code;
-}
+inline int Exception::code() const { return m_code; }
 
 //
 // Macros for quickly declaring and implementing exception classes.
@@ -119,59 +107,40 @@ inline int Exception::code() const
 // pointers (which we need for specifying the exception name)
 // are not allowed as template arguments.
 //
-#define GLUE_DECLARE_EXCEPTION_CODE(API, CLS, BASE, CODE)                                          \
-    class API CLS : public BASE                                                                    \
-    {                                                                                              \
-    public:                                                                                        \
-        CLS(int code = CODE);                                                                      \
-        CLS(const std::string& msg, int code = CODE);                                              \
-        CLS(const std::string& msg, const std::string& arg, int code = CODE);                      \
-        CLS(const std::string& msg, const glue::Exception& exc, int code = CODE);                  \
-        CLS(const CLS& exc);                                                                       \
-        ~CLS() noexcept;                                                                           \
-        CLS& operator=(const CLS& exc);                                                            \
-        const char* name() const noexcept;                                                         \
-        const char* className() const noexcept;                                                    \
-        glue::Exception* clone() const;                                                            \
-        void rethrow() const;                                                                      \
+#define GLUE_DECLARE_EXCEPTION_CODE(API, CLS, BASE, CODE)                         \
+    class API CLS : public BASE {                                                 \
+       public:                                                                    \
+        CLS(int code = CODE);                                                     \
+        CLS(const std::string& msg, int code = CODE);                             \
+        CLS(const std::string& msg, const std::string& arg, int code = CODE);     \
+        CLS(const std::string& msg, const glue::Exception& exc, int code = CODE); \
+        CLS(const CLS& exc);                                                      \
+        ~CLS() noexcept;                                                          \
+        CLS& operator=(const CLS& exc);                                           \
+        const char* name() const noexcept;                                        \
+        const char* className() const noexcept;                                   \
+        glue::Exception* clone() const;                                           \
+        void rethrow() const;                                                     \
     };
 
 #define GLUE_DECLARE_EXCEPTION(API, CLS, BASE) GLUE_DECLARE_EXCEPTION_CODE(API, CLS, BASE, 0)
 
-#define GLUE_IMPLEMENT_EXCEPTION(CLS, BASE, NAME)                                                  \
-    CLS::CLS(int code) : BASE(code)                                                                \
-    {}                                                                                             \
-    CLS::CLS(const std::string& msg, int code) : BASE(msg, code)                                   \
-    {}                                                                                             \
-    CLS::CLS(const std::string& msg, const std::string& arg, int code) : BASE(msg, arg, code)      \
-    {}                                                                                             \
-    CLS::CLS(const std::string& msg, const glue::Exception& exc, int code) : BASE(msg, exc, code)  \
-    {}                                                                                             \
-    CLS::CLS(const CLS& exc) : BASE(exc)                                                           \
-    {}                                                                                             \
-    CLS::~CLS() noexcept                                                                           \
-    {}                                                                                             \
-    CLS& CLS::operator=(const CLS& exc)                                                            \
-    {                                                                                              \
-        BASE::operator=(exc);                                                                      \
-        return *this;                                                                              \
-    }                                                                                              \
-    const char* CLS::name() const noexcept                                                         \
-    {                                                                                              \
-        return NAME;                                                                               \
-    }                                                                                              \
-    const char* CLS::className() const noexcept                                                    \
-    {                                                                                              \
-        return typeid(*this).name();                                                               \
-    }                                                                                              \
-    glue::Exception* CLS::clone() const                                                            \
-    {                                                                                              \
-        return new CLS(*this);                                                                     \
-    }                                                                                              \
-    void CLS::rethrow() const                                                                      \
-    {                                                                                              \
-        throw *this;                                                                               \
-    }
+#define GLUE_IMPLEMENT_EXCEPTION(CLS, BASE, NAME)                                                \
+    CLS::CLS(int code) : BASE(code) {}                                                           \
+    CLS::CLS(const std::string& msg, int code) : BASE(msg, code) {}                              \
+    CLS::CLS(const std::string& msg, const std::string& arg, int code) : BASE(msg, arg, code) {} \
+    CLS::CLS(const std::string& msg, const glue::Exception& exc, int code)                       \
+        : BASE(msg, exc, code) {}                                                                \
+    CLS::CLS(const CLS& exc) : BASE(exc) {}                                                      \
+    CLS::~CLS() noexcept {}                                                                      \
+    CLS& CLS::operator=(const CLS& exc) {                                                        \
+        BASE::operator=(exc);                                                                    \
+        return *this;                                                                            \
+    }                                                                                            \
+    const char* CLS::name() const noexcept { return NAME; }                                      \
+    const char* CLS::className() const noexcept { return typeid(*this).name(); }                 \
+    glue::Exception* CLS::clone() const { return new CLS(*this); }                               \
+    void CLS::rethrow() const { throw *this; }
 
 //
 // Standard exception classes
@@ -228,4 +197,4 @@ GLUE_DECLARE_EXCEPTION(GLUE_API, URISyntaxException, SyntaxException)
 GLUE_DECLARE_EXCEPTION(GLUE_API, ApplicationException, Exception)
 GLUE_DECLARE_EXCEPTION(GLUE_API, BadCastException, RuntimeException)
 
-} // namespace glue
+}  // namespace glue

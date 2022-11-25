@@ -13,7 +13,8 @@ namespace glue {
 /**
     Automatically locks and unlocks a mutex object.
 
-    Use one of these as a local variable to provide RAII-based locking of a mutex.
+    Use one of these as a local variable to provide RAII-based locking of a
+   mutex.
 
     The templated class could be a Mutex, SpinLock, or anything else that
     provides lock() and unlock() methods.
@@ -37,35 +38,29 @@ namespace glue {
     @tags{Core}
 */
 template <class LockType>
-class ScopedLock
-{
-public:
+class ScopedLock {
+   public:
     //==============================================================================
     /** Creates a ScopedLock.
 
-        As soon as it is created, this will acquire the lock, and when the ScopedLock
-        object is deleted, the lock will be released.
+        As soon as it is created, this will acquire the lock, and when the
+       ScopedLock object is deleted, the lock will be released.
 
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen! Best just to use it
-        as a local stack object, rather than creating one with the new() operator.
+        as a local stack object, rather than creating one with the new()
+       operator.
     */
-    inline explicit ScopedLock(LockType& lock) noexcept : m_lock(lock)
-    {
-        m_lock.lock();
-    }
+    inline explicit ScopedLock(LockType& lock) noexcept : m_lock(lock) { m_lock.lock(); }
 
     /** Destructor.
         The lock will be released when the destructor is called.
-        Make sure this object is created and deleted by the same thread, otherwise there are
-        no guarantees what will happen!
+        Make sure this object is created and deleted by the same thread,
+       otherwise there are no guarantees what will happen!
     */
-    inline ~ScopedLock() noexcept
-    {
-        m_lock.unlock();
-    }
+    inline ~ScopedLock() noexcept { m_lock.unlock(); }
 
-private:
+   private:
     //==============================================================================
     LockType& m_lock;
 
@@ -113,9 +108,8 @@ private:
     @tags{Core}
 */
 template <class LockType>
-class ScopedUnlock
-{
-public:
+class ScopedUnlock {
+   public:
     //==============================================================================
     /** Creates a ScopedUnlock.
 
@@ -125,12 +119,10 @@ public:
 
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen! Best just to use it
-        as a local stack object, rather than creating one with the new() operator.
+        as a local stack object, rather than creating one with the new()
+       operator.
     */
-    inline explicit ScopedUnlock(LockType& lock) noexcept : m_lock(lock)
-    {
-        lock.unlock();
-    }
+    inline explicit ScopedUnlock(LockType& lock) noexcept : m_lock(lock) { lock.unlock(); }
 
     /** Destructor.
 
@@ -139,16 +131,13 @@ public:
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
     */
-    inline ~ScopedUnlock() noexcept
-    {
-        m_lock.lock();
-    }
+    inline ~ScopedUnlock() noexcept { m_lock.lock(); }
 
-private:
+   private:
     //==============================================================================
     LockType& m_lock;
 
     GLUE_DECLARE_NON_COPYABLE(ScopedUnlock)
 };
 
-} // namespace glue
+}  // namespace glue

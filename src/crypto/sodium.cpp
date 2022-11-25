@@ -7,14 +7,16 @@
 
 #include "glue/crypto/poly1305.h"
 #include "glue/crypto/salsa20.h"
-
 #include "mem_ops.h"
 
 namespace glue {
 
-GLUE_API int crypto_secretbox_detached(uint8_t ctext[], uint8_t mac[], const uint8_t ptext[],
-                                       size_t ptext_len, const uint8_t nonce[], const uint8_t key[])
-{
+GLUE_API int crypto_secretbox_detached(uint8_t ctext[],
+                                       uint8_t mac[],
+                                       const uint8_t ptext[],
+                                       size_t ptext_len,
+                                       const uint8_t nonce[],
+                                       const uint8_t key[]) {
     Salsa20 salsa;
     salsa.set_key(key, crypto_secretbox_KEYBYTES);
     salsa.set_iv(nonce, crypto_secretbox_NONCEBYTES);
@@ -32,10 +34,12 @@ GLUE_API int crypto_secretbox_detached(uint8_t ctext[], uint8_t mac[], const uin
     return 0;
 }
 
-GLUE_API int crypto_secretbox_open_detached(uint8_t ptext[], const uint8_t ctext[],
-                                            const uint8_t mac[], size_t ctext_len,
-                                            const uint8_t nonce[], const uint8_t key[])
-{
+GLUE_API int crypto_secretbox_open_detached(uint8_t ptext[],
+                                            const uint8_t ctext[],
+                                            const uint8_t mac[],
+                                            size_t ctext_len,
+                                            const uint8_t nonce[],
+                                            const uint8_t key[]) {
     Salsa20 salsa;
     salsa.set_key(key, crypto_secretbox_KEYBYTES);
     salsa.set_iv(nonce, crypto_secretbox_NONCEBYTES);
@@ -57,4 +61,4 @@ GLUE_API int crypto_secretbox_open_detached(uint8_t ptext[], const uint8_t ctext
     return 0;
 }
 
-} // namespace glue
+}  // namespace glue

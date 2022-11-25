@@ -10,20 +10,15 @@
 
 namespace glue {
 
-inline uint64_t load_3(const uint8_t in[3])
-{
+inline uint64_t load_3(const uint8_t in[3]) {
     return static_cast<uint64_t>(in[0]) | (static_cast<uint64_t>(in[1]) << 8) |
            (static_cast<uint64_t>(in[2]) << 16);
 }
 
-inline uint64_t load_4(const uint8_t* in)
-{
-    return load_le<uint32_t>(in, 0);
-}
+inline uint64_t load_4(const uint8_t* in) { return load_le<uint32_t>(in, 0); }
 
 template <size_t S, int64_t MUL = 1>
-inline void carry(int64_t& h0, int64_t& h1)
-{
+inline void carry(int64_t& h0, int64_t& h1) {
     static_assert(S > 0 && S < 64, "Shift in range");
 
     const int64_t X1 = (static_cast<int64_t>(1) << S);
@@ -34,8 +29,7 @@ inline void carry(int64_t& h0, int64_t& h1)
 }
 
 template <size_t S>
-inline void carry0(int64_t& h0, int64_t& h1)
-{
+inline void carry0(int64_t& h0, int64_t& h1) {
     static_assert(S > 0 && S < 64, "Shift in range");
 
     const int64_t X1 = (static_cast<int64_t>(1) << S);
@@ -45,8 +39,7 @@ inline void carry0(int64_t& h0, int64_t& h1)
 }
 
 template <size_t S>
-inline void carry0(int32_t& h0, int32_t& h1)
-{
+inline void carry0(int32_t& h0, int32_t& h1) {
     static_assert(S > 0 && S < 32, "Shift in range");
 
     const int32_t X1 = (static_cast<int64_t>(1) << S);
@@ -55,9 +48,8 @@ inline void carry0(int32_t& h0, int32_t& h1)
     h0 -= c * X1;
 }
 
-inline void redc_mul(int64_t& s1, int64_t& s2, int64_t& s3, int64_t& s4, int64_t& s5, int64_t& s6,
-                     int64_t& X)
-{
+inline void redc_mul(
+    int64_t& s1, int64_t& s2, int64_t& s3, int64_t& s4, int64_t& s5, int64_t& s6, int64_t& X) {
     s1 += X * 666643;
     s2 += X * 470296;
     s3 += X * 654183;
@@ -78,8 +70,7 @@ Representations:
 ge_p3 (extended): (X:Y:Z:T) satisfying x=X/Z, y=Y/Z, XY=ZT
 */
 
-typedef struct
-{
+typedef struct {
     fe X;
     fe Y;
     fe Z;
@@ -89,7 +80,9 @@ typedef struct
 int ge_frombytes_negate_vartime(ge_p3*, const uint8_t*);
 void ge_scalarmult_base(uint8_t out[32], const uint8_t in[32]);
 
-void ge_double_scalarmult_vartime(uint8_t out[32], const uint8_t a[], const ge_p3* A,
+void ge_double_scalarmult_vartime(uint8_t out[32],
+                                  const uint8_t a[],
+                                  const ge_p3* A,
                                   const uint8_t b[]);
 
 /*
@@ -100,4 +93,4 @@ where l = 2^252 + 27742317777372353535851937790883648493.
 void sc_reduce(uint8_t*);
 void sc_muladd(uint8_t*, const uint8_t*, const uint8_t*, const uint8_t*);
 
-} // namespace glue
+}  // namespace glue

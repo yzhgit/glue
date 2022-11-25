@@ -5,23 +5,16 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <vector>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
-class GLUE_API MD5 final
-{
-public:
-    enum
-    {
-        BlockSize = 64
-    };
-    enum
-    {
-        DigestSize = 16
-    };
+class GLUE_API MD5 final {
+   public:
+    enum { BlockSize = 64 };
+    enum { DigestSize = 16 };
 
     MD5();
 
@@ -30,10 +23,10 @@ public:
     // output is DigestSize long
     void final(uint8_t output[]);
 
-private:
+   private:
     void compress_n(const uint8_t[], size_t blocks);
 
-private:
+   private:
     /// size of processed data in bytes
     uint64_t m_count;
     /// valid bytes in m_buffer
@@ -46,4 +39,4 @@ private:
     std::vector<uint32_t> m_digest;
 };
 
-} // namespace glue
+}  // namespace glue

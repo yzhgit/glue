@@ -1,36 +1,12 @@
+Language:        Cpp
+BasedOnStyle:  Google
+IndentWidth:     4
+TabWidth:        4
+ContinuationIndentWidth: 4
+AccessModifierOffset: -1  # The private/protected/public has no indent in class
+Standard:  Cpp11
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackParameters: false
+BinPackArguments: false
+
 ColumnLimit: 100
-
-UseTab: Never
-IndentWidth: 4
-AccessModifierOffset: -4
-NamespaceIndentation: Inner
-
-BreakBeforeBraces: Custom
-BraceWrapping:
-  AfterNamespace: false
-  AfterEnum: true
-  AfterStruct: true
-  AfterClass: true
-  SplitEmptyFunction: false
-  AfterControlStatement: true
-  AfterFunction: true
-  AfterUnion: true
-  BeforeElse: true
-
-
-AlwaysBreakTemplateDeclarations: true
-BreakConstructorInitializersBeforeComma: true
-ConstructorInitializerAllOnOneLineOrOnePerLine: true
-AllowShortBlocksOnASingleLine: true
-AllowShortFunctionsOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: true
-AllowShortLoopsOnASingleLine: true
-
-PointerAlignment: Left
-AlignConsecutiveAssignments: false
-AlignTrailingComments: true
-
-SpaceAfterCStyleCast: true
-CommentPragmas: '^ NO-FORMAT:'
-
-IndentPPDirectives: BeforeHash

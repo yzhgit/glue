@@ -10,17 +10,18 @@
 namespace glue {
 
 CountDownLatch::CountDownLatch(int initial_count)
-    : m_done(initial_count == 0 ? true : false), m_num_waiting(0), m_count(initial_count)
-{
-    if (initial_count < 0) { LogFatal("", "initial_count negative"); }
+    : m_done(initial_count == 0 ? true : false), m_num_waiting(0), m_count(initial_count) {
+    if (initial_count < 0) {
+        LogFatal("", "initial_count negative");
+    }
 }
 
-bool CountDownLatch::countDown() noexcept
-{
+bool CountDownLatch::countDown() noexcept {
     int count = m_count.fetch_sub(1, std::memory_order_acq_rel) - 1;
-    if (count < 0) { LogFatal("", "called too many times"); }
-    if (count == 0)
-    {
+    if (count < 0) {
+        LogFatal("", "called too many times");
+    }
+    if (count == 0) {
         std::unique_lock<std::mutex> lock(m_mutex);
         m_done = true;
         m_cond.notify_all();
@@ -29,13 +30,14 @@ bool CountDownLatch::countDown() noexcept
     return false;
 }
 
-void CountDownLatch::wait() noexcept
-{
+void CountDownLatch::wait() noexcept {
     std::unique_lock<std::mutex> lock(m_mutex);
 
     // only one thread may call wait(). To support more than one thread,
     // implement a counter num_to_exit, like in the Barrier class.
-    if (m_num_waiting != 0) { LogFatal("", "multiple threads called wait()"); }
+    if (m_num_waiting != 0) {
+        LogFatal("", "multiple threads called wait()");
+    }
 
     m_num_waiting++;
 
@@ -47,4 +49,4 @@ void CountDownLatch::wait() noexcept
     // after we return from this method.
 }
 
-} // namespace glue
+}  // namespace glue

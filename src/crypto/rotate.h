@@ -15,8 +15,7 @@ namespace glue {
  * @return input rotated left by ROT bits
  */
 template <size_t ROT, typename T>
-inline constexpr T rotl(T input)
-{
+inline constexpr T rotl(T input) {
     static_assert(ROT > 0 && ROT < 8 * sizeof(T), "Invalid rotation constant");
     return static_cast<T>((input << ROT) | (input >> (8 * sizeof(T) - ROT)));
 }
@@ -27,8 +26,7 @@ inline constexpr T rotl(T input)
  * @return input rotated right by ROT bits
  */
 template <size_t ROT, typename T>
-inline constexpr T rotr(T input)
-{
+inline constexpr T rotr(T input) {
     static_assert(ROT > 0 && ROT < 8 * sizeof(T), "Invalid rotation constant");
     return static_cast<T>((input >> ROT) | (input << (8 * sizeof(T) - ROT)));
 }
@@ -40,8 +38,7 @@ inline constexpr T rotr(T input)
  * @return input rotated left by rot bits
  */
 template <typename T>
-inline T rotl_var(T input, size_t rot)
-{
+inline T rotl_var(T input, size_t rot) {
     return rot ? static_cast<T>((input << rot) | (input >> (sizeof(T) * 8 - rot))) : input;
 }
 
@@ -52,31 +49,28 @@ inline T rotl_var(T input, size_t rot)
  * @return input rotated right by rot bits
  */
 template <typename T>
-inline T rotr_var(T input, size_t rot)
-{
+inline T rotr_var(T input, size_t rot) {
     return rot ? static_cast<T>((input >> rot) | (input << (sizeof(T) * 8 - rot))) : input;
 }
 
 #if defined(GLUE_USE_GCC_INLINE_ASM)
 
-    #if defined(GLUE_ARCH_X86_64) || defined(GLUE_ARCH_X86_32)
+#if defined(GLUE_ARCH_X86_64) || defined(GLUE_ARCH_X86_32)
 
 template <>
-inline uint32_t rotl_var(uint32_t input, size_t rot)
-{
+inline uint32_t rotl_var(uint32_t input, size_t rot) {
     asm("roll %1,%0" : "+r"(input) : "c"(static_cast<uint8_t>(rot)));
     return input;
 }
 
 template <>
-inline uint32_t rotr_var(uint32_t input, size_t rot)
-{
+inline uint32_t rotr_var(uint32_t input, size_t rot) {
     asm("rorl %1,%0" : "+r"(input) : "c"(static_cast<uint8_t>(rot)));
     return input;
 }
 
-    #endif
+#endif
 
 #endif
 
-} // namespace glue
+}  // namespace glue

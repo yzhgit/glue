@@ -4,8 +4,9 @@
 //
 
 #if defined(GL_HAS_SHA2_32_ARMV8)
-    #include "glue/base/compiler.h"
-    #include <arm_neon.h>
+#include <arm_neon.h>
+
+#include "glue/base/compiler.h"
 
 namespace glue {
 
@@ -15,9 +16,9 @@ namespace glue {
 // static
 
 GLUE_FUNC_ISA("+crypto")
-void SHA_256::compress_digest_armv8(secure_vector<uint32_t>& digest, const uint8_t input8[],
-                                    size_t blocks)
-{
+void SHA_256::compress_digest_armv8(secure_vector<uint32_t>& digest,
+                                    const uint8_t input8[],
+                                    size_t blocks) {
     static const uint32_t K[] = {
         0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4,
         0xAB1C5ED5, 0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE,
@@ -44,8 +45,7 @@ void SHA_256::compress_digest_armv8(secure_vector<uint32_t>& digest, const uint8
     const uint32_t* input32 =
         reinterpret_cast<const uint32_t*>(reinterpret_cast<const void*>(input8));
 
-    while (blocks)
-    {
+    while (blocks) {
         // Save current state
         ABEF_SAVE = STATE0;
         CDGH_SAVE = STATE1;
@@ -194,6 +194,6 @@ void SHA_256::compress_digest_armv8(secure_vector<uint32_t>& digest, const uint8
     vst1q_u32(&digest[4], STATE1);
 }
 
-}
+}  // namespace glue
 
 #endif

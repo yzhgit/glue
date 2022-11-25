@@ -7,10 +7,9 @@
 
 namespace glue {
 
-const char* getVersion()
-{
+const char* getVersion() {
     return "GLUE v" GLUE_STRINGIFY(GLUE_MAJOR_VERSION) "." GLUE_STRINGIFY(
         GLUE_MINOR_VERSION) "." GLUE_STRINGIFY(GLUE_PATCH_VERSION);
 }
 
-} // namespace glue
+}  // namespace glue

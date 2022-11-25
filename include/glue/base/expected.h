@@ -5,17 +5,16 @@
 
 #pragma once
 
-#include "glue/base/in_place.h" // in_place
-#include "glue/base/invoke.h"   // invoke, invoke_result_t
-#include "glue/base/tribool.h"  // tribools
+#include <initializer_list>  // std::initializer_list
+#include <stdexcept>         // std::logic_error
+#include <system_error>      // std::error_condition
 
+#include "glue/base/in_place.h"  // in_place
+#include "glue/base/invoke.h"    // invoke, invoke_result_t
 #include "glue/base/traits/conjunction.hpp"
 #include "glue/base/traits/empty.hpp"
 #include "glue/base/traits/sfinae.hpp"
-
-#include <initializer_list> // std::initializer_list
-#include <stdexcept>        // std::logic_error
-#include <system_error>     // std::error_condition
+#include "glue/base/tribool.h"  // tribools
 
 namespace glue {
 
@@ -27,14 +26,10 @@ class expected;
 //=========================================================================
 
 template <typename T>
-struct is_expected : std::false_type
-{
-};
+struct is_expected : std::false_type {};
 
 template <typename T, typename E>
-struct is_expected<expected<T, E>> : std::true_type
-{
-};
+struct is_expected<expected<T, E>> : std::true_type {};
 
 template <typename T>
 constexpr bool is_expected_v = is_expected<T>::value;
@@ -50,18 +45,17 @@ constexpr bool is_expected_v = is_expected<T>::value;
 /// \tparam E the error type
 ///////////////////////////////////////////////////////////////////////////
 template <typename E>
-class bad_expected_access : public std::logic_error
-{
+class bad_expected_access : public std::logic_error {
     //-----------------------------------------------------------------------
     // Public Member Types
     //-----------------------------------------------------------------------
-public:
+   public:
     using error_type = E;
 
     //-----------------------------------------------------------------------
     // Constructors
     //-----------------------------------------------------------------------
-public:
+   public:
     /// \brief Constructs a bad_expected_access from a given error, \p e
     ///
     /// \param e the error
@@ -70,7 +64,7 @@ public:
     //-----------------------------------------------------------------------
     // Observers
     //-----------------------------------------------------------------------
-public:
+   public:
     /// \{
     /// \brief Gets the underlying error
     ///
@@ -84,19 +78,18 @@ public:
     //-----------------------------------------------------------------------
     // Private Members
     //-----------------------------------------------------------------------
-private:
+   private:
     error_type m_error_value;
 };
 
 //=========================================================================
 
 template <>
-class bad_expected_access<void> : std::logic_error
-{
+class bad_expected_access<void> : std::logic_error {
     //-----------------------------------------------------------------------
     // Constructors
     //-----------------------------------------------------------------------
-public:
+   public:
     /// \brief Constructs a bad_expected_access
     bad_expected_access();
 };
@@ -112,12 +105,11 @@ public:
 /// \tparam E the unexpected type
 ///////////////////////////////////////////////////////////////////////////
 template <typename E>
-class unexpected_type
-{
+class unexpected_type {
     //-----------------------------------------------------------------------
     // Constructors
     //-----------------------------------------------------------------------
-public:
+   public:
     // Deleted default constructor
     unexpected_type() = delete;
 
@@ -176,7 +168,8 @@ public:
     /// \throws ... any exception that E's constructor may throw
     /// \param ilist an initializer list of arguments
     /// \param args the arguments to forward
-    template <typename U, typename... Args,
+    template <typename U,
+              typename... Args,
               typename = std::enable_if_t<
                   std::is_constructible<E, std::initializer_list<U>, Args...>::value>>
     constexpr explicit unexpected_type(in_place_t, std::initializer_list<U> ilist, Args&&... args);
@@ -184,7 +177,7 @@ public:
     //-----------------------------------------------------------------------
     // Observers
     //-----------------------------------------------------------------------
-public:
+   public:
     /// \{
     /// \brief Extracts the value for this unexpected_type
     ///
@@ -198,7 +191,7 @@ public:
     //-----------------------------------------------------------------------
     // Private Members
     //-----------------------------------------------------------------------
-private:
+   private:
     E m_value;
 };
 
@@ -207,14 +200,10 @@ private:
 //=========================================================================
 
 template <typename T>
-struct is_unexpected_type : std::false_type
-{
-};
+struct is_unexpected_type : std::false_type {};
 
 template <typename T>
-struct is_unexpected_type<unexpected_type<T>> : std::true_type
-{
-};
+struct is_unexpected_type<unexpected_type<T>> : std::true_type {};
 
 template <typename T>
 constexpr bool is_unexpected_type_v = is_unexpected_type<T>::value;
@@ -253,11 +242,9 @@ constexpr bool operator>=(const unexpected_type<E>& lhs, const unexpected_type<E
 //=========================================================================
 
 /// \brief A tag type used for tag-dispatch
-struct unexpect_t
-{
+struct unexpect_t {
     unexpect_t() = delete;
-    constexpr unexpect_t(int)
-    {}
+    constexpr unexpect_t(int) {}
 };
 
 //-------------------------------------------------------------------------
@@ -270,190 +257,179 @@ constexpr unexpect_t unexpect{0};
 
 namespace detail {
 
-    //=======================================================================
-    // expected_base
-    //=======================================================================
+//=======================================================================
+// expected_base
+//=======================================================================
 
-    template <bool Trivial, typename T, typename E>
-    class expected_base;
+template <bool Trivial, typename T, typename E>
+class expected_base;
 
-    template <typename T, typename E>
-    class expected_base<true, T, E>
-    {
-        //-----------------------------------------------------------------------
-        // Constructors
-        //-----------------------------------------------------------------------
-    public:
-        constexpr expected_base();
+template <typename T, typename E>
+class expected_base<true, T, E> {
+    //-----------------------------------------------------------------------
+    // Constructors
+    //-----------------------------------------------------------------------
+   public:
+    constexpr expected_base();
+    template <typename... Args>
+    constexpr expected_base(in_place_t, Args&&... args);
+    template <typename... Args>
+    constexpr expected_base(unexpect_t, Args&&... args);
+
+    //---------------------------------------------------------------------
+    // Observers
+    //---------------------------------------------------------------------
+   protected:
+    constexpr bool has_value() const noexcept;
+    constexpr bool has_error() const noexcept;
+    constexpr bool valueless_by_exception() const noexcept;
+
+    //---------------------------------------------------------------------
+
+    constexpr T& get_value() & noexcept;
+    constexpr T&& get_value() && noexcept;
+    constexpr const T& get_value() const& noexcept;
+    constexpr const T&& get_value() const&& noexcept;
+
+    //---------------------------------------------------------------------
+
+    constexpr unexpected_type<E>& get_unexpected() & noexcept;
+    constexpr unexpected_type<E>&& get_unexpected() && noexcept;
+    constexpr const unexpected_type<E>& get_unexpected() const& noexcept;
+    constexpr const unexpected_type<E>&& get_unexpected() const&& noexcept;
+
+    //---------------------------------------------------------------------
+    // Modifiers
+    //---------------------------------------------------------------------
+   protected:
+    template <typename... Args>
+    void emplace_value(Args&&... args);
+    template <typename... Args>
+    void emplace_error(Args&&... args);
+
+    //---------------------------------------------------------------------
+
+    template <typename U>
+    void assign_value(U&& value);
+    template <typename U>
+    void assign_error(U&& error);
+
+    //---------------------------------------------------------------------
+    // Protected Member Types
+    //---------------------------------------------------------------------
+   protected:
+    union storage_type {
+        constexpr storage_type() : dummy{} {}
+
         template <typename... Args>
-        constexpr expected_base(in_place_t, Args&&... args);
+        constexpr storage_type(in_place_t, Args&&... args) : value(std::forward<Args>(args)...) {}
+
         template <typename... Args>
-        constexpr expected_base(unexpect_t, Args&&... args);
+        constexpr storage_type(unexpect_t, Args&&... args) : error(std::forward<Args>(args)...) {}
 
-        //---------------------------------------------------------------------
-        // Observers
-        //---------------------------------------------------------------------
-    protected:
-        constexpr bool has_value() const noexcept;
-        constexpr bool has_error() const noexcept;
-        constexpr bool valueless_by_exception() const noexcept;
-
-        //---------------------------------------------------------------------
-
-        constexpr T& get_value() & noexcept;
-        constexpr T&& get_value() && noexcept;
-        constexpr const T& get_value() const& noexcept;
-        constexpr const T&& get_value() const&& noexcept;
-
-        //---------------------------------------------------------------------
-
-        constexpr unexpected_type<E>& get_unexpected() & noexcept;
-        constexpr unexpected_type<E>&& get_unexpected() && noexcept;
-        constexpr const unexpected_type<E>& get_unexpected() const& noexcept;
-        constexpr const unexpected_type<E>&& get_unexpected() const&& noexcept;
-
-        //---------------------------------------------------------------------
-        // Modifiers
-        //---------------------------------------------------------------------
-    protected:
-        template <typename... Args>
-        void emplace_value(Args&&... args);
-        template <typename... Args>
-        void emplace_error(Args&&... args);
-
-        //---------------------------------------------------------------------
-
-        template <typename U>
-        void assign_value(U&& value);
-        template <typename U>
-        void assign_error(U&& error);
-
-        //---------------------------------------------------------------------
-        // Protected Member Types
-        //---------------------------------------------------------------------
-    protected:
-        union storage_type
-        {
-            constexpr storage_type() : dummy{}
-            {}
-
-            template <typename... Args>
-            constexpr storage_type(in_place_t, Args&&... args) : value(std::forward<Args>(args)...)
-            {}
-
-            template <typename... Args>
-            constexpr storage_type(unexpect_t, Args&&... args) : error(std::forward<Args>(args)...)
-            {}
-
-            empty<void> dummy;
-            T value;
-            unexpected_type<E> error;
-        };
-
-        //---------------------------------------------------------------------
-        // Private Members
-        //---------------------------------------------------------------------
-    private:
-        storage_type m_storage;
-        tribool m_has_value;
+        empty<void> dummy;
+        T value;
+        unexpected_type<E> error;
     };
 
-    //=======================================================================
+    //---------------------------------------------------------------------
+    // Private Members
+    //---------------------------------------------------------------------
+   private:
+    storage_type m_storage;
+    tribool m_has_value;
+};
 
-    template <typename T, typename E>
-    class expected_base<false, T, E>
-    {
-        //---------------------------------------------------------------------
-        // Constructors / Destructor
-        //---------------------------------------------------------------------
-    public:
-        constexpr expected_base();
+//=======================================================================
+
+template <typename T, typename E>
+class expected_base<false, T, E> {
+    //---------------------------------------------------------------------
+    // Constructors / Destructor
+    //---------------------------------------------------------------------
+   public:
+    constexpr expected_base();
+    template <typename... Args>
+    constexpr expected_base(in_place_t, Args&&... args);
+    template <typename... Args>
+    constexpr expected_base(unexpect_t, Args&&... args);
+
+    //---------------------------------------------------------------------
+
+    ~expected_base();
+
+    //---------------------------------------------------------------------
+    // Observers
+    //---------------------------------------------------------------------
+   protected:
+    constexpr bool has_value() const noexcept;
+    constexpr bool has_error() const noexcept;
+    constexpr bool valueless_by_exception() const noexcept;
+
+    //---------------------------------------------------------------------
+
+    constexpr T& get_value() & noexcept;
+    constexpr T&& get_value() && noexcept;
+    constexpr const T& get_value() const& noexcept;
+    constexpr const T&& get_value() const&& noexcept;
+
+    //---------------------------------------------------------------------
+
+    constexpr unexpected_type<E>& get_unexpected() & noexcept;
+    constexpr unexpected_type<E>&& get_unexpected() && noexcept;
+    constexpr const unexpected_type<E>& get_unexpected() const& noexcept;
+    constexpr const unexpected_type<E>&& get_unexpected() const&& noexcept;
+
+    //---------------------------------------------------------------------
+    // Modifiers
+    //---------------------------------------------------------------------
+   protected:
+    void destruct();
+
+    //---------------------------------------------------------------------
+
+    template <typename... Args>
+    void emplace_value(Args&&... args);
+
+    template <typename... Args>
+    void emplace_error(Args&&... args);
+
+    //---------------------------------------------------------------------
+
+    template <typename U>
+    void assign_value(U&& value);
+
+    template <typename U>
+    void assign_error(U&& error);
+
+    //---------------------------------------------------------------------
+    // Protected Member Types
+    //---------------------------------------------------------------------
+   protected:
+    union storage_type {
+        constexpr storage_type() : dummy{} {}
+
         template <typename... Args>
-        constexpr expected_base(in_place_t, Args&&... args);
-        template <typename... Args>
-        constexpr expected_base(unexpect_t, Args&&... args);
-
-        //---------------------------------------------------------------------
-
-        ~expected_base();
-
-        //---------------------------------------------------------------------
-        // Observers
-        //---------------------------------------------------------------------
-    protected:
-        constexpr bool has_value() const noexcept;
-        constexpr bool has_error() const noexcept;
-        constexpr bool valueless_by_exception() const noexcept;
-
-        //---------------------------------------------------------------------
-
-        constexpr T& get_value() & noexcept;
-        constexpr T&& get_value() && noexcept;
-        constexpr const T& get_value() const& noexcept;
-        constexpr const T&& get_value() const&& noexcept;
-
-        //---------------------------------------------------------------------
-
-        constexpr unexpected_type<E>& get_unexpected() & noexcept;
-        constexpr unexpected_type<E>&& get_unexpected() && noexcept;
-        constexpr const unexpected_type<E>& get_unexpected() const& noexcept;
-        constexpr const unexpected_type<E>&& get_unexpected() const&& noexcept;
-
-        //---------------------------------------------------------------------
-        // Modifiers
-        //---------------------------------------------------------------------
-    protected:
-        void destruct();
-
-        //---------------------------------------------------------------------
+        constexpr storage_type(in_place_t, Args&&... args) : value(std::forward<Args>(args)...) {}
 
         template <typename... Args>
-        void emplace_value(Args&&... args);
+        constexpr storage_type(unexpect_t, Args&&... args) : error(std::forward<Args>(args)...) {}
 
-        template <typename... Args>
-        void emplace_error(Args&&... args);
+        ~storage_type() {}
 
-        //---------------------------------------------------------------------
-
-        template <typename U>
-        void assign_value(U&& value);
-
-        template <typename U>
-        void assign_error(U&& error);
-
-        //---------------------------------------------------------------------
-        // Protected Member Types
-        //---------------------------------------------------------------------
-    protected:
-        union storage_type
-        {
-            constexpr storage_type() : dummy{}
-            {}
-
-            template <typename... Args>
-            constexpr storage_type(in_place_t, Args&&... args) : value(std::forward<Args>(args)...)
-            {}
-
-            template <typename... Args>
-            constexpr storage_type(unexpect_t, Args&&... args) : error(std::forward<Args>(args)...)
-            {}
-
-            ~storage_type()
-            {}
-
-            empty<void> dummy;
-            T value;
-            unexpected_type<E> error;
-        };
-
-        //---------------------------------------------------------------------
-        // Private Members
-        //---------------------------------------------------------------------
-    private:
-        storage_type m_storage;
-        tribool m_has_value;
+        empty<void> dummy;
+        T value;
+        unexpected_type<E> error;
     };
-} // namespace detail
+
+    //---------------------------------------------------------------------
+    // Private Members
+    //---------------------------------------------------------------------
+   private:
+    storage_type m_storage;
+    tribool m_has_value;
+};
+}  // namespace detail
 
 ///////////////////////////////////////////////////////////////////////////
 /// \brief
@@ -464,10 +440,12 @@ namespace detail {
 template <typename T, typename E = std::error_condition>
 class expected : detail::expected_base<std::is_trivially_destructible<T>::value &&
                                            std::is_trivially_destructible<E>::value,
-                                       T, E>
-{
-    using base_type = detail::expected_base<
-        std::is_trivially_destructible<T>::value && std::is_trivially_destructible<E>::value, T, E>;
+                                       T,
+                                       E> {
+    using base_type = detail::expected_base<std::is_trivially_destructible<T>::value &&
+                                                std::is_trivially_destructible<E>::value,
+                                            T,
+                                            E>;
 
     template <typename U, typename G>
     static constexpr bool is_constructible =
@@ -489,20 +467,19 @@ class expected : detail::expected_base<std::is_trivially_destructible<T>::value 
     //-----------------------------------------------------------------------
     // Public Member Types
     //-----------------------------------------------------------------------
-public:
+   public:
     using value_type = T;
     using error_type = E;
 
     template <typename U>
-    struct rebind
-    {
+    struct rebind {
         using type = expected<U, error_type>;
     };
 
     //-----------------------------------------------------------------------
     // Constructors / Destructor / Assignment
     //-----------------------------------------------------------------------
-public:
+   public:
     // X.Z.4.1, constructors
 
     /// \brief Initializes the contained value as if direct-non-list-
@@ -519,12 +496,10 @@ public:
     /// \param other the other expected
     expected(enable_overload_if<std::is_copy_constructible<T>::value &&
                                     std::is_copy_constructible<E>::value,
-                                const expected&>
-                 other);
+                                const expected&> other);
     expected(disable_overload_if<std::is_copy_constructible<T>::value &&
                                      std::is_copy_constructible<E>::value,
-                                 const expected&>
-                 other) = delete;
+                                 const expected&> other) = delete;
 
     //-----------------------------------------------------------------------
 
@@ -533,12 +508,10 @@ public:
     /// \param other the other expected
     expected(enable_overload_if<std::is_move_constructible<T>::value &&
                                     std::is_move_constructible<E>::value,
-                                expected&&>
-                 other);
+                                expected&&> other);
     expected(disable_overload_if<std::is_move_constructible<T>::value &&
                                      std::is_move_constructible<E>::value,
-                                 expected&&>
-                 other) = delete;
+                                 expected&&> other) = delete;
 
     //-----------------------------------------------------------------------
 
@@ -546,7 +519,8 @@ public:
     ///
     /// \param other the other expected
 #ifndef BIT_DOXYGEN
-    template <typename U, typename G,
+    template <typename U,
+              typename G,
               typename = std::enable_if_t<std::is_constructible<T, const U&>::value &&
                                           std::is_constructible<E, const G&>::value>>
 #else
@@ -558,7 +532,8 @@ public:
     ///
     /// \param other the other expected
 #ifndef BIT_DOXYGEN
-    template <typename U, typename G,
+    template <typename U,
+              typename G,
               typename = std::enable_if_t<std::is_constructible<T, U&&>::value &&
                                           std::is_constructible<E, G&&>::value>>
 #else
@@ -595,7 +570,8 @@ public:
     ///
     /// \param ilist an initializer list to forward
     /// \param args the arguments to forward
-    template <typename U, typename... Args,
+    template <typename U,
+              typename... Args,
               typename = std::enable_if_t<
                   std::is_constructible<T, std::initializer_list<U>, Args...>::value>>
     constexpr explicit expected(in_place_t, std::initializer_list<U> ilist, Args&&... args);
@@ -630,7 +606,8 @@ public:
     ///
     /// \param ilist an initializer list to forward
     /// \param args the arguments to forward
-    template <typename U, typename... Args,
+    template <typename U,
+              typename... Args,
               typename = std::enable_if_t<
                   std::is_constructible<E, std::initializer_list<U>, Args...>::value>>
     constexpr explicit expected(unexpect_t, std::initializer_list<U> ilist, Args&&... args);
@@ -654,7 +631,7 @@ public:
     //-----------------------------------------------------------------------
     // Modifiers
     //-----------------------------------------------------------------------
-public:
+   public:
     /// \brief Consturcts the underlying value type in-place
     ///
     /// If the expected already contains a value, it is destructed first.
@@ -670,7 +647,8 @@ public:
     ///
     /// \param ilist the initializer list of arguments to forward
     /// \param args the arguments to forward to \c T's constructors
-    template <typename U, typename... Args,
+    template <typename U,
+              typename... Args,
               typename = std::enable_if_t<std::is_constructible<T, Args...>::value>>
     void emplace(std::initializer_list<U> ilist, Args&&... args);
 
@@ -682,7 +660,7 @@ public:
     //-----------------------------------------------------------------------
     // Observers
     //-----------------------------------------------------------------------
-public:
+   public:
     /// \brief Queries whether the expected has a value
     ///
     /// \return \c true if the expected has a value
@@ -773,15 +751,16 @@ public:
     //------------------------------------------------------------------------
     // Monadic Functionality
     //------------------------------------------------------------------------
-public:
+   public:
     /// \brief Invokes the function \p fn with this expected as the argument
     ///
     /// If this expected contains an error, the result also contains an error
     /// \param fn the function to invoke with this
     /// \return The result of the function being called
-    template <typename Fn,
-              typename = std::enable_if_t<conjunction<
-                  is_invocable<Fn, const T&>, is_expected<invoke_result_t<Fn, const T&>>>::value>>
+    template <
+        typename Fn,
+        typename = std::enable_if_t<conjunction<is_invocable<Fn, const T&>,
+                                                is_expected<invoke_result_t<Fn, const T&>>>::value>>
     invoke_result_t<Fn, const T&> flat_map(Fn&& fn) const;
 
     /// \brief Invokes this function \p fn with this expected as the argument
@@ -802,28 +781,26 @@ public:
 
 template <typename E>
 class expected<void, E>
-    : detail::expected_base<std::is_trivially_destructible<E>::value, empty<void>, E>
-{
+    : detail::expected_base<std::is_trivially_destructible<E>::value, empty<void>, E> {
     using base_type =
         detail::expected_base<std::is_trivially_destructible<E>::value, empty<void>, E>;
 
     //-----------------------------------------------------------------------
     // Public Member Types
     //-----------------------------------------------------------------------
-public:
+   public:
     using value_type = void;
     using error_type = E;
 
     template <typename U>
-    struct rebind
-    {
+    struct rebind {
         typedef expected<U, error_type> type;
     };
 
     //-----------------------------------------------------------------------
     // Constructors / Destructor / Assignment
     //-----------------------------------------------------------------------
-public:
+   public:
     /// \brief Default constructs this expected type with no error
     constexpr expected() noexcept;
 
@@ -893,7 +870,8 @@ public:
     ///
     /// \param ilist an initializer list to forward
     /// \param args the arguments to forward
-    template <typename U, typename... Args,
+    template <typename U,
+              typename... Args,
               typename = std::enable_if_t<
                   std::is_constructible<E, std::initializer_list<U>, Args...>::value>>
     constexpr explicit expected(unexpect_t, std::initializer_list<U> ilist, Args&&... args);
@@ -921,7 +899,7 @@ public:
     //-----------------------------------------------------------------------
     // Modifiers
     //-----------------------------------------------------------------------
-public:
+   public:
     /// \brief Constructs this expected without an error state
     void emplace();
 
@@ -933,7 +911,7 @@ public:
     //-----------------------------------------------------------------------
     // Observers
     //-----------------------------------------------------------------------
-public:
+   public:
     /// \brief Queries whether the expected has a value
     ///
     /// \return \c true if the expected has a value
@@ -1000,14 +978,15 @@ public:
     //------------------------------------------------------------------------
     // Monadic Functionality
     //------------------------------------------------------------------------
-public:
+   public:
     /// \brief Invokes the function \p fn with this expected as the argument
     ///
     /// If this expected contains an error, the result also contains an error
     /// \param fn the function to invoke with this
     /// \return The result of the function being called
-    template <typename Fn, typename = std::enable_if_t<conjunction<
-                               is_invocable<Fn>, is_expected<invoke_result_t<Fn>>>::value>>
+    template <typename Fn,
+              typename = std::enable_if_t<
+                  conjunction<is_invocable<Fn>, is_expected<invoke_result_t<Fn>>>::value>>
     invoke_result_t<Fn> flat_map(Fn&& fn) const;
 
     /// \brief Invokes this function \p fn with this expected as the argument
@@ -1101,6 +1080,6 @@ constexpr bool operator>=(const unexpected_type<E>& e, const expected<T, E>& x);
 template <typename T, typename E>
 void swap(expected<T, E>& lhs, expected<T, E>& rhs);
 
-} // namespace glue
+}  // namespace glue
 
 #include "glue/base/detail/expected.inl"

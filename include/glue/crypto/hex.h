@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <string>
 #include <vector>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
@@ -19,7 +19,9 @@ namespace glue {
  * @param input_length length of input in bytes
  * @param uppercase should output be upper or lower case?
  */
-GLUE_API void hex_encode(char output[], const uint8_t input[], size_t input_length,
+GLUE_API void hex_encode(char output[],
+                         const uint8_t input[],
+                         size_t input_length,
                          bool uppercase = false);
 
 /**
@@ -37,9 +39,8 @@ GLUE_API std::string hex_encode(const uint8_t input[], size_t input_length, bool
  * @param uppercase should output be upper or lower case?
  * @return hexadecimal representation of input
  */
-std::string hex_encode(const std::string& input, bool uppercase = false)
-{
-    return hex_encode((const uint8_t*) input.data(), input.size(), uppercase);
+std::string hex_encode(const std::string& input, bool uppercase = false) {
+    return hex_encode((const uint8_t*)input.data(), input.size(), uppercase);
 }
 
 /**
@@ -55,8 +56,11 @@ std::string hex_encode(const std::string& input, bool uppercase = false)
                 exception if whitespace is encountered
 * @return number of bytes written to output
 */
-GLUE_API size_t hex_decode(uint8_t output[], const char input[], size_t input_length,
-                           size_t& input_consumed, bool ignore_ws = true);
+GLUE_API size_t hex_decode(uint8_t output[],
+                           const char input[],
+                           size_t input_length,
+                           size_t& input_consumed,
+                           bool ignore_ws = true);
 
 /**
 * Perform hex decoding
@@ -67,7 +71,9 @@ GLUE_API size_t hex_decode(uint8_t output[], const char input[], size_t input_le
                 exception if whitespace is encountered
 * @return number of bytes written to output
 */
-GLUE_API size_t hex_decode(uint8_t output[], const char input[], size_t input_length,
+GLUE_API size_t hex_decode(uint8_t output[],
+                           const char input[],
+                           size_t input_length,
                            bool ignore_ws = true);
 
 /**
@@ -99,4 +105,4 @@ GLUE_API std::string hex_decode(const char input[], size_t input_length, bool ig
 */
 GLUE_API std::string hex_decode(const std::string& input, bool ignore_ws = true);
 
-} // namespace glue
+}  // namespace glue

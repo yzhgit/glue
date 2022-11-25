@@ -17,13 +17,9 @@ template <typename...>
 struct conjunction;
 
 template <typename B1>
-struct conjunction<B1> : B1
-{
-};
+struct conjunction<B1> : B1 {};
 
 template <typename B1, typename... Bn>
-struct conjunction<B1, Bn...> : std::conditional_t<B1::value, conjunction<Bn...>, B1>
-{
-};
+struct conjunction<B1, Bn...> : std::conditional_t<B1::value, conjunction<Bn...>, B1> {};
 
-} // namespace glue
+}  // namespace glue

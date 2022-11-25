@@ -4,13 +4,13 @@
 //
 
 #include "ed25519_fe.h"
+
 #include "ed25519_internal.h"
 
 namespace glue {
 
 // static
-FE_25519 FE_25519::invert(const FE_25519& z)
-{
+FE_25519 FE_25519::invert(const FE_25519& z) {
     fe t0;
     fe t1;
     fe t2;
@@ -42,8 +42,7 @@ FE_25519 FE_25519::invert(const FE_25519& z)
     return t0;
 }
 
-FE_25519 FE_25519::pow_22523(const fe& z)
-{
+FE_25519 FE_25519::pow_22523(const fe& z) {
     fe t0;
     fe t1;
     fe t2;
@@ -107,8 +106,7 @@ With tighter constraints on inputs can squeeze carries into int32.
 */
 
 // static
-FE_25519 FE_25519::mul(const FE_25519& f, const FE_25519& g)
-{
+FE_25519 FE_25519::mul(const FE_25519& f, const FE_25519& g) {
     const int32_t f0 = f[0];
     const int32_t f1 = f[1];
     const int32_t f2 = f[2];
@@ -334,8 +332,7 @@ See fe_mul.c for discussion of implementation strategy.
 */
 
 // static
-FE_25519 FE_25519::sqr_iter(const FE_25519& f, size_t iter)
-{
+FE_25519 FE_25519::sqr_iter(const FE_25519& f, size_t iter) {
     int32_t f0 = f[0];
     int32_t f1 = f[1];
     int32_t f2 = f[2];
@@ -347,8 +344,7 @@ FE_25519 FE_25519::sqr_iter(const FE_25519& f, size_t iter)
     int32_t f8 = f[8];
     int32_t f9 = f[9];
 
-    for (size_t i = 0; i != iter; ++i)
-    {
+    for (size_t i = 0; i != iter; ++i) {
         const int32_t f0_2 = 2 * f0;
         const int32_t f1_2 = 2 * f1;
         const int32_t f2_2 = 2 * f2;
@@ -476,8 +472,7 @@ See fe_mul.c for discussion of implementation strategy.
 */
 
 // static
-FE_25519 FE_25519::sqr2(const FE_25519& f)
-{
+FE_25519 FE_25519::sqr2(const FE_25519& f) {
     const int32_t f0 = f[0];
     const int32_t f1 = f[1];
     const int32_t f2 = f[2];
@@ -602,8 +597,7 @@ FE_25519 FE_25519::sqr2(const FE_25519& f)
 Ignores top bit of h.
 */
 
-void FE_25519::from_bytes(const uint8_t s[32])
-{
+void FE_25519::from_bytes(const uint8_t s[32]) {
     int64_t h0 = load_4(s);
     int64_t h1 = load_3(s + 4) << 6;
     int64_t h2 = load_3(s + 7) << 5;
@@ -664,8 +658,7 @@ Have q+2^(-255)x = 2^(-255)(h + 19 2^(-25) h9 + 2^(-1))
 so floor(2^(-255)(h + 19 2^(-25) h9 + 2^(-1))) = q.
 */
 
-void FE_25519::to_bytes(uint8_t s[32]) const
-{
+void FE_25519::to_bytes(uint8_t s[32]) const {
     const int64_t X25 = (1 << 25);
 
     int32_t h0 = m_fe[0];
@@ -751,4 +744,4 @@ void FE_25519::to_bytes(uint8_t s[32]) const
     s[31] = static_cast<uint8_t>(h9 >> 18);
 }
 
-} // namespace glue
+}  // namespace glue

@@ -4,12 +4,12 @@
 //
 
 #include "mem_ops.h"
+
 #include "ct_utils.h"
 
 namespace glue {
 
-void secure_scrub_memory(void* ptr, size_t n)
-{
+void secure_scrub_memory(void* ptr, size_t n) {
 #if defined(GLUE_OS_WINDOWS)
     ::RtlSecureZeroMemory(ptr, n);
 
@@ -30,8 +30,7 @@ void secure_scrub_memory(void* ptr, size_t n)
 #endif
 }
 
-uint8_t ct_compare_u8(const uint8_t x[], const uint8_t y[], size_t len)
-{
+uint8_t ct_compare_u8(const uint8_t x[], const uint8_t y[], size_t len) {
     volatile uint8_t difference = 0;
 
     for (size_t i = 0; i != len; ++i) difference = difference | (x[i] ^ y[i]);
@@ -39,4 +38,4 @@ uint8_t ct_compare_u8(const uint8_t x[], const uint8_t y[], size_t len)
     return CT::Mask<uint8_t>::is_zero(difference).value();
 }
 
-} // namespace glue
+}  // namespace glue

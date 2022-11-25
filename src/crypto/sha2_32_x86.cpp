@@ -7,15 +7,16 @@
 
 #if defined(GL_HAS_SHA2_32_X86)
 
-    #include "glue/base/compiler.h"
-    #include <immintrin.h>
+#include <immintrin.h>
+
+#include "glue/base/compiler.h"
 
 namespace glue {
 
 GLUE_FUNC_ISA("sha,sse4.1,ssse3")
-void SHA_256::compress_digest_x86(secure_vector<uint32_t>& digest, const uint8_t input[],
-                                  size_t blocks)
-{
+void SHA_256::compress_digest_x86(secure_vector<uint32_t>& digest,
+                                  const uint8_t input[],
+                                  size_t blocks) {
     __m128i STATE0, STATE1;
     __m128i MSG, TMP, MASK;
     __m128i TMSG0, TMSG1, TMSG2, TMSG3;
@@ -30,13 +31,12 @@ void SHA_256::compress_digest_x86(secure_vector<uint32_t>& digest, const uint8_t
     STATE1 = _mm_loadu_si128(reinterpret_cast<__m128i*>(&state[4]));
     MASK = _mm_set_epi64x(0x0c0d0e0f08090a0bULL, 0x0405060700010203ULL);
 
-    TMP = _mm_shuffle_epi32(TMP, 0xB1);          // CDAB
-    STATE1 = _mm_shuffle_epi32(STATE1, 0x1B);    // EFGH
-    STATE0 = _mm_alignr_epi8(TMP, STATE1, 8);    // ABEF
-    STATE1 = _mm_blend_epi16(STATE1, TMP, 0xF0); // CDGH
+    TMP = _mm_shuffle_epi32(TMP, 0xB1);           // CDAB
+    STATE1 = _mm_shuffle_epi32(STATE1, 0x1B);     // EFGH
+    STATE0 = _mm_alignr_epi8(TMP, STATE1, 8);     // ABEF
+    STATE1 = _mm_blend_epi16(STATE1, TMP, 0xF0);  // CDGH
 
-    while (blocks)
-    {
+    while (blocks) {
         // Save current hash
         ABEF_SAVE = STATE0;
         CDGH_SAVE = STATE1;
@@ -201,16 +201,16 @@ void SHA_256::compress_digest_x86(secure_vector<uint32_t>& digest, const uint8_t
         blocks--;
     }
 
-    TMP = _mm_shuffle_epi32(STATE0, 0x1B);       // FEBA
-    STATE1 = _mm_shuffle_epi32(STATE1, 0xB1);    // DCHG
-    STATE0 = _mm_blend_epi16(TMP, STATE1, 0xF0); // DCBA
-    STATE1 = _mm_alignr_epi8(STATE1, TMP, 8);    // ABEF
+    TMP = _mm_shuffle_epi32(STATE0, 0x1B);        // FEBA
+    STATE1 = _mm_shuffle_epi32(STATE1, 0xB1);     // DCHG
+    STATE0 = _mm_blend_epi16(TMP, STATE1, 0xF0);  // DCBA
+    STATE1 = _mm_alignr_epi8(STATE1, TMP, 8);     // ABEF
 
     // Save state
     _mm_storeu_si128(reinterpret_cast<__m128i*>(&state[0]), STATE0);
     _mm_storeu_si128(reinterpret_cast<__m128i*>(&state[4]), STATE1);
 }
 
-}
+}  // namespace glue
 
 #endif

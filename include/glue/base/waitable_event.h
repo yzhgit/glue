@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <atomic>
 #include <mutex>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
@@ -19,16 +19,12 @@ namespace glue {
 /// Usually, one thread signals an event,
 /// while one or more other threads wait
 /// for an event to become signalled.
-class GLUE_API WaitableEvent final
-{
-public:
+class GLUE_API WaitableEvent final {
+   public:
     explicit WaitableEvent();
 
     // Returns the value of the event's internal "notified" state.
-    bool isNotified()
-    {
-        return hasBeenNotifiedInternal(&m_notified);
-    }
+    bool isNotified() { return hasBeenNotifiedInternal(&m_notified); }
 
     // Blocks the calling thread until the event's "notified" state is
     // `true`. Note that if `notify()` has been previously called on this
@@ -48,9 +44,8 @@ public:
 
     void reset();
 
-private:
-    static inline bool hasBeenNotifiedInternal(std::atomic<bool>* notified_yet)
-    {
+   private:
+    static inline bool hasBeenNotifiedInternal(std::atomic<bool>* notified_yet) {
         return notified_yet->load(std::memory_order_acquire);
     }
 
@@ -61,4 +56,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(WaitableEvent)
 };
 
-} // namespace glue
+}  // namespace glue

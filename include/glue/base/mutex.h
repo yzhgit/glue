@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "glue/base/scoped_lock.h"
-
 #include <mutex>
+
+#include "glue/base/scoped_lock.h"
 
 namespace glue {
 
@@ -25,25 +25,19 @@ typedef std::mutex Mutex;
 
     @tags{Core}
 */
-class GLUE_API EmptyMutex
-{
-public:
+class GLUE_API EmptyMutex {
+   public:
     using ScopedLock = ScopedLock<EmptyMutex>;
 
     inline EmptyMutex() = default;
     inline ~EmptyMutex() = default;
 
-    inline void lock() noexcept
-    {}
-    inline bool try_lock() noexcept
-    {
-        return true;
-    }
-    inline void unlock() noexcept
-    {}
+    inline void lock() noexcept {}
+    inline bool try_lock() noexcept { return true; }
+    inline void unlock() noexcept {}
 
-private:
+   private:
     GLUE_DECLARE_NON_COPYABLE(EmptyMutex)
 };
 
-}
+}  // namespace glue

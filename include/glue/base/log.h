@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <fstream>
 #include <sstream>
 #include <string>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
@@ -52,8 +52,8 @@ namespace glue {
 /// // The stream style, setting the log level to GLUE_LOG_WARN.
 /// Log(GLUE_LOG_WARN) << "the number is " << 10;
 ///
-/// // This is the same as the last line, except it uses the default GLUE_LOG_INFO.
-/// Log() << "the number is " << 10;
+/// // This is the same as the last line, except it uses the default
+/// GLUE_LOG_INFO. Log() << "the number is " << 10;
 ///
 /// // There are also log level-specific stream objects, one for each level
 /// // except GLUE_LOG_SILENT.
@@ -111,13 +111,14 @@ namespace glue {
 /// \returns A string representation of the argument list.
 ///
 template <typename... Args>
-std::string formatString(const char* format, Args&&... args)
-{
+std::string formatString(const char* format, Args&&... args) {
     char buf[256];
     size_t n = std::snprintf(buf, sizeof(buf), format, std::forward<Args>(args)...);
 
     // Static buffer large enough?
-    if (n < sizeof(buf)) { return {buf, n}; }
+    if (n < sizeof(buf)) {
+        return {buf, n};
+    }
 
     // Static buffer too small
     std::string s(n + 1, 0);
@@ -131,16 +132,15 @@ std::string formatString(const char* format, Args&&... args)
 /// \{
 
 /// \brief The supported logging levels. Default is `GLUE_LOG_INFO`.
-enum LogLevel : short
-{
+enum LogLevel : short {
     GLUE_LOG_DEBUG,
     GLUE_LOG_INFO,
     GLUE_LOG_WARN,
     GLUE_LOG_ERROR,
     GLUE_LOG_FATAL,
-    GLUE_LOG_SILENT // GLUE_LOG_SILENT can be used to disable _all_ log messages.
-                    // All logging can be disabled by calling
-                    /// SetLogLevel(GLUE_LOG_SILENT).
+    GLUE_LOG_SILENT  // GLUE_LOG_SILENT can be used to disable _all_ log
+                     // messages. All logging can be disabled by calling
+                     /// SetLogLevel(GLUE_LOG_SILENT).
 };
 
 /// \brief Sets the logging level to selectively show log messages.
@@ -283,13 +283,12 @@ GLUE_API std::shared_ptr<BaseLoggerChannel> GetLoggerChannel();
 /// \author Dan Wilcox <danomatika@gmail.com> danomatika.com
 
 // Class idea from
-// http://www.gamedev.net/community/forums/topic.asp?topic_id=525405&whichpage=1&#3406418 How to
-// catch std::endl (which is actually a func pointer)
+// http://www.gamedev.net/community/forums/topic.asp?topic_id=525405&whichpage=1&#3406418
+// How to catch std::endl (which is actually a func pointer)
 // http://yvan.seth.id.au/Entries/Technology/Code/std__endl.html
 
-class GLUE_API Log
-{
-public:
+class GLUE_API Log {
+   public:
     /// \name Logging
     /// \{
 
@@ -324,7 +323,8 @@ public:
     ///
     /// ~~~~
     ///
-    /// You can use the derived convenience classes as an alternative for specific log levels:
+    /// You can use the derived convenience classes as an alternative for
+    /// specific log levels:
     ///
     /// 	LogDebug()
     /// 	LogInfo()
@@ -365,7 +365,8 @@ public:
     /// \param message The log message.
     Log(LogLevel level, const std::string& message);
 
-    /// \brief Logs a message at a specific log level using the printf interface.
+    /// \brief Logs a message at a specific log level using the printf
+    /// interface.
     ///
     /// The message is built using the formatting from the C printf function
     /// and can be used as a direct replacement. Essentially, the second
@@ -380,13 +381,15 @@ public:
     ///
     /// * `%d`: integer number, `123`
     /// * `%f`: floating point number, `123.45`
-    /// * `%s`: a C string ([null terminated](http://en.wikipedia.org/wiki/Null-terminated_string));
-    /// this is not a C++ string, use
-    /// [string::c_str()](http://www.cplusplus.com/reference/string/string/c_str/) to get a C string
-    /// from a C++ string
+    /// * `%s`: a C string ([null
+    /// terminated](http://en.wikipedia.org/wiki/Null-terminated_string)); this
+    /// is not a C++ string, use
+    /// [string::c_str()](http://www.cplusplus.com/reference/string/string/c_str/)
+    /// to get a C string from a C++ string
     /// * `%c`: a single character
-    /// * `%x`: unsigned integer as a [hexidecimal](http://en.wikipedia.org/wiki/Hexadecimal)
-    /// number; `x` uses lower-case letters and `X` uses upper-case
+    /// * `%x`: unsigned integer as a
+    /// [hexidecimal](http://en.wikipedia.org/wiki/Hexadecimal) number; `x` uses
+    /// lower-case letters and `X` uses upper-case
     /// * `%%`: prints a `%` character
     ///
     /// The specifier should match the variable type as it is used to tell
@@ -408,8 +411,8 @@ public:
     ///
     /// // Print a message with variables, sets the message format in the
     /// // format string.
-    /// Log(GLUE_LOG_INFO, "we've got %d & %f, we got everything you want honey, we know %s", fun,
-    /// games, theNames.c_str());
+    /// Log(GLUE_LOG_INFO, "we've got %d & %f, we got everything you want honey,
+    /// we know %s", fun, games, theNames.c_str());
     ///
     /// ~~~~
     ///
@@ -426,8 +429,7 @@ public:
     /// \param format The printf-style format string.
     template <typename... Args>
     Log(LogLevel level, const char* format, Args&&... args)
-        : Log(level, formatString(format, args...))
-    {}
+        : Log(level, formatString(format, args...)) {}
     /// \}
 
     //--------------------------------------------------
@@ -470,8 +472,7 @@ public:
     /// \param value the data to be streamed.
     /// \returns A reference to itself.
     template <class T>
-    Log& operator<<(const T& value)
-    {
+    Log& operator<<(const T& value) {
         m_message << value << getPadding();
         return *this;
     }
@@ -483,20 +484,19 @@ public:
     ///
     /// \param func A function pointer that takes a std::ostream as an argument.
     /// \returns A reference to itself.
-    Log& operator<<(std::ostream& (*func)(std::ostream&) )
-    {
+    Log& operator<<(std::ostream& (*func)(std::ostream&)) {
         func(m_message);
         return *this;
     }
 
     /// \endcond
 
-protected:
+   protected:
     /// \cond INTERNAL
 
-    LogLevel m_level;     ///< Log level.
-    bool m_bPrinted;      ///< Has the message been printed in the constructor?
-    std::string m_module; ///< The destination module for this message.
+    LogLevel m_level;      ///< Log level.
+    bool m_bPrinted;       ///< Has the message been printed in the constructor?
+    std::string m_module;  ///< The destination module for this message.
 
     /// \brief Print a log line.
     /// \param level The log level.
@@ -510,31 +510,26 @@ protected:
     /// \returns true if the given module is active at the given log level.
     bool checkLog(LogLevel level, const std::string& module);
 
-    static std::shared_ptr<BaseLoggerChannel>& channel(); ///< The target channel.
+    static std::shared_ptr<BaseLoggerChannel>& channel();  ///< The target channel.
 
     /// \endcond
 
-private:
-    std::stringstream m_message; ///< Temporary buffer.
+   private:
+    std::stringstream m_message;  ///< Temporary buffer.
 
-    static bool m_bAutoSpace; ///< Should space be added between messages?
+    static bool m_bAutoSpace;  ///< Should space be added between messages?
 
-    Log(Log const&)
-    {} // not defined, not copyable
-    Log& operator=(Log& from)
-    {
-        return *this;
-    } // not defined, not assignable
+    Log(Log const&) {}                           // not defined, not copyable
+    Log& operator=(Log& from) { return *this; }  // not defined, not assignable
 
-    static std::string& getPadding(); ///< The padding between std::ostream calls.
+    static std::string& getPadding();  ///< The padding between std::ostream calls.
 };
 
 /// \brief Derived log class for easy verbose logging.
 ///
 /// Example: `LogDebug("Log message")`.
-class GLUE_API LogDebug : public Log
-{
-public:
+class GLUE_API LogDebug : public Log {
+   public:
     /// \brief Create a verbose log message.
     /// \param module The target module.
     LogDebug(const std::string& module = "");
@@ -549,16 +544,14 @@ public:
     /// \param format The printf-style format string.
     template <typename... Args>
     LogDebug(const std::string& module, const char* format, Args&&... args)
-        : LogDebug(module, formatString(format, args...))
-    {}
+        : LogDebug(module, formatString(format, args...)) {}
 };
 
 /// \brief Derived log class for easy notice logging.
 ///
 /// Example: `LogInfo("Log message")`.
-class GLUE_API LogInfo : public Log
-{
-public:
+class GLUE_API LogInfo : public Log {
+   public:
     /// \brief Create a notice log message.
     /// \param module The target module.
     LogInfo(const std::string& module = "");
@@ -573,16 +566,14 @@ public:
     /// \param format The printf-style format string.
     template <typename... Args>
     LogInfo(const std::string& module, const char* format, Args&&... args)
-        : LogInfo(module, formatString(format, args...))
-    {}
+        : LogInfo(module, formatString(format, args...)) {}
 };
 
 /// \brief Derived log class for easy warning logging.
 ///
 /// Example: `LogWarn("Log message")`.
-class GLUE_API LogWarn : public Log
-{
-public:
+class GLUE_API LogWarn : public Log {
+   public:
     /// \brief Create a verbose log message.
     /// \param module The target module.
     LogWarn(const std::string& module = "");
@@ -596,16 +587,14 @@ public:
     /// \param format The printf-style format string.
     template <typename... Args>
     LogWarn(const std::string& module, const char* format, Args&&... args)
-        : LogWarn(module, formatString(format, args...))
-    {}
+        : LogWarn(module, formatString(format, args...)) {}
 };
 
 /// \brief Derived log class for easy error logging.
 ///
 /// Example: `LogError("Log message")`.
-class GLUE_API LogError : public Log
-{
-public:
+class GLUE_API LogError : public Log {
+   public:
     /// \brief Create a error log message.
     /// \param module The target module.
     LogError(const std::string& module = "");
@@ -620,16 +609,14 @@ public:
     /// \param format The printf-style format string.
     template <typename... Args>
     LogError(const std::string& module, const char* format, Args&&... args)
-        : LogError(module, formatString(format, args...))
-    {}
+        : LogError(module, formatString(format, args...)) {}
 };
 
 /// \brief Derived log class for easy fatal error logging.
 ///
 /// Example: `LogFatal("Log message")`.
-class GLUE_API LogFatal : public Log
-{
-public:
+class GLUE_API LogFatal : public Log {
+   public:
     /// \brief Create a fatal error log message.
     /// \param module The target module.
     LogFatal(const std::string& module = "");
@@ -644,8 +631,7 @@ public:
     /// \param format The printf-style format string.
     template <typename... Args>
     LogFatal(const std::string& module, const char* format, Args&&... args)
-        : LogFatal(module, formatString(format, args...))
-    {}
+        : LogFatal(module, formatString(format, args...)) {}
 };
 
 /// \cond INTERNAL
@@ -657,9 +643,8 @@ public:
 ///
 /// Users can derive their own logging channels from BaseLoggerChannel or use
 /// default channels.
-class GLUE_API BaseLoggerChannel
-{
-public:
+class GLUE_API BaseLoggerChannel {
+   public:
     /// \brief Destroy the channel.
     virtual ~BaseLoggerChannel(){};
 
@@ -674,25 +659,22 @@ public:
     /// \param module The target module.
     /// \param format The printf-style format string.
     template <typename... Args>
-    void log(LogLevel level, const std::string& module, const char* format, Args&&... args)
-    {
+    void log(LogLevel level, const std::string& module, const char* format, Args&&... args) {
         log(level, module, formatString(format, args...));
     }
 };
 
 /// \brief A logger channel that logs its messages to the console.
-class GLUE_API ConsoleLoggerChannel : public BaseLoggerChannel
-{
-public:
+class GLUE_API ConsoleLoggerChannel : public BaseLoggerChannel {
+   public:
     /// \brief Destroy the console logger channel.
     virtual ~ConsoleLoggerChannel(){};
     void log(LogLevel level, const std::string& module, const std::string& message);
 };
 
 #if defined(GLUE_OS_ANDROID)
-class GLUE_API AndroidLogChannel : public BaseLoggerChannel
-{
-public:
+class GLUE_API AndroidLogChannel : public BaseLoggerChannel {
+   public:
     virtual ~AndroidLogChannel(){};
 
     void log(LogLevel level, const std::string& module, const std::string& msg);
@@ -700,10 +682,10 @@ public:
 #endif
 
 #if defined(GLUE_OS_WINDOWS)
-/// A logger channel that logs its messages to windows debug view and visual studio output.
-class GLUE_API DebugViewLoggerChannel : public BaseLoggerChannel
-{
-public:
+/// A logger channel that logs its messages to windows debug view and visual
+/// studio output.
+class GLUE_API DebugViewLoggerChannel : public BaseLoggerChannel {
+   public:
     /// \brief Destroy the console logger channel.
     virtual ~DebugViewLoggerChannel(){};
     void log(LogLevel level, const std::string& module, const std::string& message);
@@ -711,9 +693,8 @@ public:
 #endif
 
 /// \brief A logger channel that logs its messages to a log file.
-class GLUE_API FileLoggerChannel : public BaseLoggerChannel
-{
-public:
+class GLUE_API FileLoggerChannel : public BaseLoggerChannel {
+   public:
     /// \brief Create an FileLoggerChannel.
     FileLoggerChannel();
 
@@ -735,10 +716,10 @@ public:
     /// \brief CLose the log file.
     void close();
 
-private:
-    std::ofstream m_fileStream; ///< The location of the log file.
+   private:
+    std::ofstream m_fileStream;  ///< The location of the log file.
 };
 
 /// \endcond
 
-} // namespace glue
+}  // namespace glue

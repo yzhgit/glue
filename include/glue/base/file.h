@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <list>
 
 #include "ghc/fs_std.hpp"
+#include "glue/base/common.h"
 
 namespace glue {
 
@@ -27,10 +26,9 @@ namespace glue {
 
     @tags{Core}
 */
-class GLUE_API File final
-{
-public:
+class GLUE_API File final {
+   public:
     static std::list<std::string> readLines(const fs::path& path);
 };
 
-}
+}  // namespace glue

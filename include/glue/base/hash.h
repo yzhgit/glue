@@ -5,12 +5,12 @@
 
 #pragma once
 
+#include <cstddef>   // std::size_t
+#include <iterator>  // std::iterator_traits
+#include <type_traits>
+
 #include "glue/base/traits/conjunction.hpp"
 #include "glue/base/traits/void_t.hpp"
-
-#include <type_traits>
-#include <cstddef>  // std::size_t
-#include <iterator> // std::iterator_traits
 
 namespace glue {
 
@@ -19,9 +19,7 @@ namespace glue {
 //=========================================================================
 
 /// \brief Type that represents a hash value
-enum class hash_t : std::size_t
-{
-};
+enum class hash_t : std::size_t {};
 
 //=========================================================================
 // non-member functions : enum class : hash_t
@@ -254,31 +252,26 @@ constexpr hash_t hash_value(Enum val) noexcept;
 
 namespace detail {
 
-    template <typename T, typename = void>
-    struct is_hashable_impl : std::false_type
-    {
-    };
+template <typename T, typename = void>
+struct is_hashable_impl : std::false_type {};
 
-    template <typename T>
-    struct is_hashable_impl<
-        T, void_t<decltype(std::declval<glue::hash_t&>() = hash_value(std::declval<T>()))>>
-        : std::true_type
-    {
-    };
+template <typename T>
+struct is_hashable_impl<
+    T,
+    void_t<decltype(std::declval<glue::hash_t&>() = hash_value(std::declval<T>()))>>
+    : std::true_type {};
 
-    template <typename T, typename = void>
-    struct is_nothrow_hashable_impl : std::false_type
-    {
-    };
+template <typename T, typename = void>
+struct is_nothrow_hashable_impl : std::false_type {};
 
-    template <typename T>
-    struct is_nothrow_hashable_impl<
-        T, void_t<decltype(std::declval<glue::hash_t&>() = hash_value(std::declval<T>()))>>
-        : std::bool_constant<noexcept(std::declval<glue::hash_t&>() = hash_value(std::declval<T>()))>
-    {
-    };
+template <typename T>
+struct is_nothrow_hashable_impl<
+    T,
+    void_t<decltype(std::declval<glue::hash_t&>() = hash_value(std::declval<T>()))>>
+    : std::bool_constant<noexcept(std::declval<glue::hash_t&>() = hash_value(std::declval<T>()))> {
+};
 
-} // namespace detail
+}  // namespace detail
 
 /// \brief Trait determining whether \p T is hashable by an ADL call to
 ///        \c hash_value
@@ -287,9 +280,7 @@ namespace detail {
 ///
 /// \tparam T the type to check
 template <typename T>
-struct is_hashable : detail::is_hashable_impl<T>
-{
-};
+struct is_hashable : detail::is_hashable_impl<T> {};
 
 /// \brief Convenience utility for extracting \c ::value from
 ///        \c is_hashable
@@ -305,9 +296,7 @@ constexpr bool is_hashable_v = is_hashable<T>::value;
 ///
 /// \tparam T the type to check
 template <typename T>
-struct is_nothrow_hashable : detail::is_nothrow_hashable_impl<T>
-{
-};
+struct is_nothrow_hashable : detail::is_nothrow_hashable_impl<T> {};
 
 /// \brief Convenience utility for extracting \c ::value from
 ///        \c is_nothrow_hashable
@@ -329,8 +318,8 @@ constexpr hash_t hash_combine(hash_t seed, hash_t hash) noexcept;
 ///
 /// \param seed the seed to begin combination with
 /// \param hash0 the first hash to comnbine with the seed
-/// \param hashes the rest of the hashes to combine with the combined seed/hashes
-/// \return the result of the combinations
+/// \param hashes the rest of the hashes to combine with the combined
+/// seed/hashes \return the result of the combinations
 template <typename... Hashes,
           typename = std::enable_if<(sizeof...(Hashes) > 0) &&
                                     conjunction<std::is_same<Hashes, hash_t>...>::value>>
@@ -388,8 +377,7 @@ hash_t hash_raw(const T& data) noexcept;
 ///        easy ADL overloads and type-querying
 ///////////////////////////////////////////////////////////////////////////
 template <typename Key>
-struct hash
-{
+struct hash {
     /// \brief Functor that hashes all key types
     ///
     /// \param val the value to hash
@@ -397,6 +385,6 @@ struct hash
     constexpr hash_t operator()(const Key& val);
 };
 
-} // namespace glue
+}  // namespace glue
 
 #include "glue/base/detail/hash.inl"

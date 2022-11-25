@@ -12,8 +12,7 @@ namespace glue {
 ///
 /// The result is aliased as \c ::type
 template <typename T>
-struct type_identity
-{
+struct type_identity {
     using type = T;
 };
 
@@ -23,4 +22,4 @@ struct type_identity
 template <typename T>
 using type_identity_t = typename type_identity<T>::type;
 
-} // namespace glue
+}  // namespace glue

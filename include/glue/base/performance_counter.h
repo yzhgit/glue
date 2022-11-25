@@ -6,7 +6,6 @@
 #pragma once
 
 #include "glue/base/leaked_detector.h"
-
 #include "glue/base/time.h"
 
 namespace glue {
@@ -34,19 +33,20 @@ namespace glue {
 
     @tags{Core}
 */
-class GLUE_API PerformanceCounter
-{
-public:
+class GLUE_API PerformanceCounter {
+   public:
     //==============================================================================
     /** Creates a PerformanceCounter object.
 
         @param counterName      the name used when printing out the statistics
-        @param runsPerPrintout  the number of start/stop iterations before calling
-                                printStatistics()
+        @param runsPerPrintout  the number of start/stop iterations before
+       calling printStatistics()
         @param loggingFile      a file to dump the results to - if this is NULL,
-                                the results are just written to the debugger output
+                                the results are just written to the debugger
+       output
     */
-    PerformanceCounter(const char* counterName, int runsPerPrintout = 100,
+    PerformanceCounter(const char* counterName,
+                       int runsPerPrintout = 100,
                        const char* loggingFile = nullptr);
 
     /** Destructor. */
@@ -76,8 +76,7 @@ public:
     void printStatistics();
 
     /** Holds the current statistics. */
-    struct Statistics
-    {
+    struct Statistics {
         Statistics() noexcept;
 
         void clear() noexcept;
@@ -96,7 +95,7 @@ public:
     /** Returns a copy of the current stats, and resets the internal counter. */
     Statistics getStatisticsAndReset();
 
-private:
+   private:
     //==============================================================================
     Statistics m_stats;
     int64 m_runsPerPrint;
@@ -120,32 +119,31 @@ private:
             doSomething();
         }
 
-        Logger::writeToLog ("doSomething() took " + String (timeSec) + "seconds");
+        Logger::writeToLog ("doSomething() took " + String (timeSec) +
+   "seconds");
     }
 
-    @param resultInSeconds The result of the measurement will be stored in this variable.
+    @param resultInSeconds The result of the measurement will be stored in this
+   variable.
 
     @tags{Core}
 */
-class GLUE_API ScopedTimeMeasurement
-{
-public:
-    ScopedTimeMeasurement(double& resultInSeconds) noexcept : m_result(resultInSeconds)
-    {
+class GLUE_API ScopedTimeMeasurement {
+   public:
+    ScopedTimeMeasurement(double& resultInSeconds) noexcept : m_result(resultInSeconds) {
         m_result = 0.0;
     }
 
-    ~ScopedTimeMeasurement()
-    {
+    ~ScopedTimeMeasurement() {
         static auto scaler = 1.0 / static_cast<double>(Time::getHighResolutionTicksPerSecond());
         m_result = static_cast<double>(Time::getHighResolutionTicks() - m_startTimeTicks) * scaler;
     }
 
-private:
+   private:
     int64 m_startTimeTicks = Time::getHighResolutionTicks();
     double& m_result;
 
     GLUE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScopedTimeMeasurement)
 };
 
-} // namespace glue
+}  // namespace glue

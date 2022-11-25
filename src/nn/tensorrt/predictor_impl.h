@@ -11,13 +11,12 @@ namespace nvinfer1 {
 class IRuntime;
 class ICudaEngine;
 class IExecutionContext;
-} // namespace nvinfer1
+}  // namespace nvinfer1
 
 namespace glue {
 
-class PredictorImpl : public Predictor
-{
-public:
+class PredictorImpl : public Predictor {
+   public:
     PredictorImpl();
     ~PredictorImpl();
     int SetNumThreads(int num_threads);
@@ -27,16 +26,13 @@ public:
     int Finalize(void);
     int PreProcess(const std::vector<TensorInfo>& input_tensor_info_list);
     int Process(std::vector<TensorInfo>& output_tensor_info_list);
-    void SetDlaCore(int dla_core)
-    {
-        dla_core_ = dla_core;
-    }
+    void SetDlaCore(int dla_core) { dla_core_ = dla_core; }
 
-private:
+   private:
     int AllocateBuffers(std::vector<TensorInfo>& input_tensor_info_list,
                         std::vector<TensorInfo>& output_tensor_info_list);
 
-private:
+   private:
     int num_threads_;
     int dla_core_;
     std::unique_ptr<nvinfer1::IRuntime> runtime_;
@@ -47,4 +43,4 @@ private:
     std::vector<void*> buffer_list_gpu_;
 };
 
-} // namespace glue
+}  // namespace glue

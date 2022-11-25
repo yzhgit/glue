@@ -14,18 +14,12 @@ namespace glue {
 ///
 /// The result is aliased as \c ::value
 template <typename...>
-struct disjunction : false_type
-{
-};
+struct disjunction : false_type {};
 
 template <typename B1>
-struct disjunction<B1> : B1
-{
-};
+struct disjunction<B1> : B1 {};
 
 template <typename B1, typename... Bn>
-struct disjunction<B1, Bn...> : std::conditional_t<B1::value != false, B1, disjunction<Bn...>>
-{
-};
+struct disjunction<B1, Bn...> : std::conditional_t<B1::value != false, B1, disjunction<Bn...>> {};
 
-} // namespace glue
+}  // namespace glue

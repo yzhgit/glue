@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "glue/base/mutex.h"
-
 #include <string>
 #include <vector>
+
+#include "glue/base/mutex.h"
 
 namespace glue {
 
@@ -30,7 +30,7 @@ class GLUE_API ThreadPool
 /// again, no-longer used threads are stopped and removed
 /// from the pool.
 {
-public:
+   public:
     ThreadPool(int minCapacity = 2, int maxCapacity = 16, int idleTime = 60);
     /// Creates a thread pool with minCapacity threads.
     /// If required, up to maxCapacity threads are created
@@ -39,7 +39,9 @@ public:
     /// and more than minCapacity threads are running, the thread
     /// is killed. Threads are created with given stack size.
 
-    ThreadPool(const std::string& name, int minCapacity = 2, int maxCapacity = 16,
+    ThreadPool(const std::string& name,
+               int minCapacity = 2,
+               int maxCapacity = 16,
                int idleTime = 60);
     /// Creates a thread pool with the given name and minCapacity threads.
     /// If required, up to maxCapacity threads are created
@@ -108,10 +110,7 @@ public:
     /// as the thread pool is also implicitly managed in
     /// calls to start(), addCapacity() and joinAll().
 
-    const std::string& name() const
-    {
-        return m_name;
-    };
+    const std::string& name() const { return m_name; };
     /// Returns the name of the thread pool,
     /// or an empty string if no name has been
     /// specified in the constructor.
@@ -120,13 +119,13 @@ public:
     /// Returns a reference to the default
     /// thread pool.
 
-protected:
+   protected:
     PooledThread* getThread();
     PooledThread* createThread();
 
     void housekeep();
 
-private:
+   private:
     ThreadPool(const ThreadPool& pool);
     ThreadPool& operator=(const ThreadPool& pool);
 
@@ -142,4 +141,4 @@ private:
     mutable Mutex m_mutex;
 };
 
-} // namespace glue
+}  // namespace glue

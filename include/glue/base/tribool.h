@@ -5,19 +5,18 @@
 
 #pragma once
 
-#include "glue/base/hash.h" // hash_t
+#include "glue/base/hash.h"  // hash_t
 
 namespace glue {
 
 namespace detail {
 
-    struct tribool_t
-    {
-        constexpr tribool_t() = delete;
-        explicit constexpr tribool_t(int){};
-    };
+struct tribool_t {
+    constexpr tribool_t() = delete;
+    explicit constexpr tribool_t(int){};
+};
 
-} // namespace detail
+}  // namespace detail
 
 //=========================================================================
 // class : tribool
@@ -34,12 +33,11 @@ using indeterminate_t = bool (*)(const tribool&, detail::tribool_t);
 ///
 /// Normal boolean logic is still supported
 ///////////////////////////////////////////////////////////////////////////
-class tribool
-{
+class tribool {
     //----------------------------------------------------------------------
     // Constructor / Assignment
     //----------------------------------------------------------------------
-public:
+   public:
     /// \brief Constructs this tribool with an indeterminate state
     constexpr tribool();
 
@@ -76,7 +74,7 @@ public:
     //----------------------------------------------------------------------
     // Observers
     //----------------------------------------------------------------------
-public:
+   public:
     /// \brief Converts this tribool to a boolean value
     ///
     /// Indeterminate states translate to false
@@ -92,24 +90,19 @@ public:
     //----------------------------------------------------------------------
     // Private Member Types
     //----------------------------------------------------------------------
-private:
-    enum class state : unsigned char
-    {
-        e_false = 0,
-        e_true = 1,
-        e_indeterminate = 2
-    };
+   private:
+    enum class state : unsigned char { e_false = 0, e_true = 1, e_indeterminate = 2 };
 
     //----------------------------------------------------------------------
     // Private Members
     //----------------------------------------------------------------------
-private:
+   private:
     state m_state;
 
     //----------------------------------------------------------------------
     // Friends
     //----------------------------------------------------------------------
-private:
+   private:
     friend constexpr bool operator==(const tribool&, const tribool&) noexcept;
     friend constexpr tribool operator&&(const tribool&, const tribool&) noexcept;
     friend constexpr tribool operator||(const tribool&, const tribool&) noexcept;
@@ -165,6 +158,6 @@ constexpr bool operator!=(bool lhs, const tribool& rhs) noexcept;
 constexpr tribool operator&&(const tribool& lhs, const tribool& rhs) noexcept;
 constexpr tribool operator||(const tribool& lhs, const tribool& rhs) noexcept;
 
-} // namespace glue
+}  // namespace glue
 
 #include "detail/tribool.inl"

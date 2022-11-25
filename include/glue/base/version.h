@@ -32,4 +32,4 @@ namespace glue {
 */
 GLUE_API const char* getVersion();
 
-} // namespace glue
+}  // namespace glue

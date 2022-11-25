@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
@@ -45,9 +45,8 @@ namespace glue {
 //
 //     bcount.wait();                    // wait for all work to be complete
 //
-class GLUE_API CountDownLatch final
-{
-public:
+class GLUE_API CountDownLatch final {
+   public:
     explicit CountDownLatch(int initial_count);
 
     // CountDownLatch::countDown()
@@ -62,8 +61,8 @@ public:
 
     // CountDownLatch::wait()
     //
-    // Blocks until the counter reaches zero. This function may be called at most
-    // once. On return, `countDown()` will have been called "initial_count"
+    // Blocks until the counter reaches zero. This function may be called at
+    // most once. On return, `countDown()` will have been called "initial_count"
     // times and the blocking counter may be destroyed.
     //
     // Memory ordering: For any threads X and Y, any action taken by X
@@ -71,7 +70,7 @@ public:
     // from `wait()`.
     void wait() noexcept;
 
-private:
+   private:
     bool m_done;
     int m_num_waiting;
     std::atomic<int> m_count;
@@ -81,4 +80,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(CountDownLatch)
 };
 
-} // namespace glue
+}  // namespace glue

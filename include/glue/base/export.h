@@ -9,9 +9,9 @@
 // Ensure that GLUE_DLL is default unless GL_STATIC is defined
 //
 #if defined(_WIN32) && defined(_DLL)
-    #if !defined(GLUE_DLL) && !defined(GL_STATIC)
-        #define GLUE_DLL
-    #endif
+#if !defined(GLUE_DLL) && !defined(GL_STATIC)
+#define GLUE_DLL
+#endif
 #endif
 
 //
@@ -24,17 +24,17 @@
 // being exported.
 //
 #if (defined(_WIN32) || defined(_WIN32_WCE)) && defined(GLUE_DLL)
-    #if defined(GLUE_EXPORTS)
-        #define GLUE_API __declspec(dllexport)
-    #else
-        #define GLUE_API __declspec(dllimport)
-    #endif
+#if defined(GLUE_EXPORTS)
+#define GLUE_API __declspec(dllexport)
+#else
+#define GLUE_API __declspec(dllimport)
+#endif
 #endif
 
 #if !defined(GLUE_API)
-    #if defined(__GNUC__) && (__GNUC__ >= 4)
-        #define GLUE_API __attribute__((visibility("default")))
-    #else
-        #define GLUE_API
-    #endif
+#if defined(__GNUC__) && (__GNUC__ >= 4)
+#define GLUE_API __attribute__((visibility("default")))
+#else
+#define GLUE_API
+#endif
 #endif

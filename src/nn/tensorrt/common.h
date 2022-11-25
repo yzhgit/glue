@@ -17,36 +17,35 @@
 #ifndef TENSORRT_COMMON_H
 #define TENSORRT_COMMON_H
 
-#include "NvInfer.h"
-#include "NvInferPlugin.h"
-#include "logger.h"
-#include <algorithm>
 #include <cuda_runtime_api.h>
+
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 
+#include "NvInfer.h"
+#include "NvInferPlugin.h"
+#include "logger.h"
+
 using namespace nvinfer1;
 using namespace plugin;
 
-#define CHECK(status)                                                                              \
-    do {                                                                                           \
-        auto ret = (status);                                                                       \
-        if (ret != 0)                                                                              \
-        {                                                                                          \
-            sample::gLogError << "Cuda failure: " << ret << std::endl;                             \
-            abort();                                                                               \
-        }                                                                                          \
+#define CHECK(status)                                                  \
+    do {                                                               \
+        auto ret = (status);                                           \
+        if (ret != 0) {                                                \
+            sample::gLogError << "Cuda failure: " << ret << std::endl; \
+            abort();                                                   \
+        }                                                              \
     } while (0)
 
 namespace samplesCommon {
 
-struct InferDeleter
-{
+struct InferDeleter {
     template <typename T>
-    void operator()(T* obj) const
-    {
+    void operator()(T* obj) const {
         delete obj;
     }
 };
@@ -67,19 +66,16 @@ using SampleUniquePtr = std::unique_ptr<T, InferDeleter>;
 //
 // The default parameter values are intended to demonstrate, for final layers in the network,
 // cases where scaling factors are asymmetric.
-inline void setAllTensorScales(INetworkDefinition* network, float inScales = 2.0f,
-                               float outScales = 4.0f)
-{
+inline void setAllTensorScales(INetworkDefinition* network,
+                               float inScales = 2.0f,
+                               float outScales = 4.0f) {
     // Ensure that all layer inputs have a scale.
-    for (int i = 0; i < network->getNbLayers(); i++)
-    {
+    for (int i = 0; i < network->getNbLayers(); i++) {
         auto layer = network->getLayer(i);
-        for (int j = 0; j < layer->getNbInputs(); j++)
-        {
+        for (int j = 0; j < layer->getNbInputs(); j++) {
             ITensor* input{layer->getInput(j)};
             // Optional inputs are nullptr here and are from RNN layers.
-            if (input != nullptr && !input->dynamicRangeIsSet())
-            {
+            if (input != nullptr && !input->dynamicRangeIsSet()) {
                 input->setDynamicRange(-inScales, inScales);
             }
         }
@@ -88,46 +84,43 @@ inline void setAllTensorScales(INetworkDefinition* network, float inScales = 2.0
     // Ensure that all layer outputs have a scale.
     // Tensors that are also inputs to layers are ingored here
     // since the previous loop nest assigned scales to them.
-    for (int i = 0; i < network->getNbLayers(); i++)
-    {
+    for (int i = 0; i < network->getNbLayers(); i++) {
         auto layer = network->getLayer(i);
-        for (int j = 0; j < layer->getNbOutputs(); j++)
-        {
+        for (int j = 0; j < layer->getNbOutputs(); j++) {
             ITensor* output{layer->getOutput(j)};
             // Optional outputs are nullptr here and are from RNN layers.
-            if (output != nullptr && !output->dynamicRangeIsSet())
-            {
+            if (output != nullptr && !output->dynamicRangeIsSet()) {
                 // Pooling must have the same input and output scales.
-                if (layer->getType() == LayerType::kPOOLING)
-                {
+                if (layer->getType() == LayerType::kPOOLING) {
                     output->setDynamicRange(-inScales, inScales);
+                } else {
+                    output->setDynamicRange(-outScales, outScales);
                 }
-                else { output->setDynamicRange(-outScales, outScales); }
             }
         }
     }
 }
 
-inline void setAllDynamicRanges(INetworkDefinition* network, float inRange = 2.0f,
-                                float outRange = 4.0f)
-{
+inline void setAllDynamicRanges(INetworkDefinition* network,
+                                float inRange = 2.0f,
+                                float outRange = 4.0f) {
     return setAllTensorScales(network, inRange, outRange);
 }
 
-inline void enableDLA(IBuilder* builder, IBuilderConfig* config, int useDLACore,
-                      bool allowGPUFallback = true)
-{
-    if (useDLACore >= 0)
-    {
-        if (builder->getNbDLACores() == 0)
-        {
+inline void enableDLA(IBuilder* builder,
+                      IBuilderConfig* config,
+                      int useDLACore,
+                      bool allowGPUFallback = true) {
+    if (useDLACore >= 0) {
+        if (builder->getNbDLACores() == 0) {
             std::cerr << "Trying to use DLA core " << useDLACore
                       << " on a platform that doesn't have any DLA cores" << std::endl;
             assert("Error: use DLA core on a platfrom that doesn't have any DLA cores" && false);
         }
-        if (allowGPUFallback) { config->setFlag(BuilderFlag::kGPU_FALLBACK); }
-        if (!config->getFlag(BuilderFlag::kINT8))
-        {
+        if (allowGPUFallback) {
+            config->setFlag(BuilderFlag::kGPU_FALLBACK);
+        }
+        if (!config->getFlag(BuilderFlag::kINT8)) {
             // User has not requested INT8 Mode.
             // By default run in FP16 mode. FP32 mode is not permitted.
             config->setFlag(BuilderFlag::kFP16);
@@ -138,13 +131,14 @@ inline void enableDLA(IBuilder* builder, IBuilderConfig* config, int useDLACore,
     }
 }
 
-} // namespace samplesCommon
+}  // namespace samplesCommon
 
-inline std::ostream& operator<<(std::ostream& os, const nvinfer1::Dims& dims)
-{
+inline std::ostream& operator<<(std::ostream& os, const nvinfer1::Dims& dims) {
     os << "(";
-    for (int i = 0; i < dims.nbDims; ++i) { os << (i ? ", " : "") << dims.d[i]; }
+    for (int i = 0; i < dims.nbDims; ++i) {
+        os << (i ? ", " : "") << dims.d[i];
+    }
     return os << ")";
 }
 
-#endif // TENSORRT_COMMON_H
+#endif  // TENSORRT_COMMON_H

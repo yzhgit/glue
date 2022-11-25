@@ -5,12 +5,12 @@
 
 #include "glue/crypto/sha256.h"
 
+#include <algorithm>
+
 #include "loadstor.h"
 #include "mem_ops.h"
 #include "rotate.h"
 #include "secmem.h"
-
-#include <algorithm>
 
 namespace glue {
 
@@ -20,36 +20,38 @@ namespace glue {
  * Use a macro as many compilers won't inline a function this big,
  * even though it is much faster if inlined.
  */
-#define SHA2_32_F(A, B, C, D, E, F, G, H, M1, M2, M3, M4, magic)                                   \
-    do {                                                                                           \
-        uint32_t A_rho = rotr<2>(A) ^ rotr<13>(A) ^ rotr<22>(A);                                   \
-        uint32_t E_rho = rotr<6>(E) ^ rotr<11>(E) ^ rotr<25>(E);                                   \
-        uint32_t M2_sigma = rotr<17>(M2) ^ rotr<19>(M2) ^ (M2 >> 10);                              \
-        uint32_t M4_sigma = rotr<7>(M4) ^ rotr<18>(M4) ^ (M4 >> 3);                                \
-        H += magic + E_rho + ((E & F) ^ (~E & G)) + M1;                                            \
-        D += H;                                                                                    \
-        H += A_rho + ((A & B) | ((A | B) & C));                                                    \
-        M1 += M2_sigma + M3 + M4_sigma;                                                            \
+#define SHA2_32_F(A, B, C, D, E, F, G, H, M1, M2, M3, M4, magic)      \
+    do {                                                              \
+        uint32_t A_rho = rotr<2>(A) ^ rotr<13>(A) ^ rotr<22>(A);      \
+        uint32_t E_rho = rotr<6>(E) ^ rotr<11>(E) ^ rotr<25>(E);      \
+        uint32_t M2_sigma = rotr<17>(M2) ^ rotr<19>(M2) ^ (M2 >> 10); \
+        uint32_t M4_sigma = rotr<7>(M4) ^ rotr<18>(M4) ^ (M4 >> 3);   \
+        H += magic + E_rho + ((E & F) ^ (~E & G)) + M1;               \
+        D += H;                                                       \
+        H += A_rho + ((A & B) | ((A | B) & C));                       \
+        M1 += M2_sigma + M3 + M4_sigma;                               \
     } while (0);
 
 /*
  * SHA-224 / SHA-256 compression function
  */
-void SHA_256::compress_digest(std::vector<uint32_t>& digest, const uint8_t input[], size_t blocks)
-{
+void SHA_256::compress_digest(std::vector<uint32_t>& digest, const uint8_t input[], size_t blocks) {
 #if defined(GL_HAS_SHA2_32_X86)
-    if (CPUID::has_intel_sha()) { return SHA_256::compress_digest_x86(digest, input, blocks); }
+    if (CPUID::has_intel_sha()) {
+        return SHA_256::compress_digest_x86(digest, input, blocks);
+    }
 #endif
 
 #if defined(GL_HAS_SHA2_32_ARMV8)
-    if (CPUID::has_arm_sha2()) { return SHA_256::compress_digest_armv8(digest, input, blocks); }
+    if (CPUID::has_arm_sha2()) {
+        return SHA_256::compress_digest_armv8(digest, input, blocks);
+    }
 #endif
 
     uint32_t A = digest[0], B = digest[1], C = digest[2], D = digest[3], E = digest[4],
              F = digest[5], G = digest[6], H = digest[7];
 
-    for (size_t i = 0; i != blocks; ++i)
-    {
+    for (size_t i = 0; i != blocks; ++i) {
         uint32_t W00 = load_be<uint32_t>(input, 0);
         uint32_t W01 = load_be<uint32_t>(input, 1);
         uint32_t W02 = load_be<uint32_t>(input, 2);
@@ -148,13 +150,9 @@ void SHA_256::compress_digest(std::vector<uint32_t>& digest, const uint8_t input
     }
 }
 
-SHA_256::SHA_256() : m_buffer(BlockSize), m_digest(DigestSize / sizeof(uint32_t))
-{
-    clear();
-}
+SHA_256::SHA_256() : m_buffer(BlockSize), m_digest(DigestSize / sizeof(uint32_t)) { clear(); }
 
-void SHA_256::clear()
-{
+void SHA_256::clear() {
     zeroise(m_buffer);
     m_count = 0;
     m_position = 0;
@@ -169,15 +167,12 @@ void SHA_256::clear()
     m_digest[7] = 0x5BE0CD19;
 }
 
-void SHA_256::update(const uint8_t input[], size_t length)
-{
+void SHA_256::update(const uint8_t input[], size_t length) {
     m_count += length;
 
-    if (m_position)
-    {
+    if (m_position) {
         buffer_insert(m_buffer, m_position, input, length);
-        if (m_position + length >= BlockSize)
-        {
+        if (m_position + length >= BlockSize) {
             compress_n(m_buffer.data(), 1);
             input += (BlockSize - m_position);
             length -= (BlockSize - m_position);
@@ -189,19 +184,19 @@ void SHA_256::update(const uint8_t input[], size_t length)
     const size_t full_blocks = length >> 6;
     const size_t remaining = length & (BlockSize - 1);
 
-    if (full_blocks > 0) { compress_n(input, full_blocks); }
+    if (full_blocks > 0) {
+        compress_n(input, full_blocks);
+    }
 
     buffer_insert(m_buffer, m_position, input + full_blocks * BlockSize, remaining);
     m_position += remaining;
 }
 
-void SHA_256::final(uint8_t output[])
-{
+void SHA_256::final(uint8_t output[]) {
     clear_mem(&m_buffer[m_position], BlockSize - m_position);
     m_buffer[m_position] = 0x80;
 
-    if (m_position >= BlockSize - 8)
-    {
+    if (m_position >= BlockSize - 8) {
         compress_n(m_buffer.data(), 1);
         zeroise(m_buffer);
     }
@@ -213,9 +208,8 @@ void SHA_256::final(uint8_t output[])
     clear();
 }
 
-void SHA_256::compress_n(const uint8_t input[], size_t blocks)
-{
+void SHA_256::compress_n(const uint8_t input[], size_t blocks) {
     SHA_256::compress_digest(m_digest, input, blocks);
 }
 
-} // namespace glue
+}  // namespace glue

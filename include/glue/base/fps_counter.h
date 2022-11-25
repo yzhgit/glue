@@ -5,15 +5,14 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <queue>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
-class GLUE_API FpsCounter final
-{
-public:
+class GLUE_API FpsCounter final {
+   public:
     FpsCounter();
     FpsCounter(double targetFps);
     void newFrame();
@@ -28,10 +27,10 @@ public:
     uint64_t getNumFrames() const;
     void setFilterAlpha(float alpha);
 
-private:
+   private:
     void update(double now);
 
-private:
+   private:
     uint64_t m_nFrameCount;
     int64_t m_then;
     int64_t m_lastFrameTime;
@@ -41,4 +40,4 @@ private:
     std::queue<double> m_timestamps;
 };
 
-} // namespace glue
+}  // namespace glue

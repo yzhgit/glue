@@ -19,9 +19,8 @@ namespace glue {
 
     @tags{Core}
 */
-class GLUE_API Time
-{
-public:
+class GLUE_API Time {
+   public:
     /** Returns the current system time.
 
         Returns the number of milliseconds since midnight Jan 1st 1970 UTC.
@@ -31,10 +30,11 @@ public:
     */
     static int64 currentTimeMillis() noexcept;
 
-    /** Returns the number of millisecs since a fixed event (usually system startup).
+    /** Returns the number of millisecs since a fixed event (usually system
+       startup).
 
-        This has the same function as getMillisecondCounter(), but returns a more accurate
-        value, using a higher-resolution timer if one is available.
+        This has the same function as getMillisecondCounter(), but returns a
+       more accurate value, using a higher-resolution timer if one is available.
 
         @see getMillisecondCounter
     */
@@ -50,7 +50,8 @@ public:
     */
     static int64 getHighResolutionTicks() noexcept;
 
-    /** Returns the resolution of the high-resolution counter in ticks per second.
+    /** Returns the resolution of the high-resolution counter in ticks per
+       second.
 
         @see getHighResolutionTicks, highResolutionTicksToSeconds,
              secondsToHighResolutionTicks
@@ -72,4 +73,4 @@ public:
     static int64 secondsToHighResolutionTicks(double seconds) noexcept;
 };
 
-} // namespace glue
+}  // namespace glue

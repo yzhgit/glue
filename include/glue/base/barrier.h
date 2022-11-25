@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <condition_variable>
 #include <mutex>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
@@ -31,10 +31,10 @@ namespace glue {
 //   delete barrier;
 //
 //
-class GLUE_API Barrier final
-{
-public:
-    // `num_threads` is the number of threads that will participate in the barrier
+class GLUE_API Barrier final {
+   public:
+    // `num_threads` is the number of threads that will participate in the
+    // barrier
     explicit Barrier(int num_threads);
 
     // Barrier::wait()
@@ -45,7 +45,7 @@ public:
 
     void reset();
 
-private:
+   private:
     int m_num_threads;
     int m_num_started;
     std::mutex m_mutex;
@@ -54,4 +54,4 @@ private:
     GLUE_DECLARE_NON_COPYABLE(Barrier)
 };
 
-} // namespace glue
+}  // namespace glue

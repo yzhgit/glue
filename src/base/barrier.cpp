@@ -9,11 +9,9 @@
 
 namespace glue {
 
-Barrier::Barrier(int num_threads) : m_num_threads(num_threads), m_num_started(0)
-{}
+Barrier::Barrier(int num_threads) : m_num_threads(num_threads), m_num_started(0) {}
 
-void Barrier::wait()
-{
+void Barrier::wait() {
     std::unique_lock<std::mutex> lk(m_mutex);
 
     if (++m_num_started >= m_num_threads)
@@ -22,10 +20,9 @@ void Barrier::wait()
         m_cond.wait(lk);
 }
 
-void Barrier::reset()
-{
+void Barrier::reset() {
     std::lock_guard<std::mutex> lk(m_mutex);
     m_num_started = 0;
 }
 
-} // namespace glue
+}  // namespace glue

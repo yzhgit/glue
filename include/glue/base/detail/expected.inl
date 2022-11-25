@@ -11,23 +11,22 @@
 
 template <typename E>
 glue::bad_expected_access<E>::bad_expected_access(error_type e)
-    : std::logic_error("Found an error instead of the expected value."), m_error_value(std::move(e))
-{}
+    : std::logic_error("Found an error instead of the expected value."),
+      m_error_value(std::move(e)) {}
 
 //-----------------------------------------------------------------------------
 // Observers
 //-----------------------------------------------------------------------------
 
 template <typename E>
-typename glue::bad_expected_access<E>::error_type& glue::bad_expected_access<E>::error() & noexcept
-{
+typename glue::bad_expected_access<E>::error_type&
+glue::bad_expected_access<E>::error() & noexcept {
     return m_error_value;
 }
 
 template <typename E>
-const typename glue::bad_expected_access<E>::error_type&
-glue::bad_expected_access<E>::error() const& noexcept
-{
+const typename glue::bad_expected_access<E>::error_type& glue::bad_expected_access<E>::error()
+    const& noexcept {
     return m_error_value;
 }
 
@@ -35,23 +34,20 @@ glue::bad_expected_access<E>::error() const& noexcept
 
 template <typename E>
 typename glue::bad_expected_access<E>::error_type&&
-glue::bad_expected_access<E>::error() && noexcept
-{
+glue::bad_expected_access<E>::error() && noexcept {
     return std::move(m_error_value);
 }
 
 template <typename E>
-const typename glue::bad_expected_access<E>::error_type&&
-glue::bad_expected_access<E>::error() const&& noexcept
-{
+const typename glue::bad_expected_access<E>::error_type&& glue::bad_expected_access<E>::error()
+    const&& noexcept {
     return std::move(m_error_value);
 }
 
 //=============================================================================
 
 inline glue::bad_expected_access<void>::bad_expected_access()
-    : std::logic_error("Bad access to expected type with no value.")
-{}
+    : std::logic_error("Bad access to expected type with no value.") {}
 
 //=============================================================================
 // X.Y.4, unexpected_type
@@ -64,64 +60,54 @@ inline glue::bad_expected_access<void>::bad_expected_access()
 template <typename E>
 template <typename E2, typename>
 inline constexpr glue::unexpected_type<E>::unexpected_type(const unexpected_type<E2>& other)
-    : m_value(other.value())
-{}
+    : m_value(other.value()) {}
 
 template <typename E>
 template <typename E2, typename>
 inline constexpr glue::unexpected_type<E>::unexpected_type(unexpected_type<E2>&& other)
-    : m_value(std::move(other.value()))
-{}
+    : m_value(std::move(other.value())) {}
 
 template <typename E>
-inline constexpr glue::unexpected_type<E>::unexpected_type(const E& other) : m_value(other)
-{}
+inline constexpr glue::unexpected_type<E>::unexpected_type(const E& other) : m_value(other) {}
 
 template <typename E>
-inline constexpr glue::unexpected_type<E>::unexpected_type(E&& other) : m_value(std::move(other))
-{}
+inline constexpr glue::unexpected_type<E>::unexpected_type(E&& other) : m_value(std::move(other)) {}
 
 template <typename E>
 template <typename... Args, typename>
 inline constexpr glue::unexpected_type<E>::unexpected_type(in_place_t, Args&&... args)
-    : m_value{std::forward<Args>(args)...}
-{}
+    : m_value{std::forward<Args>(args)...} {}
 
 template <typename E>
 template <typename U, typename... Args, typename>
 inline constexpr glue::unexpected_type<E>::unexpected_type(in_place_t,
                                                            std::initializer_list<U> ilist,
                                                            Args&&... args)
-    : m_value{std::move(ilist), std::forward<Args>(args)...}
-{}
+    : m_value{std::move(ilist), std::forward<Args>(args)...} {}
 
 //-----------------------------------------------------------------------------
 // Observers
 //-----------------------------------------------------------------------------
 
 template <typename E>
-inline constexpr E& glue::unexpected_type<E>::value() &
-{
+inline constexpr E& glue::unexpected_type<E>::value() & {
     return m_value;
 }
 
 template <typename E>
-inline constexpr const E& glue::unexpected_type<E>::value() const&
-{
+inline constexpr const E& glue::unexpected_type<E>::value() const& {
     return m_value;
 }
 
 //-----------------------------------------------------------------------------
 
 template <typename E>
-inline constexpr E&& glue::unexpected_type<E>::value() &&
-{
+inline constexpr E&& glue::unexpected_type<E>::value() && {
     return std::move(m_value);
 }
 
 template <typename E>
-inline constexpr const E&& glue::unexpected_type<E>::value() const&&
-{
+inline constexpr const E&& glue::unexpected_type<E>::value() const&& {
     return std::move(m_value);
 }
 
@@ -130,8 +116,7 @@ inline constexpr const E&& glue::unexpected_type<E>::value() const&&
 //=============================================================================
 
 template <typename E, typename... Args>
-inline constexpr glue::unexpected_type<E> glue::make_unexpected(Args&&... args)
-{
+inline constexpr glue::unexpected_type<E> glue::make_unexpected(Args&&... args) {
     return unexpected_type<E>(in_place, std::forward<Args>(args)...);
 }
 
@@ -140,38 +125,38 @@ inline constexpr glue::unexpected_type<E> glue::make_unexpected(Args&&... args)
 //=============================================================================
 
 template <typename E>
-inline constexpr bool glue::operator==(const unexpected_type<E>& lhs, const unexpected_type<E>& rhs)
-{
+inline constexpr bool glue::operator==(const unexpected_type<E>& lhs,
+                                       const unexpected_type<E>& rhs) {
     return lhs.value() == rhs.value();
 }
 
 template <typename E>
-inline constexpr bool glue::operator!=(const unexpected_type<E>& lhs, const unexpected_type<E>& rhs)
-{
+inline constexpr bool glue::operator!=(const unexpected_type<E>& lhs,
+                                       const unexpected_type<E>& rhs) {
     return lhs.value() != rhs.value();
 }
 
 template <typename E>
-inline constexpr bool glue::operator<(const unexpected_type<E>& lhs, const unexpected_type<E>& rhs)
-{
+inline constexpr bool glue::operator<(const unexpected_type<E>& lhs,
+                                      const unexpected_type<E>& rhs) {
     return lhs.value() < rhs.value();
 }
 
 template <typename E>
-inline constexpr bool glue::operator>(const unexpected_type<E>& lhs, const unexpected_type<E>& rhs)
-{
+inline constexpr bool glue::operator>(const unexpected_type<E>& lhs,
+                                      const unexpected_type<E>& rhs) {
     return lhs.value() > rhs.value();
 }
 
 template <typename E>
-inline constexpr bool glue::operator<=(const unexpected_type<E>& lhs, const unexpected_type<E>& rhs)
-{
+inline constexpr bool glue::operator<=(const unexpected_type<E>& lhs,
+                                       const unexpected_type<E>& rhs) {
     return lhs.value() <= rhs.value();
 }
 
 template <typename E>
-inline constexpr bool glue::operator>=(const unexpected_type<E>& lhs, const unexpected_type<E>& rhs)
-{
+inline constexpr bool glue::operator>=(const unexpected_type<E>& lhs,
+                                       const unexpected_type<E>& rhs) {
     return lhs.value() >= rhs.value();
 }
 
@@ -185,67 +170,57 @@ inline constexpr bool glue::operator>=(const unexpected_type<E>& lhs, const unex
 
 template <typename T, typename E>
 inline constexpr glue::detail::expected_base<true, T, E>::expected_base()
-    : m_storage(), m_has_value(indeterminate)
-{}
+    : m_storage(), m_has_value(indeterminate) {}
 
 template <typename T, typename E>
 template <typename... Args>
 inline constexpr glue::detail::expected_base<true, T, E>::expected_base(in_place_t, Args&&... args)
-    : m_storage(in_place, std::forward<Args>(args)...), m_has_value(true)
-{}
+    : m_storage(in_place, std::forward<Args>(args)...), m_has_value(true) {}
 
 template <typename T, typename E>
 template <typename... Args>
 inline constexpr glue::detail::expected_base<true, T, E>::expected_base(unexpect_t, Args&&... args)
-    : m_storage(unexpect, std::forward<Args>(args)...), m_has_value(false)
-{}
+    : m_storage(unexpect, std::forward<Args>(args)...), m_has_value(false) {}
 
 //-----------------------------------------------------------------------------
 // Observers
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
-inline constexpr bool glue::detail::expected_base<true, T, E>::has_value() const noexcept
-{
+inline constexpr bool glue::detail::expected_base<true, T, E>::has_value() const noexcept {
     return m_has_value == true;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::detail::expected_base<true, T, E>::has_error() const noexcept
-{
+inline constexpr bool glue::detail::expected_base<true, T, E>::has_error() const noexcept {
     return m_has_value == false;
 }
 
 template <typename T, typename E>
-inline constexpr bool
-glue::detail::expected_base<true, T, E>::valueless_by_exception() const noexcept
-{
+inline constexpr bool glue::detail::expected_base<true, T, E>::valueless_by_exception()
+    const noexcept {
     return m_has_value == indeterminate;
 }
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
-inline constexpr T& glue::detail::expected_base<true, T, E>::get_value() & noexcept
-{
+inline constexpr T& glue::detail::expected_base<true, T, E>::get_value() & noexcept {
     return m_storage.value;
 }
 
 template <typename T, typename E>
-inline constexpr T&& glue::detail::expected_base<true, T, E>::get_value() && noexcept
-{
+inline constexpr T&& glue::detail::expected_base<true, T, E>::get_value() && noexcept {
     return m_storage.value;
 }
 
 template <typename T, typename E>
-inline constexpr const T& glue::detail::expected_base<true, T, E>::get_value() const& noexcept
-{
+inline constexpr const T& glue::detail::expected_base<true, T, E>::get_value() const& noexcept {
     return m_storage.value;
 }
 
 template <typename T, typename E>
-inline constexpr const T&& glue::detail::expected_base<true, T, E>::get_value() const&& noexcept
-{
+inline constexpr const T&& glue::detail::expected_base<true, T, E>::get_value() const&& noexcept {
     return m_storage.value;
 }
 
@@ -253,29 +228,25 @@ inline constexpr const T&& glue::detail::expected_base<true, T, E>::get_value() 
 
 template <typename T, typename E>
 inline constexpr glue::unexpected_type<E>&
-glue::detail::expected_base<true, T, E>::get_unexpected() & noexcept
-{
+glue::detail::expected_base<true, T, E>::get_unexpected() & noexcept {
     return m_storage.error;
 }
 
 template <typename T, typename E>
 inline constexpr glue::unexpected_type<E>&&
-glue::detail::expected_base<true, T, E>::get_unexpected() && noexcept
-{
+glue::detail::expected_base<true, T, E>::get_unexpected() && noexcept {
     return m_storage.error;
 }
 
 template <typename T, typename E>
 inline constexpr const glue::unexpected_type<E>&
-glue::detail::expected_base<true, T, E>::get_unexpected() const& noexcept
-{
+glue::detail::expected_base<true, T, E>::get_unexpected() const& noexcept {
     return m_storage.error;
 }
 
 template <typename T, typename E>
 inline constexpr const glue::unexpected_type<E>&&
-glue::detail::expected_base<true, T, E>::get_unexpected() const&& noexcept
-{
+glue::detail::expected_base<true, T, E>::get_unexpected() const&& noexcept {
     return m_storage.error;
 }
 
@@ -285,62 +256,54 @@ glue::detail::expected_base<true, T, E>::get_unexpected() const&& noexcept
 
 template <typename T, typename E>
 template <typename... Args>
-inline void glue::detail::expected_base<true, T, E>::emplace_value(Args&&... args)
-{
+inline void glue::detail::expected_base<true, T, E>::emplace_value(Args&&... args) {
 #ifndef GLUE_NO_EXCEPTIONS
-    try
-    {
-#endif // GLUE_EXCEPTIONS_ENABLED
+    try {
+#endif  // GLUE_EXCEPTIONS_ENABLED
         new (&m_storage.value) T(std::forward<Args>(args)...);
         m_has_value = true;
 #ifndef GLUE_NO_EXCEPTIONS
-    } catch (...)
-    {
+    } catch (...) {
         m_has_value = indeterminate;
         throw;
     }
-#endif // GLUE_EXCEPTIONS_ENABLED
+#endif  // GLUE_EXCEPTIONS_ENABLED
 }
 
 template <typename T, typename E>
 template <typename... Args>
-inline void glue::detail::expected_base<true, T, E>::emplace_error(Args&&... args)
-{
+inline void glue::detail::expected_base<true, T, E>::emplace_error(Args&&... args) {
 #ifndef GLUE_NO_EXCEPTIONS
-    try
-    {
-#endif // GLUE_EXCEPTIONS_ENABLED
+    try {
+#endif  // GLUE_EXCEPTIONS_ENABLED
         new (&m_storage.error) unexpected_type<E>(std::forward<Args>(args)...);
         m_has_value = false;
 #ifndef GLUE_NO_EXCEPTIONS
-    } catch (...)
-    {
+    } catch (...) {
         m_has_value = indeterminate;
         throw;
     }
-#endif // GLUE_EXCEPTIONS_ENABLED
+#endif  // GLUE_EXCEPTIONS_ENABLED
 }
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
 template <typename U>
-inline void glue::detail::expected_base<true, T, E>::assign_value(U&& value)
-{
-    if (m_has_value) { m_storage.value = std::forward<U>(value); }
-    else
-    {
+inline void glue::detail::expected_base<true, T, E>::assign_value(U&& value) {
+    if (m_has_value) {
+        m_storage.value = std::forward<U>(value);
+    } else {
         emplace(std::forward<U>(value));
     }
 }
 
 template <typename T, typename E>
 template <typename U>
-inline void glue::detail::expected_base<true, T, E>::assign_error(U&& error)
-{
-    if (!m_has_value) { m_storage.error = std::forward<U>(error); }
-    else
-    {
+inline void glue::detail::expected_base<true, T, E>::assign_error(U&& error) {
+    if (!m_has_value) {
+        m_storage.error = std::forward<U>(error);
+    } else {
         emplace_error(std::forward<U>(error));
     }
 }
@@ -355,26 +318,22 @@ inline void glue::detail::expected_base<true, T, E>::assign_error(U&& error)
 
 template <typename T, typename E>
 inline constexpr glue::detail::expected_base<false, T, E>::expected_base()
-    : m_storage(), m_has_value(indeterminate)
-{}
+    : m_storage(), m_has_value(indeterminate) {}
 
 template <typename T, typename E>
 template <typename... Args>
 inline constexpr glue::detail::expected_base<false, T, E>::expected_base(in_place_t, Args&&... args)
-    : m_storage(in_place, std::forward<Args>(args)...), m_has_value(true)
-{}
+    : m_storage(in_place, std::forward<Args>(args)...), m_has_value(true) {}
 
 template <typename T, typename E>
 template <typename... Args>
 inline constexpr glue::detail::expected_base<false, T, E>::expected_base(unexpect_t, Args&&... args)
-    : m_storage(unexpect, std::forward<Args>(args)...), m_has_value(false)
-{}
+    : m_storage(unexpect, std::forward<Args>(args)...), m_has_value(false) {}
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
-inline glue::detail::expected_base<false, T, E>::~expected_base()
-{
+inline glue::detail::expected_base<false, T, E>::~expected_base() {
     destruct();
 }
 
@@ -383,46 +342,39 @@ inline glue::detail::expected_base<false, T, E>::~expected_base()
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
-inline constexpr bool glue::detail::expected_base<false, T, E>::has_value() const noexcept
-{
+inline constexpr bool glue::detail::expected_base<false, T, E>::has_value() const noexcept {
     return m_has_value == true;
 }
 
 template <typename T, typename E>
-constexpr bool glue::detail::expected_base<false, T, E>::has_error() const noexcept
-{
+constexpr bool glue::detail::expected_base<false, T, E>::has_error() const noexcept {
     return m_has_value == false;
 }
 
 template <typename T, typename E>
-constexpr bool glue::detail::expected_base<false, T, E>::valueless_by_exception() const noexcept
-{
+constexpr bool glue::detail::expected_base<false, T, E>::valueless_by_exception() const noexcept {
     return m_has_value == indeterminate;
 }
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
-inline constexpr T& glue::detail::expected_base<false, T, E>::get_value() & noexcept
-{
+inline constexpr T& glue::detail::expected_base<false, T, E>::get_value() & noexcept {
     return m_storage.value;
 }
 
 template <typename T, typename E>
-inline constexpr T&& glue::detail::expected_base<false, T, E>::get_value() && noexcept
-{
+inline constexpr T&& glue::detail::expected_base<false, T, E>::get_value() && noexcept {
     return m_storage.value;
 }
 
 template <typename T, typename E>
-inline constexpr const T& glue::detail::expected_base<false, T, E>::get_value() const& noexcept
-{
+inline constexpr const T& glue::detail::expected_base<false, T, E>::get_value() const& noexcept {
     return m_storage.value;
 }
 
 template <typename T, typename E>
-inline constexpr const T&& glue::detail::expected_base<false, T, E>::get_value() const&& noexcept
-{
+inline constexpr const T&& glue::detail::expected_base<false, T, E>::get_value() const&& noexcept {
     return m_storage.value;
 }
 
@@ -430,29 +382,25 @@ inline constexpr const T&& glue::detail::expected_base<false, T, E>::get_value()
 
 template <typename T, typename E>
 inline constexpr glue::unexpected_type<E>&
-glue::detail::expected_base<false, T, E>::get_unexpected() & noexcept
-{
+glue::detail::expected_base<false, T, E>::get_unexpected() & noexcept {
     return m_storage.error;
 }
 
 template <typename T, typename E>
 inline constexpr glue::unexpected_type<E>&&
-glue::detail::expected_base<false, T, E>::get_unexpected() && noexcept
-{
+glue::detail::expected_base<false, T, E>::get_unexpected() && noexcept {
     return m_storage.error;
 }
 
 template <typename T, typename E>
 inline constexpr const glue::unexpected_type<E>&
-glue::detail::expected_base<false, T, E>::get_unexpected() const& noexcept
-{
+glue::detail::expected_base<false, T, E>::get_unexpected() const& noexcept {
     return m_storage.error;
 }
 
 template <typename T, typename E>
 inline constexpr const glue::unexpected_type<E>&&
-glue::detail::expected_base<false, T, E>::get_unexpected() const&& noexcept
-{
+glue::detail::expected_base<false, T, E>::get_unexpected() const&& noexcept {
     return m_storage.error;
 }
 
@@ -461,11 +409,10 @@ glue::detail::expected_base<false, T, E>::get_unexpected() const&& noexcept
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
-inline void glue::detail::expected_base<false, T, E>::destruct()
-{
-    if (m_has_value) { m_storage.value.~T(); }
-    else if (!m_has_value)
-    {
+inline void glue::detail::expected_base<false, T, E>::destruct() {
+    if (m_has_value) {
+        m_storage.value.~T();
+    } else if (!m_has_value) {
         m_storage.error.~E();
     }
 }
@@ -474,64 +421,56 @@ inline void glue::detail::expected_base<false, T, E>::destruct()
 
 template <typename T, typename E>
 template <typename... Args>
-inline void glue::detail::expected_base<false, T, E>::emplace_value(Args&&... args)
-{
+inline void glue::detail::expected_base<false, T, E>::emplace_value(Args&&... args) {
     destruct();
 #ifndef GLUE_NO_EXCEPTIONS
-    try
-    {
-#endif // GLUE_EXCEPTIONS_ENABLED
+    try {
+#endif  // GLUE_EXCEPTIONS_ENABLED
         new (&m_storage.value) T{std::forward<Args>(args)...};
         m_has_value = true;
 #ifndef GLUE_NO_EXCEPTIONS
-    } catch (...)
-    {
+    } catch (...) {
         m_has_value = indeterminate;
         throw;
     }
-#endif // GLUE_EXCEPTIONS_ENABLED
+#endif  // GLUE_EXCEPTIONS_ENABLED
 }
 
 template <typename T, typename E>
 template <typename... Args>
-void glue::detail::expected_base<false, T, E>::emplace_error(Args&&... args)
-{
+void glue::detail::expected_base<false, T, E>::emplace_error(Args&&... args) {
     destruct();
 #ifndef GLUE_NO_EXCEPTIONS
-    try
-    {
-#endif // GLUE_EXCEPTIONS_ENABLED
+    try {
+#endif  // GLUE_EXCEPTIONS_ENABLED
         new (&m_storage.error) unexpected_type<E>(std::forward<Args>(args)...);
         m_has_value = false;
 #ifndef GLUE_NO_EXCEPTIONS
-    } catch (...)
-    {
+    } catch (...) {
         m_has_value = indeterminate;
         throw;
     }
-#endif // GLUE_EXCEPTIONS_ENABLED
+#endif  // GLUE_EXCEPTIONS_ENABLED
 }
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
 template <typename U>
-inline void glue::detail::expected_base<false, T, E>::assign_value(U&& value)
-{
-    if (!m_has_value) { m_storage.value = std::forward<U>(value); }
-    else
-    {
+inline void glue::detail::expected_base<false, T, E>::assign_value(U&& value) {
+    if (!m_has_value) {
+        m_storage.value = std::forward<U>(value);
+    } else {
         emplace(std::forward<U>(value));
     }
 }
 
 template <typename T, typename E>
 template <typename U>
-inline void glue::detail::expected_base<false, T, E>::assign_error(U&& error)
-{
-    if (m_has_value) { m_storage.error = std::forward<U>(error); }
-    else
-    {
+inline void glue::detail::expected_base<false, T, E>::assign_error(U&& error) {
+    if (m_has_value) {
+        m_storage.error = std::forward<U>(error);
+    } else {
         emplace_error(std::forward<U>(error));
     }
 }
@@ -546,21 +485,18 @@ inline void glue::detail::expected_base<false, T, E>::assign_error(U&& error)
 
 template <typename T, typename E>
 template <typename U, typename>
-inline constexpr glue::expected<T, E>::expected() : base_type(in_place)
-{}
+inline constexpr glue::expected<T, E>::expected() : base_type(in_place) {}
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
 inline glue::expected<T, E>::expected(
     enable_overload_if<std::is_copy_constructible<T>::value && std::is_copy_constructible<E>::value,
-                       const expected&>
-        other)
-    : base_type()
-{
-    if (other.has_value()) { base_type::emplace_value(other.get_value()); }
-    else if (other.has_error())
-    {
+                       const expected&> other)
+    : base_type() {
+    if (other.has_value()) {
+        base_type::emplace_value(other.get_value());
+    } else if (other.has_error()) {
         base_type::emplace_error(other.get_unexpected());
     }
 }
@@ -568,13 +504,11 @@ inline glue::expected<T, E>::expected(
 template <typename T, typename E>
 inline glue::expected<T, E>::expected(
     enable_overload_if<std::is_move_constructible<T>::value && std::is_move_constructible<E>::value,
-                       expected&&>
-        other)
-    : base_type()
-{
-    if (other.has_value()) { base_type::emplace_value(std::move(other.get_value())); }
-    else if (other.has_error())
-    {
+                       expected&&> other)
+    : base_type() {
+    if (other.has_value()) {
+        base_type::emplace_value(std::move(other.get_value()));
+    } else if (other.has_error()) {
         base_type::emplace_error(std::move(other.get_unexpected()));
     }
 }
@@ -583,22 +517,20 @@ inline glue::expected<T, E>::expected(
 
 template <typename T, typename E>
 template <typename U, typename G, typename>
-inline glue::expected<T, E>::expected(const expected<U, G>& other) : base_type()
-{
-    if (other.has_value()) { base_type::emplace_value(other.get_value()); }
-    else if (other.has_error())
-    {
+inline glue::expected<T, E>::expected(const expected<U, G>& other) : base_type() {
+    if (other.has_value()) {
+        base_type::emplace_value(other.get_value());
+    } else if (other.has_error()) {
         base_type::emplace_error(other.get_unexpected());
     }
 }
 
 template <typename T, typename E>
 template <typename U, typename G, typename>
-inline glue::expected<T, E>::expected(expected<U, G>&& other) : base_type()
-{
-    if (other.has_value()) { base_type::emplace_value(std::move(other.get_value())); }
-    else if (other.has_error())
-    {
+inline glue::expected<T, E>::expected(expected<U, G>&& other) : base_type() {
+    if (other.has_value()) {
+        base_type::emplace_value(std::move(other.get_value()));
+    } else if (other.has_error()) {
         base_type::emplace_error(std::move(other.get_unexpected()));
     }
 }
@@ -607,67 +539,60 @@ inline glue::expected<T, E>::expected(expected<U, G>&& other) : base_type()
 
 template <typename T, typename E>
 template <typename U, typename>
-inline constexpr glue::expected<T, E>::expected(const T& value) : base_type(in_place, value)
-{}
+inline constexpr glue::expected<T, E>::expected(const T& value) : base_type(in_place, value) {}
 
 template <typename T, typename E>
 template <typename U, typename>
-constexpr glue::expected<T, E>::expected(T&& value) : base_type(in_place, std::forward<T>(value))
-{}
+constexpr glue::expected<T, E>::expected(T&& value) : base_type(in_place, std::forward<T>(value)) {}
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
 template <typename... Args, typename>
 inline constexpr glue::expected<T, E>::expected(in_place_t, Args&&... args)
-    : base_type(in_place, std::forward<Args>(args)...)
-{}
+    : base_type(in_place, std::forward<Args>(args)...) {}
 
 template <typename T, typename E>
 template <typename U, typename... Args, typename>
-inline constexpr glue::expected<T, E>::expected(in_place_t, std::initializer_list<U> ilist,
+inline constexpr glue::expected<T, E>::expected(in_place_t,
+                                                std::initializer_list<U> ilist,
                                                 Args&&... args)
-    : base_type(in_place, std::move(ilist), std::forward<Args>(args)...)
-{}
+    : base_type(in_place, std::move(ilist), std::forward<Args>(args)...) {}
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
 template <typename UError, typename>
 inline constexpr glue::expected<T, E>::expected(unexpected_type<E> const& unexpected)
-    : base_type(unexpect, unexpected.value())
-{}
+    : base_type(unexpect, unexpected.value()) {}
 
 template <typename T, typename E>
 template <typename Err, typename>
 inline constexpr glue::expected<T, E>::expected(unexpected_type<Err> const& unexpected)
-    : base_type(unexpect, unexpected.value())
-{}
+    : base_type(unexpect, unexpected.value()) {}
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
 template <typename... Args, typename>
 inline constexpr glue::expected<T, E>::expected(unexpect_t, Args&&... args)
-    : base_type(unexpect, std::forward<Args>(args)...)
-{}
+    : base_type(unexpect, std::forward<Args>(args)...) {}
 
 template <typename T, typename E>
 template <typename U, typename... Args, typename>
-inline constexpr glue::expected<T, E>::expected(unexpect_t, std::initializer_list<U> ilist,
+inline constexpr glue::expected<T, E>::expected(unexpect_t,
+                                                std::initializer_list<U> ilist,
                                                 Args&&... args)
-    : base_type(unexpect, std::move(ilist), std::forward<Args>(args)...)
-{}
+    : base_type(unexpect, std::move(ilist), std::forward<Args>(args)...) {}
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
 template <typename U, typename F, typename>
-inline glue::expected<T, E>& glue::expected<T, E>::operator=(const expected& other)
-{
-    if (other.has_value()) { base_type::assign_value(other.get_value()); }
-    else if (other.has_error())
-    {
+inline glue::expected<T, E>& glue::expected<T, E>::operator=(const expected& other) {
+    if (other.has_value()) {
+        base_type::assign_value(other.get_value());
+    } else if (other.has_error()) {
         base_type::assign_error(other.get_unexpected());
     }
 
@@ -676,11 +601,10 @@ inline glue::expected<T, E>& glue::expected<T, E>::operator=(const expected& oth
 
 template <typename T, typename E>
 template <typename U, typename F, typename>
-inline glue::expected<T, E>& glue::expected<T, E>::operator=(expected&& other)
-{
-    if (other.has_value()) { base_type::assign_value(std::move(other.get_value())); }
-    else if (other.has_error())
-    {
+inline glue::expected<T, E>& glue::expected<T, E>::operator=(expected&& other) {
+    if (other.has_value()) {
+        base_type::assign_value(std::move(other.get_value()));
+    } else if (other.has_error()) {
         base_type::assign_error(std::move(other.get_unexpected()));
     }
 
@@ -689,24 +613,21 @@ inline glue::expected<T, E>& glue::expected<T, E>::operator=(expected&& other)
 
 template <typename T, typename E>
 template <typename U, typename>
-inline glue::expected<T, E>& glue::expected<T, E>::operator=(U&& value)
-{
+inline glue::expected<T, E>& glue::expected<T, E>::operator=(U&& value) {
     base_type::assign_value(std::forward<U>(value));
 
     return (*this);
 }
 
 template <typename T, typename E>
-inline glue::expected<T, E>& glue::expected<T, E>::operator=(const unexpected_type<E>& unexpected)
-{
+inline glue::expected<T, E>& glue::expected<T, E>::operator=(const unexpected_type<E>& unexpected) {
     base_type::assign_error(unexpected.value());
 
     return (*this);
 }
 
 template <typename T, typename E>
-inline glue::expected<T, E>& glue::expected<T, E>::operator=(unexpected_type<E>&& unexpected)
-{
+inline glue::expected<T, E>& glue::expected<T, E>::operator=(unexpected_type<E>&& unexpected) {
     base_type::assign_error(std::move(unexpected.value()));
 
     return (*this);
@@ -718,97 +639,83 @@ inline glue::expected<T, E>& glue::expected<T, E>::operator=(unexpected_type<E>&
 
 template <typename T, typename E>
 template <typename... Args, typename>
-inline void glue::expected<T, E>::emplace(Args&&... args)
-{
+inline void glue::expected<T, E>::emplace(Args&&... args) {
     base_type::emplace_value(std::forward<Args>(args)...);
 }
 
 template <typename T, typename E>
 template <typename U, typename... Args, typename>
-inline void glue::expected<T, E>::emplace(std::initializer_list<U> ilist, Args&&... args)
-{
+inline void glue::expected<T, E>::emplace(std::initializer_list<U> ilist, Args&&... args) {
     base_type::emplace_value(std::move(ilist), std::forward<Args>(args)...);
 }
 
 template <typename T, typename E>
-inline void glue::expected<T, E>::swap(expected& other)
-{}
+inline void glue::expected<T, E>::swap(expected& other) {}
 
 //-----------------------------------------------------------------------------
 // Observers
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
-inline constexpr bool glue::expected<T, E>::has_value() const noexcept
-{
+inline constexpr bool glue::expected<T, E>::has_value() const noexcept {
     return base_type::has_value();
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::expected<T, E>::has_error() const noexcept
-{
+inline constexpr bool glue::expected<T, E>::has_error() const noexcept {
     return base_type::has_error();
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::expected<T, E>::valueless_by_exception() const noexcept
-{
+inline constexpr bool glue::expected<T, E>::valueless_by_exception() const noexcept {
     return base_type::valueless_by_exception();
 }
 
 template <typename T, typename E>
-inline constexpr glue::expected<T, E>::operator bool() const noexcept
-{
+inline constexpr glue::expected<T, E>::operator bool() const noexcept {
     return has_value();
 }
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
-inline constexpr T* glue::expected<T, E>::operator->()
-{
+inline constexpr T* glue::expected<T, E>::operator->() {
     return &base_type::get_value();
 }
 
 template <typename T, typename E>
-inline constexpr const T* glue::expected<T, E>::operator->() const
-{
+inline constexpr const T* glue::expected<T, E>::operator->() const {
     return &base_type::get_value();
 }
 
 template <typename T, typename E>
-inline constexpr T& glue::expected<T, E>::operator*() &
-{
+inline constexpr T& glue::expected<T, E>::operator*() & {
     return base_type::get_value();
 }
 
 template <typename T, typename E>
-inline constexpr T&& glue::expected<T, E>::operator*() &&
-{
+inline constexpr T&& glue::expected<T, E>::operator*() && {
     return base_type::get_value();
 }
 
 template <typename T, typename E>
-inline constexpr const T& glue::expected<T, E>::operator*() const&
-{
+inline constexpr const T& glue::expected<T, E>::operator*() const& {
     return base_type::get_value();
 }
 
 template <typename T, typename E>
-inline constexpr const T&& glue::expected<T, E>::operator*() const&&
-{
+inline constexpr const T&& glue::expected<T, E>::operator*() const&& {
     return base_type::get_value();
 }
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
-inline constexpr T& glue::expected<T, E>::value() &
-{
+inline constexpr T& glue::expected<T, E>::value() & {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (has_error()) { throw bad_expected_access<E>(base_type::get_unexpected().value()); }
-    else if (valueless_by_exception())
-    {
+    if (has_error()) {
+        throw bad_expected_access<E>(base_type::get_unexpected().value());
+    } else if (valueless_by_exception()) {
         throw bad_expected_access<void>();
     }
 #else
@@ -818,12 +725,11 @@ inline constexpr T& glue::expected<T, E>::value() &
 }
 
 template <typename T, typename E>
-inline constexpr T&& glue::expected<T, E>::value() &&
-{
+inline constexpr T&& glue::expected<T, E>::value() && {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (has_error()) { throw bad_expected_access<E>(base_type::get_unexpected().value()); }
-    else if (valueless_by_exception())
-    {
+    if (has_error()) {
+        throw bad_expected_access<E>(base_type::get_unexpected().value());
+    } else if (valueless_by_exception()) {
         throw bad_expected_access<void>();
     }
 #else
@@ -833,12 +739,11 @@ inline constexpr T&& glue::expected<T, E>::value() &&
 }
 
 template <typename T, typename E>
-inline constexpr const T& glue::expected<T, E>::value() const&
-{
+inline constexpr const T& glue::expected<T, E>::value() const& {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (has_error()) { throw bad_expected_access<E>(base_type::get_unexpected().value()); }
-    else if (valueless_by_exception())
-    {
+    if (has_error()) {
+        throw bad_expected_access<E>(base_type::get_unexpected().value());
+    } else if (valueless_by_exception()) {
         throw bad_expected_access<void>();
     }
 #else
@@ -848,12 +753,11 @@ inline constexpr const T& glue::expected<T, E>::value() const&
 }
 
 template <typename T, typename E>
-inline constexpr const T&& glue::expected<T, E>::value() const&&
-{
+inline constexpr const T&& glue::expected<T, E>::value() const&& {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (has_error()) { throw bad_expected_access<E>(base_type::get_unexpected().value()); }
-    else if (valueless_by_exception())
-    {
+    if (has_error()) {
+        throw bad_expected_access<E>(base_type::get_unexpected().value());
+    } else if (valueless_by_exception()) {
         throw bad_expected_access<void>();
     }
 #else
@@ -866,39 +770,33 @@ inline constexpr const T&& glue::expected<T, E>::value() const&&
 
 template <typename T, typename E>
 template <typename U>
-inline constexpr T glue::expected<T, E>::value_or(U&& default_value) const&
-{
+inline constexpr T glue::expected<T, E>::value_or(U&& default_value) const& {
     return bool(*this) ? base_type::get_value() : std::forward<U>(default_value);
 }
 
 template <typename T, typename E>
 template <typename U>
-inline constexpr T glue::expected<T, E>::value_or(U&& default_value) &&
-{
+inline constexpr T glue::expected<T, E>::value_or(U&& default_value) && {
     return bool(*this) ? base_type::get_value() : std::forward<U>(default_value);
 }
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
-constexpr E& glue::expected<T, E>::error() &
-{
+constexpr E& glue::expected<T, E>::error() & {
     return get_unexpected().value();
 }
 
 template <typename T, typename E>
-constexpr E&& glue::expected<T, E>::error() &&
-{
+constexpr E&& glue::expected<T, E>::error() && {
     return std::move(get_unexpected().value());
 }
 template <typename T, typename E>
-constexpr const E& glue::expected<T, E>::error() const&
-{
+constexpr const E& glue::expected<T, E>::error() const& {
     return get_unexpected().value();
 }
 template <typename T, typename E>
-constexpr const E&& glue::expected<T, E>::error() const&&
-{
+constexpr const E&& glue::expected<T, E>::error() const&& {
     return std::move(get_unexpected().value());
 }
 
@@ -906,25 +804,24 @@ constexpr const E&& glue::expected<T, E>::error() const&&
 
 template <typename T, typename E>
 template <typename U>
-inline constexpr E glue::expected<T, E>::error_or(U&& default_value) const&
-{
+inline constexpr E glue::expected<T, E>::error_or(U&& default_value) const& {
     return !bool(*this) ? base_type::get_unexpected().value() : std::forward<U>(default_value);
 }
 
 template <typename T, typename E>
 template <typename U>
-inline constexpr E glue::expected<T, E>::error_or(U&& default_value) &&
-{
+inline constexpr E glue::expected<T, E>::error_or(U&& default_value) && {
     return !bool(*this) ? base_type::get_unexpected().value() : std::forward<U>(default_value);
 }
 
 //-----------------------------------------------------------------------------
 
 template <typename T, typename E>
-inline constexpr glue::unexpected_type<E>& glue::expected<T, E>::get_unexpected() &
-{
+inline constexpr glue::unexpected_type<E>& glue::expected<T, E>::get_unexpected() & {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (!has_error()) { throw bad_expected_access<void>(); }
+    if (!has_error()) {
+        throw bad_expected_access<void>();
+    }
 #else
     GLUE_ASSERT_MSG(has_error(), "expected must have error");
 #endif
@@ -933,10 +830,11 @@ inline constexpr glue::unexpected_type<E>& glue::expected<T, E>::get_unexpected(
 }
 
 template <typename T, typename E>
-inline constexpr glue::unexpected_type<E>&& glue::expected<T, E>::get_unexpected() &&
-{
+inline constexpr glue::unexpected_type<E>&& glue::expected<T, E>::get_unexpected() && {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (!has_error()) { throw bad_expected_access<void>(); }
+    if (!has_error()) {
+        throw bad_expected_access<void>();
+    }
 #else
     GLUE_ASSERT_MSG(has_error(), "expected must have error");
 #endif
@@ -945,10 +843,11 @@ inline constexpr glue::unexpected_type<E>&& glue::expected<T, E>::get_unexpected
 }
 
 template <typename T, typename E>
-inline constexpr const glue::unexpected_type<E>& glue::expected<T, E>::get_unexpected() const&
-{
+inline constexpr const glue::unexpected_type<E>& glue::expected<T, E>::get_unexpected() const& {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (!has_error()) { throw bad_expected_access<void>(); }
+    if (!has_error()) {
+        throw bad_expected_access<void>();
+    }
 #else
     GLUE_ASSERT_MSG(has_error(), "expected must have error");
 #endif
@@ -957,10 +856,11 @@ inline constexpr const glue::unexpected_type<E>& glue::expected<T, E>::get_unexp
 }
 
 template <typename T, typename E>
-inline constexpr const glue::unexpected_type<E>&& glue::expected<T, E>::get_unexpected() const&&
-{
+inline constexpr const glue::unexpected_type<E>&& glue::expected<T, E>::get_unexpected() const&& {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (!has_error()) { throw bad_expected_access<void>(); }
+    if (!has_error()) {
+        throw bad_expected_access<void>();
+    }
 #else
     GLUE_ASSERT_MSG(has_error(), "expected must have error");
 #endif
@@ -974,8 +874,7 @@ inline constexpr const glue::unexpected_type<E>&& glue::expected<T, E>::get_unex
 
 template <typename T, typename E>
 template <typename Fn, typename>
-glue::invoke_result_t<Fn, const T&> glue::expected<T, E>::flat_map(Fn&& fn) const
-{
+glue::invoke_result_t<Fn, const T&> glue::expected<T, E>::flat_map(Fn&& fn) const {
     if (has_value())
         return std::forward<Fn>(fn);
     else if (has_error())
@@ -989,8 +888,7 @@ glue::invoke_result_t<Fn, const T&> glue::expected<T, E>::flat_map(Fn&& fn) cons
 
 template <typename T, typename E>
 template <typename Fn, typename>
-glue::expected<glue::invoke_result_t<Fn, const T&>, E> glue::expected<T, E>::map(Fn&& fn) const
-{
+glue::expected<glue::invoke_result_t<Fn, const T&>, E> glue::expected<T, E>::map(Fn&& fn) const {
     if (has_value())
         return {std::forward<Fn>(fn)};
     else if (has_error())
@@ -1007,87 +905,84 @@ glue::expected<glue::invoke_result_t<Fn, const T&>, E> glue::expected<T, E>::map
 //=============================================================================
 
 template <typename E>
-inline constexpr glue::expected<void, E>::expected() noexcept : base_type(in_place)
-{}
+inline constexpr glue::expected<void, E>::expected() noexcept : base_type(in_place) {}
 
 //-----------------------------------------------------------------------------
 
 template <typename E>
 inline glue::expected<void, E>::expected(
     enable_overload_if<std::is_copy_constructible<E>::value, const expected&> other)
-    : base_type()
-{
-    if (other.has_error()) { base_type::emplace_error(other.get_unexpected()); }
+    : base_type() {
+    if (other.has_error()) {
+        base_type::emplace_error(other.get_unexpected());
+    }
 }
 
 template <typename E>
 inline glue::expected<void, E>::expected(
     enable_overload_if<std::is_move_constructible<E>::value, expected&&> other)
-    : base_type()
-{
-    if (other.has_error()) { base_type::emplace_error(std::move(other.get_unexpected())); }
+    : base_type() {
+    if (other.has_error()) {
+        base_type::emplace_error(std::move(other.get_unexpected()));
+    }
 }
 
 //-----------------------------------------------------------------------------
 
 template <typename E>
 template <typename G, typename>
-inline glue::expected<void, E>::expected(const expected<void, G>& other) : base_type()
-{
-    if (other.has_error()) { base_type::emplace_error(other.get_unexpected()); }
+inline glue::expected<void, E>::expected(const expected<void, G>& other) : base_type() {
+    if (other.has_error()) {
+        base_type::emplace_error(other.get_unexpected());
+    }
 }
 
 template <typename E>
 template <typename G, typename>
-inline glue::expected<void, E>::expected(expected<void, G>&& other) : base_type()
-{
-    if (other.has_error()) { base_type::emplace_error(std::move(other.get_unexpected())); }
+inline glue::expected<void, E>::expected(expected<void, G>&& other) : base_type() {
+    if (other.has_error()) {
+        base_type::emplace_error(std::move(other.get_unexpected()));
+    }
 }
 
 //-----------------------------------------------------------------------------
 
 template <typename E>
-inline constexpr glue::expected<void, E>::expected(in_place_t) : base_type(in_place)
-{}
+inline constexpr glue::expected<void, E>::expected(in_place_t) : base_type(in_place) {}
 
 //-----------------------------------------------------------------------------
 
 template <typename E>
 template <typename UError, typename>
 inline constexpr glue::expected<void, E>::expected(unexpected_type<E> const& unexpected)
-    : base_type(unexpect, unexpected)
-{}
+    : base_type(unexpect, unexpected) {}
 
 template <typename E>
 template <typename Err, typename>
 inline constexpr glue::expected<void, E>::expected(unexpected_type<Err> const& unexpected)
-    : base_type(unexpect, std::move(unexpected))
-{}
+    : base_type(unexpect, std::move(unexpected)) {}
 
 //-----------------------------------------------------------------------------
 
 template <typename E>
 template <typename... Args, typename>
 inline constexpr glue::expected<void, E>::expected(unexpect_t, Args&&... args)
-    : base_type(unexpect, std::forward<Args>(args)...)
-{}
+    : base_type(unexpect, std::forward<Args>(args)...) {}
 
 template <typename E>
 template <typename U, typename... Args, typename>
-inline constexpr glue::expected<void, E>::expected(unexpect_t, std::initializer_list<U> ilist,
+inline constexpr glue::expected<void, E>::expected(unexpect_t,
+                                                   std::initializer_list<U> ilist,
                                                    Args&&... args)
-    : base_type(unexpect, std::forward<Args>(args)...)
-{}
+    : base_type(unexpect, std::forward<Args>(args)...) {}
 
 //-----------------------------------------------------------------------------
 
 template <typename E>
-inline glue::expected<void, E>& glue::expected<void, E>::operator=(const expected& other)
-{
-
-    if (other.has_value()) { emplace(); }
-    else if (other.has_error())
-    {
+inline glue::expected<void, E>& glue::expected<void, E>::operator=(const expected& other) {
+    if (other.has_value()) {
+        emplace();
+    } else if (other.has_error()) {
         base_type::assign_error(other.get_unexpected());
     }
 
@@ -1095,11 +990,10 @@ inline glue::expected<void, E>& glue::expected<void, E>::operator=(const expecte
 }
 
 template <typename E>
-inline glue::expected<void, E>& glue::expected<void, E>::operator=(expected&& other)
-{
-    if (other.has_value()) { emplace(); }
-    else if (other.has_error())
-    {
+inline glue::expected<void, E>& glue::expected<void, E>::operator=(expected&& other) {
+    if (other.has_value()) {
+        emplace();
+    } else if (other.has_error()) {
         base_type::assign_error(std::move(other.get_unexpected()));
     }
 
@@ -1109,17 +1003,16 @@ inline glue::expected<void, E>& glue::expected<void, E>::operator=(expected&& ot
 //-----------------------------------------------------------------------------
 
 template <typename E>
-inline glue::expected<void, E>&
-glue::expected<void, E>::operator=(const unexpected_type<E>& unexpected)
-{
+inline glue::expected<void, E>& glue::expected<void, E>::operator=(
+    const unexpected_type<E>& unexpected) {
     base_type::assign_error(unexpected);
 
     return (*this);
 }
 
 template <typename E>
-inline glue::expected<void, E>& glue::expected<void, E>::operator=(unexpected_type<E>&& unexpected)
-{
+inline glue::expected<void, E>& glue::expected<void, E>::operator=(
+    unexpected_type<E>&& unexpected) {
     base_type::assign_error(std::move(unexpected));
 
     return (*this);
@@ -1130,52 +1023,45 @@ inline glue::expected<void, E>& glue::expected<void, E>::operator=(unexpected_ty
 //-----------------------------------------------------------------------------
 
 template <typename E>
-inline void glue::expected<void, E>::emplace()
-{
+inline void glue::expected<void, E>::emplace() {
     base_type::emplace_value();
 }
 
 template <typename E>
-inline void glue::expected<void, E>::swap(expected& other)
-{}
+inline void glue::expected<void, E>::swap(expected& other) {}
 
 //-----------------------------------------------------------------------------
 // Observers
 //-----------------------------------------------------------------------------
 
 template <typename E>
-inline constexpr bool glue::expected<void, E>::has_value() const noexcept
-{
+inline constexpr bool glue::expected<void, E>::has_value() const noexcept {
     return base_type::has_value();
 }
 
 template <typename E>
-inline constexpr bool glue::expected<void, E>::has_error() const noexcept
-{
+inline constexpr bool glue::expected<void, E>::has_error() const noexcept {
     return base_type::has_error();
 }
 
 template <typename E>
-inline constexpr bool glue::expected<void, E>::valueless_by_exception() const noexcept
-{
+inline constexpr bool glue::expected<void, E>::valueless_by_exception() const noexcept {
     return base_type::valueless_by_exception();
 }
 
 template <typename E>
-inline constexpr glue::expected<void, E>::operator bool() const noexcept
-{
+inline constexpr glue::expected<void, E>::operator bool() const noexcept {
     return has_value();
 }
 
 //-----------------------------------------------------------------------
 
 template <typename E>
-inline void glue::expected<void, E>::value() const
-{
+inline void glue::expected<void, E>::value() const {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (has_error()) { throw bad_expected_access<E>(base_type::get_unexpected().value()); }
-    else if (valueless_by_exception())
-    {
+    if (has_error()) {
+        throw bad_expected_access<E>(base_type::get_unexpected().value());
+    } else if (valueless_by_exception()) {
         throw bad_expected_access<void>();
     }
 #endif
@@ -1184,26 +1070,22 @@ inline void glue::expected<void, E>::value() const
 //-----------------------------------------------------------------------
 
 template <typename E>
-inline constexpr E& glue::expected<void, E>::error() &
-{
+inline constexpr E& glue::expected<void, E>::error() & {
     return get_unexpected().value();
 }
 
 template <typename E>
-inline constexpr E&& glue::expected<void, E>::error() &&
-{
+inline constexpr E&& glue::expected<void, E>::error() && {
     return std::move(get_unexpected().value());
 }
 
 template <typename E>
-inline constexpr const E& glue::expected<void, E>::error() const&
-{
+inline constexpr const E& glue::expected<void, E>::error() const& {
     return get_unexpected().value();
 }
 
 template <typename E>
-inline constexpr const E&& glue::expected<void, E>::error() const&&
-{
+inline constexpr const E&& glue::expected<void, E>::error() const&& {
     return std::move(get_unexpected().value());
 }
 
@@ -1211,25 +1093,24 @@ inline constexpr const E&& glue::expected<void, E>::error() const&&
 
 template <typename E>
 template <typename U>
-inline constexpr E glue::expected<void, E>::error_or(U&& default_value) const&
-{
+inline constexpr E glue::expected<void, E>::error_or(U&& default_value) const& {
     return !bool(*this) ? base_type::get_unexpected().value() : std::forward<U>(default_value);
 }
 
 template <typename E>
 template <typename U>
-inline constexpr E glue::expected<void, E>::error_or(U&& default_value) &&
-{
+inline constexpr E glue::expected<void, E>::error_or(U&& default_value) && {
     return !bool(*this) ? base_type::get_unexpected().value() : std::forward<U>(default_value);
 }
 
 //-----------------------------------------------------------------------
 
 template <typename E>
-inline constexpr glue::unexpected_type<E>& glue::expected<void, E>::get_unexpected() &
-{
+inline constexpr glue::unexpected_type<E>& glue::expected<void, E>::get_unexpected() & {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (!has_error()) { throw bad_expected_access<void>(); }
+    if (!has_error()) {
+        throw bad_expected_access<void>();
+    }
 #else
     BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
 #endif
@@ -1238,10 +1119,11 @@ inline constexpr glue::unexpected_type<E>& glue::expected<void, E>::get_unexpect
 }
 
 template <typename E>
-inline constexpr glue::unexpected_type<E>&& glue::expected<void, E>::get_unexpected() &&
-{
+inline constexpr glue::unexpected_type<E>&& glue::expected<void, E>::get_unexpected() && {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (!has_error()) { throw bad_expected_access<void>(); }
+    if (!has_error()) {
+        throw bad_expected_access<void>();
+    }
 #else
     BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
 #endif
@@ -1250,10 +1132,11 @@ inline constexpr glue::unexpected_type<E>&& glue::expected<void, E>::get_unexpec
 }
 
 template <typename E>
-inline constexpr const glue::unexpected_type<E>& glue::expected<void, E>::get_unexpected() const&
-{
+inline constexpr const glue::unexpected_type<E>& glue::expected<void, E>::get_unexpected() const& {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (!has_error()) { throw bad_expected_access<void>(); }
+    if (!has_error()) {
+        throw bad_expected_access<void>();
+    }
 #else
     BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
 #endif
@@ -1262,10 +1145,12 @@ inline constexpr const glue::unexpected_type<E>& glue::expected<void, E>::get_un
 }
 
 template <typename E>
-inline constexpr const glue::unexpected_type<E>&& glue::expected<void, E>::get_unexpected() const&&
-{
+inline constexpr const glue::unexpected_type<E>&& glue::expected<void, E>::get_unexpected()
+    const&& {
 #ifndef GLUE_NO_EXCEPTIONS
-    if (!has_error()) { throw bad_expected_access<void>(); }
+    if (!has_error()) {
+        throw bad_expected_access<void>();
+    }
 #else
     BIT_ALWAYS_ASSERT(has_error(), "expected must have error");
 #endif
@@ -1279,8 +1164,7 @@ inline constexpr const glue::unexpected_type<E>&& glue::expected<void, E>::get_u
 
 template <typename E>
 template <typename Fn, typename>
-glue::invoke_result_t<Fn> glue::expected<void, E>::flat_map(Fn&& fn) const
-{
+glue::invoke_result_t<Fn> glue::expected<void, E>::flat_map(Fn&& fn) const {
     if (has_value())
         return std::forward<Fn>(fn);
     else if (has_error())
@@ -1294,8 +1178,7 @@ glue::invoke_result_t<Fn> glue::expected<void, E>::flat_map(Fn&& fn) const
 
 template <typename E>
 template <typename Fn, typename>
-glue::expected<glue::invoke_result_t<Fn>, E> glue::expected<void, E>::map(Fn&& fn) const
-{
+glue::expected<glue::invoke_result_t<Fn>, E> glue::expected<void, E>::map(Fn&& fn) const {
     if (has_value())
         return {std::forward<Fn>(fn)};
     else if (has_error())
@@ -1312,8 +1195,7 @@ glue::expected<glue::invoke_result_t<Fn>, E> glue::expected<void, E>::map(Fn&& f
 //=============================================================================
 
 template <typename T, typename E>
-inline constexpr bool glue::operator==(const expected<T, E>& lhs, const expected<T, E>& rhs)
-{
+inline constexpr bool glue::operator==(const expected<T, E>& lhs, const expected<T, E>& rhs) {
     return lhs.has_value() != rhs.has_value() ? false
            : lhs.has_error()                  ? lhs.get_unexpected() == rhs.get_unexpected()
            : lhs.has_value()                  ? *lhs == *rhs
@@ -1321,8 +1203,7 @@ inline constexpr bool glue::operator==(const expected<T, E>& lhs, const expected
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator!=(const expected<T, E>& lhs, const expected<T, E>& rhs)
-{
+inline constexpr bool glue::operator!=(const expected<T, E>& lhs, const expected<T, E>& rhs) {
     return lhs.has_value() != rhs.has_value() ? true
            : lhs.has_error()                  ? lhs.get_unexpected() != rhs.get_unexpected()
            : lhs.has_value()                  ? *lhs != *rhs
@@ -1330,8 +1211,7 @@ inline constexpr bool glue::operator!=(const expected<T, E>& lhs, const expected
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator<(const expected<T, E>& lhs, const expected<T, E>& rhs)
-{
+inline constexpr bool glue::operator<(const expected<T, E>& lhs, const expected<T, E>& rhs) {
     return lhs.has_value() && rhs.has_value()    ? *lhs < *rhs
            : lhs.has_error() && rhs.has_error()  ? lhs.get_unexpected() < rhs.get_unexpected()
            : lhs.has_value() && !rhs.has_value() ? true
@@ -1341,8 +1221,7 @@ inline constexpr bool glue::operator<(const expected<T, E>& lhs, const expected<
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator>(const expected<T, E>& lhs, const expected<T, E>& rhs)
-{
+inline constexpr bool glue::operator>(const expected<T, E>& lhs, const expected<T, E>& rhs) {
     return lhs.has_value() && rhs.has_value()    ? *lhs > *rhs
            : lhs.has_error() && rhs.has_error()  ? lhs.get_unexpected() > rhs.get_unexpected()
            : lhs.has_value() && !rhs.has_value() ? false
@@ -1352,8 +1231,7 @@ inline constexpr bool glue::operator>(const expected<T, E>& lhs, const expected<
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator<=(const expected<T, E>& lhs, const expected<T, E>& rhs)
-{
+inline constexpr bool glue::operator<=(const expected<T, E>& lhs, const expected<T, E>& rhs) {
     return lhs.has_value() && rhs.has_value()    ? *lhs <= *rhs
            : lhs.has_error() && rhs.has_error()  ? lhs.get_unexpected() <= rhs.get_unexpected()
            : lhs.has_value() && !rhs.has_value() ? true
@@ -1363,8 +1241,7 @@ inline constexpr bool glue::operator<=(const expected<T, E>& lhs, const expected
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator>=(const expected<T, E>& lhs, const expected<T, E>& rhs)
-{
+inline constexpr bool glue::operator>=(const expected<T, E>& lhs, const expected<T, E>& rhs) {
     return lhs.has_value() && rhs.has_value()    ? *lhs >= *rhs
            : lhs.has_error() && rhs.has_error()  ? lhs.get_unexpected() >= rhs.get_unexpected()
            : lhs.has_value() && !rhs.has_value() ? false
@@ -1378,74 +1255,62 @@ inline constexpr bool glue::operator>=(const expected<T, E>& lhs, const expected
 //=============================================================================
 
 template <typename T, typename E>
-inline constexpr bool glue::operator==(const expected<T, E>& x, const T& v)
-{
+inline constexpr bool glue::operator==(const expected<T, E>& x, const T& v) {
     return static_cast<bool>(x) ? *x == v : false;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator==(const T& v, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator==(const T& v, const expected<T, E>& x) {
     return static_cast<bool>(x) ? v == *x : false;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator!=(const expected<T, E>& x, const T& v)
-{
+inline constexpr bool glue::operator!=(const expected<T, E>& x, const T& v) {
     return static_cast<bool>(x) ? *x != v : true;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator!=(const T& v, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator!=(const T& v, const expected<T, E>& x) {
     return static_cast<bool>(x) ? v != *x : true;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator<(const expected<T, E>& x, const T& v)
-{
+inline constexpr bool glue::operator<(const expected<T, E>& x, const T& v) {
     return static_cast<bool>(x) ? *x < v : false;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator<(const T& v, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator<(const T& v, const expected<T, E>& x) {
     return static_cast<bool>(x) ? v < *x : true;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator<=(const expected<T, E>& x, const T& v)
-{
+inline constexpr bool glue::operator<=(const expected<T, E>& x, const T& v) {
     return static_cast<bool>(x) ? *x <= v : false;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator<=(const T& v, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator<=(const T& v, const expected<T, E>& x) {
     return static_cast<bool>(x) ? v <= *x : true;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator>(const expected<T, E>& x, const T& v)
-{
+inline constexpr bool glue::operator>(const expected<T, E>& x, const T& v) {
     return static_cast<bool>(x) ? *x > v : true;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator>(const T& v, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator>(const T& v, const expected<T, E>& x) {
     return static_cast<bool>(x) ? v > *x : false;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator>=(const expected<T, E>& x, const T& v)
-{
+inline constexpr bool glue::operator>=(const expected<T, E>& x, const T& v) {
     return static_cast<bool>(x) ? *x >= v : true;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator>=(const T& v, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator>=(const T& v, const expected<T, E>& x) {
     return static_cast<bool>(x) ? v >= *x : false;
 }
 
@@ -1454,74 +1319,62 @@ inline constexpr bool glue::operator>=(const T& v, const expected<T, E>& x)
 //=============================================================================
 
 template <typename T, typename E>
-inline constexpr bool glue::operator==(const expected<T, E>& x, const unexpected_type<E>& e)
-{
+inline constexpr bool glue::operator==(const expected<T, E>& x, const unexpected_type<E>& e) {
     return static_cast<bool>(x) ? true : x.get_unexpected() == e;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator==(const unexpected_type<E>& e, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator==(const unexpected_type<E>& e, const expected<T, E>& x) {
     return static_cast<bool>(x) ? true : e == x.get_unexpected();
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator!=(const expected<T, E>& x, const unexpected_type<E>& e)
-{
+inline constexpr bool glue::operator!=(const expected<T, E>& x, const unexpected_type<E>& e) {
     return static_cast<bool>(x) ? false : x.get_unexpected() != e;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator!=(const unexpected_type<E>& e, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator!=(const unexpected_type<E>& e, const expected<T, E>& x) {
     return static_cast<bool>(x) ? false : e != x.get_unexpected();
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator<(const expected<T, E>& x, const unexpected_type<E>& e)
-{
+inline constexpr bool glue::operator<(const expected<T, E>& x, const unexpected_type<E>& e) {
     return static_cast<bool>(x) ? true : x.get_unexpected() < e;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator<(const unexpected_type<E>& e, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator<(const unexpected_type<E>& e, const expected<T, E>& x) {
     return static_cast<bool>(x) ? false : e < x.get_unexpected();
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator<=(const expected<T, E>& x, const unexpected_type<E>& e)
-{
+inline constexpr bool glue::operator<=(const expected<T, E>& x, const unexpected_type<E>& e) {
     return static_cast<bool>(x) ? true : x.get_unexpected() <= e;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator<=(const unexpected_type<E>& e, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator<=(const unexpected_type<E>& e, const expected<T, E>& x) {
     return static_cast<bool>(x) ? false : e <= x.get_unexpected();
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator>(const expected<T, E>& x, const unexpected_type<E>& e)
-{
+inline constexpr bool glue::operator>(const expected<T, E>& x, const unexpected_type<E>& e) {
     return static_cast<bool>(x) ? false : x.get_unexpected() > e;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator>(const unexpected_type<E>& e, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator>(const unexpected_type<E>& e, const expected<T, E>& x) {
     return static_cast<bool>(x) ? true : e > x.get_unexpected();
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator>=(const expected<T, E>& x, const unexpected_type<E>& e)
-{
+inline constexpr bool glue::operator>=(const expected<T, E>& x, const unexpected_type<E>& e) {
     return static_cast<bool>(x) ? false : x.get_unexpected() >= e;
 }
 
 template <typename T, typename E>
-inline constexpr bool glue::operator>=(const unexpected_type<E>& e, const expected<T, E>& x)
-{
+inline constexpr bool glue::operator>=(const unexpected_type<E>& e, const expected<T, E>& x) {
     return static_cast<bool>(x) ? true : e >= x.get_unexpected();
 }
 
@@ -1530,8 +1383,7 @@ inline constexpr bool glue::operator>=(const unexpected_type<E>& e, const expect
 // X.Z.11, Specialized algorithms
 
 template <typename T, typename E>
-inline void glue::swap(expected<T, E>& lhs, expected<T, E>& rhs)
-{
+inline void glue::swap(expected<T, E>& lhs, expected<T, E>& rhs) {
     lhs.swap(rhs);
 }
 

@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "glue/base/common.h"
-
 #include <string>
 #include <vector>
+
+#include "glue/base/common.h"
 
 namespace glue {
 
@@ -25,8 +25,11 @@ namespace glue {
          padding chars will be applied if needed
 * @return number of bytes written to output
 */
-GLUE_API size_t base64_encode(char output[], const uint8_t input[], size_t input_length,
-                              size_t& input_consumed, bool final_inputs);
+GLUE_API size_t base64_encode(char output[],
+                              const uint8_t input[],
+                              size_t input_length,
+                              size_t& input_consumed,
+                              bool final_inputs);
 
 /**
  * Perform base64 encoding
@@ -41,9 +44,8 @@ GLUE_API std::string base64_encode(const uint8_t input[], size_t input_length);
  * @param input some input
  * @return base64adecimal representation of input
  */
-inline std::string base64_encode(const std::string& input)
-{
-    return base64_encode((const uint8_t*) input.data(), input.size());
+inline std::string base64_encode(const std::string& input) {
+    return base64_encode((const uint8_t*)input.data(), input.size());
 }
 
 /**
@@ -61,8 +63,12 @@ inline std::string base64_encode(const std::string& input)
                    exception if whitespace is encountered
 * @return number of bytes written to output
 */
-GLUE_API size_t base64_decode(uint8_t output[], const char input[], size_t input_length,
-                              size_t& input_consumed, bool final_inputs, bool ignore_ws = true);
+GLUE_API size_t base64_decode(uint8_t output[],
+                              const char input[],
+                              size_t input_length,
+                              size_t& input_consumed,
+                              bool final_inputs,
+                              bool ignore_ws = true);
 
 /**
 * Perform base64 decoding
@@ -73,7 +79,9 @@ GLUE_API size_t base64_decode(uint8_t output[], const char input[], size_t input
                    exception if whitespace is encountered
 * @return number of bytes written to output
 */
-GLUE_API size_t base64_decode(uint8_t output[], const char input[], size_t input_length,
+GLUE_API size_t base64_decode(uint8_t output[],
+                              const char input[],
+                              size_t input_length,
                               bool ignore_ws = true);
 
 /**
@@ -84,8 +92,7 @@ GLUE_API size_t base64_decode(uint8_t output[], const char input[], size_t input
                    exception if whitespace is encountered
 * @return number of bytes written to output
 */
-inline size_t base64_decode(uint8_t output[], const std::string& input, bool ignore_ws = true)
-{
+inline size_t base64_decode(uint8_t output[], const std::string& input, bool ignore_ws = true) {
     return base64_decode(output, input.data(), input.size(), ignore_ws);
 }
 
@@ -106,8 +113,7 @@ GLUE_API std::string base64_decode(const char input[], size_t input_length, bool
                    exception if whitespace is encountered
 * @return decoded base64 output
 */
-inline std::string base64_decode(const std::string& input, bool ignore_ws = true)
-{
+inline std::string base64_decode(const std::string& input, bool ignore_ws = true) {
     return base64_decode(input.data(), input.size(), ignore_ws);
 }
 
@@ -125,4 +131,4 @@ GLUE_API size_t base64_encode_max_output(size_t input_length);
  */
 GLUE_API size_t base64_decode_max_output(size_t input_length);
 
-} // namespace glue
+}  // namespace glue
